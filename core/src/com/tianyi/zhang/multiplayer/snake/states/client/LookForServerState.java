@@ -13,19 +13,24 @@ public class LookForServerState extends GameState {
             @Override
             public void connected(Connection connection) {
                 super.connected(connection);
-                Gdx.app.debug("BROADCAST", "started");
+                Gdx.app.debug("LOOK FOR SERVER", "started");
             }
 
             @Override
             public void disconnected(Connection connection) {
                 super.disconnected(connection);
-                Gdx.app.debug("BROADCAST", "disconnected");
+                Gdx.app.debug("LOOK FOR SERVER", "disconnected");
             }
 
             @Override
             public void received(Connection connection, Object object) {
                 super.received(connection, object);
-                Gdx.app.debug("BROADCAST", "received");
+                Gdx.app.debug("LOOK FOR SERVER", "received");
+
+                if (object instanceof byte[]) {
+                    Gdx.app.debug("LOOK FOR SERVER",
+                            Integer.toString(LookForServerState.this.app.getAgent().parseReceived(object).getServerState().getNumber()));
+                }
             }
         });
     }

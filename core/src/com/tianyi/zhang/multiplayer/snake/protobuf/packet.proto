@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+package messages;
+
+option java_package = "com.tianyi.zhang.multiplayer.snake.agents.messages";
+option java_outer_classname = "Packet";
+
+message Update {
+    enum ServerState {
+        WAITING_FOR_CLIENTS = 0;
+        SERVER_READY = 1;
+    }
+
+    enum ClientState {
+        CLIENT_READY = 0;
+    }
+
+    optional ServerState serverState = 1;
+    optional ClientState clientState = 2;
+
+    message Snake {
+        optional int32 dir = 1;
+        repeated int32 coords = 2;
+    }
+
+    repeated Snake snakes = 3;
+}

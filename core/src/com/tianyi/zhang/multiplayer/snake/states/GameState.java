@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.tianyi.zhang.multiplayer.snake.App;
 
 public abstract class GameState implements Screen {
-    protected App app;
+    protected final App app;
 
     public GameState(App app) {
         this.app = app;

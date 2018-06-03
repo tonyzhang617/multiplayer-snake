@@ -10,6 +10,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.tianyi.zhang.multiplayer.snake.App;
+import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.io.IOException;
@@ -64,9 +65,12 @@ public class BroadcastState extends GameState {
                                 e.printStackTrace();
                             }
                         }
-
-                        Gdx.app.debug("GAME START", "The game should start now");
                     }
+                    Gdx.app.debug("GAME START", "The game should start now");
+
+                    Packet.Update update = Packet.Update.newBuilder()
+                            .setServerState(Packet.Update.ServerState.SERVER_READY).build();
+                    BroadcastState.this.app.getAgent().send(update);
                 }
 
                 @Override
