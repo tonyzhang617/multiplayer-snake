@@ -3,8 +3,6 @@ package com.tianyi.zhang.multiplayer.snake;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.kotcrab.vis.ui.VisUI;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.agents.IAgent;
@@ -21,9 +19,6 @@ public class App extends Game {
 
 	// TODO: remove this variable
     private boolean isServer = false;
-
-	SpriteBatch batch;
-	Texture img;
 
 	public IAgent getAgent() {
 	    return agent;
@@ -49,9 +44,6 @@ public class App extends Game {
 	@Override
 	public void render () {
 	    super.render();
-//		batch.begin();
-//		batch.draw(img, 0, 0);
-//		batch.end();
 	}
 	
 	@Override
@@ -60,10 +52,7 @@ public class App extends Game {
 	    while (!stateStack.empty()) {
 	        stateStack.pop().dispose();
         }
-
         VisUI.dispose();
-//		batch.dispose();
-//		img.dispose();
 	}
 
 	public void pushState(GameState gameState) {
