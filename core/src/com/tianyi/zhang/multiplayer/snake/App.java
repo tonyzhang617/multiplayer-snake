@@ -3,6 +3,7 @@ package com.tianyi.zhang.multiplayer.snake;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.kotcrab.vis.ui.VisUI;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.agents.IAgent;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
@@ -33,6 +34,8 @@ public class App extends ApplicationAdapter {
 
 	@Override
 	public void create () {
+        VisUI.load();
+
 	    stateStack = new Stack<GameState>();
 	    if (isServer) {
 	        agent = new Server();
@@ -59,6 +62,8 @@ public class App extends ApplicationAdapter {
 	    while (!stateStack.empty()) {
 	        stateStack.pop().destroy();
         }
+
+        VisUI.dispose();
 //		batch.dispose();
 //		img.dispose();
 	}
