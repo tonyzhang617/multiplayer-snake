@@ -31,12 +31,32 @@ public class LookForServerState extends GameState {
     }
 
     @Override
-    public void render() {
-        super.render();
+    public void show() {
+
     }
 
     @Override
-    public void input() {
+    public void resize(int width, int height) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
 
     }
 }

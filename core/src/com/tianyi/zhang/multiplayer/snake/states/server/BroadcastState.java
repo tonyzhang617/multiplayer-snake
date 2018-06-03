@@ -1,6 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.states.server;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -26,7 +27,6 @@ public class BroadcastState extends GameState {
 
         // Set up UI element layout
         stage = new Stage();
-        Gdx.input.setInputProcessor(stage);
 
         table = new VisTable(true);
         table.setFillParent(true);
@@ -47,6 +47,7 @@ public class BroadcastState extends GameState {
         });
         table.row();
         table.add(btnStart);
+        Gdx.input.setInputProcessor(stage);
 
         // Start broadcasting
         try {
@@ -55,18 +56,6 @@ public class BroadcastState extends GameState {
                 public void connected(Connection connection) {
                     super.connected(connection);
                     Gdx.app.debug("BROADCAST", "started");
-                }
-
-                @Override
-                public void disconnected(Connection connection) {
-                    super.disconnected(connection);
-                    Gdx.app.debug("BROADCAST", "disconnected");
-                }
-
-                @Override
-                public void received(Connection connection, Object object) {
-                    super.received(connection, object);
-                    Gdx.app.debug("BROADCAST", "received");
                     synchronized (BroadcastState.this) {
                         while (!shouldGameStart) {
                             try {
@@ -79,6 +68,20 @@ public class BroadcastState extends GameState {
                         Gdx.app.debug("GAME START", "The game should start now");
                     }
                 }
+
+                @Override
+                public void disconnected(Connection connection) {
+                    super.disconnected(connection);
+                    Gdx.app.debug("BROADCAST", "disconnected");
+                }
+
+                @Override
+                public void received(Connection connection, Object object) {
+                    super.received(connection, object);
+                    Gdx.app.debug("BROADCAST", "received");
+
+                    Gdx.app.debug("RECEIVED OBJECT", object.toString());
+                }
             });
         } catch (IOException e) {
             // TODO: Display error message
@@ -87,15 +90,41 @@ public class BroadcastState extends GameState {
     }
 
     @Override
-    public void render() {
-        super.render();
-
+    public void render(float delta) {
+//        super.render(delta);
+        Gdx.gl.glClearColor(1, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act();
         stage.draw();
     }
 
     @Override
-    public void input() {
+    public void show() {
 
+    }
+
+    @Override
+    public void resize(int width, int height) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
     }
 }
