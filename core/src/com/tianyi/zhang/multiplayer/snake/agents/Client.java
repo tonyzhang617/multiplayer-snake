@@ -1,6 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.agents;
 
 import com.badlogic.gdx.Gdx;
+import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
@@ -10,10 +11,22 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 public class Client extends com.esotericsoftware.kryonet.Client implements IAgent {
+    private Listener listener;
+    private Connection server;
+
     @Override
     public void init() {
         getKryo().register(byte[].class);
         start();
+    }
+
+    @Override
+    public void setListener(Listener l) {
+        addListener(l);
+        if (this.listener != null) {
+            removeListener(this.listener);
+        }
+        this.listener = l;
     }
 
     @Override
@@ -23,7 +36,18 @@ public class Client extends com.esotericsoftware.kryonet.Client implements IAgen
 
     @Override
     public void lookForServer(Listener listener) {
-        addListener(listener);
+        setListener(listener);
+        addListener(new Listener() {
+            @Override
+            public void connected(Connection connection) {
+                server = connection;
+            }
+
+            @Override
+            public void disconnected(Connection connection) {
+                server = null;
+            }
+        });
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -44,7 +68,7 @@ public class Client extends com.esotericsoftware.kryonet.Client implements IAgen
 
     @Override
     public void send(Packet.Update update) {
-
+        sendTCP(update.toByteArray());
     }
 
     @Override

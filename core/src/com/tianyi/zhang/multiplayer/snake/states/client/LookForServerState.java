@@ -7,30 +7,20 @@ import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 public class LookForServerState extends GameState {
+    private static final String TAG = LookForServerState.class.getCanonicalName();
+
     public LookForServerState(App app) {
         super(app);
         this.app.getAgent().lookForServer(new Listener() {
             @Override
             public void connected(Connection connection) {
-                super.connected(connection);
-                Gdx.app.debug("LOOK FOR SERVER", "started");
+                Gdx.app.debug(TAG, "started");
+                LookForServerState.this.app.pushState(new MainGameState(LookForServerState.this.app));
             }
 
             @Override
             public void disconnected(Connection connection) {
-                super.disconnected(connection);
-                Gdx.app.debug("LOOK FOR SERVER", "disconnected");
-            }
-
-            @Override
-            public void received(Connection connection, Object object) {
-                super.received(connection, object);
-                Gdx.app.debug("LOOK FOR SERVER", "received");
-
-                if (object instanceof byte[]) {
-                    Gdx.app.debug("LOOK FOR SERVER",
-                            Integer.toString(LookForServerState.this.app.getAgent().parseReceived(object).getServerState().getNumber()));
-                }
+                Gdx.app.debug(TAG, "disconnected");
             }
         });
     }

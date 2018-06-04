@@ -7,6 +7,7 @@ import java.io.IOException;
 
 public interface IAgent {
     void init();
+    void setListener(Listener listener);
     void broadcast(Listener listener) throws IOException;
     void lookForServer(Listener listener);
     void send(Packet.Update update);
