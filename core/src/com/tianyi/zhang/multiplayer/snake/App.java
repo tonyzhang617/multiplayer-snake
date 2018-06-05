@@ -32,11 +32,9 @@ public class App extends Game {
 	    stateStack = new Stack<GameState>();
 	    if (isServer) {
 	        agent = new Server();
-	        agent.init();
 	        pushState(new BroadcastState(this));
         } else {
 	        agent = new Client();
-	        agent.init();
 	        pushState(new LookForServerState(this));
         }
 	}
@@ -64,7 +62,7 @@ public class App extends Game {
 	    stateStack.pop().dispose();
     }
 
-    public void replaceState(GameState gameState) {
+    public void setState(GameState gameState) {
 	    stateStack.pop().dispose();
 	    pushState(gameState);
     }

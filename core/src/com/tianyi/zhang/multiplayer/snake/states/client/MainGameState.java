@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
+import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
@@ -26,7 +27,7 @@ public class MainGameState extends GameState implements InputProcessor {
             @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
-                    Packet.Update update = MainGameState.this.app.getAgent().parseReceived(object);
+                    Packet.Update update = Client.parseReceived(object);
                     if (update.hasServerState() && update.getServerState().getNumber() == Packet.Update.ServerState.SERVER_READY_VALUE) {
                         serverReady = true;
                     }

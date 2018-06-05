@@ -5,6 +5,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
+import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
@@ -17,7 +18,7 @@ public class SVMainGameState extends GameState {
             @Override
             public void received(Connection connection, Object object) {
                 if (!(object instanceof FrameworkMessage.KeepAlive)) {
-                    Gdx.app.debug(TAG, Integer.toString(SVMainGameState.this.app.getAgent().parseReceived(object).getSnakes(0).getDir()));
+                    Gdx.app.debug(TAG, Integer.toString(Server.parseReceived(object).getSnakes(0).getDir()));
                 } else {
                     Gdx.app.debug(TAG, "KeepAlive object received");
                 }
