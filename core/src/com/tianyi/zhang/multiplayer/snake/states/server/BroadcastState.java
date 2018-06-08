@@ -12,9 +12,11 @@ import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BroadcastState extends GameState {
-    private volatile int clientCount = 0;
+    private final List<Integer> connectionIds;
     private static final String TAG = BroadcastState.class.getCanonicalName();
 
     // UI elements
@@ -24,6 +26,8 @@ public class BroadcastState extends GameState {
 
     public BroadcastState(App app) {
         super(app);
+
+        connectionIds = new ArrayList<Integer>();
 
         // Set up UI element layout
         stage = new Stage();
@@ -39,16 +43,16 @@ public class BroadcastState extends GameState {
                 super.clicked(event, x, y);
                 Gdx.app.debug(TAG, "START GAME button clicked");
 
-                synchronized (BroadcastState.this) {
-                    while (clientCount <= 0) {
+                synchronized (connectionIds) {
+                    while (connectionIds.size() == 0) {
                         try {
-                            BroadcastState.this.wait();
+                            connectionIds.wait();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
+                    _app.pushState(new SVMainGameState(_app, connectionIds));
                 }
-                _app.pushState(new SVMainGameState(_app));
             }
         });
         table.row();
@@ -61,17 +65,17 @@ public class BroadcastState extends GameState {
                 @Override
                 public void connected(Connection connection) {
                     Gdx.app.debug(TAG, "connected");
-                    synchronized (BroadcastState.this) {
-                        clientCount += 1;
-                        BroadcastState.this.notify();
+                    synchronized (connectionIds) {
+                        connectionIds.add(new Integer(connection.getID()));
+                        connectionIds.notify();
                     }
                 }
 
                 @Override
                 public void disconnected(Connection connection) {
                     Gdx.app.debug(TAG, "disconnected");
-                    synchronized (BroadcastState.this) {
-                        clientCount -= 1;
+                    synchronized (connectionIds) {
+                        connectionIds.remove(new Integer(connection.getID()));
                     }
                 }
             });

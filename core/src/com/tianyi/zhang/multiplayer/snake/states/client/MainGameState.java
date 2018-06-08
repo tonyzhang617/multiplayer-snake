@@ -18,9 +18,12 @@ public class MainGameState extends GameState implements InputProcessor {
     private static final String TAG = MainGameState.class.getCanonicalName();
     private AtomicInteger direction;
     private volatile boolean serverReady = false;
+    private final int connectionId;
 
-    public MainGameState(App app) {
+    public MainGameState(App app, int id) {
         super(app);
+        connectionId = id;
+
         Gdx.input.setInputProcessor(this);
         direction = new AtomicInteger(Constants.RIGHT);
         _app.getAgent().setListener(new Listener() {

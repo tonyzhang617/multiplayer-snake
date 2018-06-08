@@ -7,13 +7,25 @@ import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
+import com.tianyi.zhang.multiplayer.snake.elements.Snapshots;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SVMainGameState extends GameState {
     private static final String TAG = SVMainGameState.class.getCanonicalName();
+    private final Map<Integer, Snapshots> clientSnapshots;
 
-    public SVMainGameState(App app) {
+    public SVMainGameState(App app, List<Integer> connectionIds) {
         super(app);
+
+        clientSnapshots = new HashMap<Integer, Snapshots>();
+        for (Integer i : connectionIds) {
+            clientSnapshots.put(new Integer(i), new Snapshots());
+        }
+
         _app.getAgent().setListener(new Listener() {
             @Override
             public void received(Connection connection, Object object) {

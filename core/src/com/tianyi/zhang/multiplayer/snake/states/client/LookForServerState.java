@@ -15,7 +15,7 @@ public class LookForServerState extends GameState {
             @Override
             public void connected(Connection connection) {
                 Gdx.app.debug(TAG, "started");
-                _app.pushState(new MainGameState(_app));
+                _app.pushState(new MainGameState(_app, connection.getID()));
             }
 
             @Override
