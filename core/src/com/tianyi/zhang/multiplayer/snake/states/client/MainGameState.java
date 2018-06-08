@@ -23,7 +23,7 @@ public class MainGameState extends GameState implements InputProcessor {
         super(app);
         Gdx.input.setInputProcessor(this);
         direction = new AtomicInteger(Constants.RIGHT);
-        this.app.getAgent().setListener(new Listener() {
+        _app.getAgent().setListener(new Listener() {
             @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
@@ -83,16 +83,16 @@ public class MainGameState extends GameState implements InputProcessor {
         Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
         if (keycode == Input.Keys.LEFT) {
             direction.set(Constants.LEFT);
-            this.app.getAgent().send(Packet.Update.newBuilder().addSnakes(Packet.Update.Snake.newBuilder().setDir(Constants.LEFT).build()).build());
+            _app.getAgent().send(Packet.Update.newBuilder().addSnakes(Packet.Update.Snake.newBuilder().setDir(Constants.LEFT).build()).build());
         } else if (keycode == Input.Keys.UP) {
             direction.set(Constants.UP);
-            this.app.getAgent().send(Packet.Update.newBuilder().addSnakes(Packet.Update.Snake.newBuilder().setDir(Constants.UP).build()).build());
+            _app.getAgent().send(Packet.Update.newBuilder().addSnakes(Packet.Update.Snake.newBuilder().setDir(Constants.UP).build()).build());
         } else if (keycode == Input.Keys.RIGHT) {
             direction.set(Constants.RIGHT);
-            this.app.getAgent().send(Packet.Update.newBuilder().addSnakes(Packet.Update.Snake.newBuilder().setDir(Constants.RIGHT).build()).build());
+            _app.getAgent().send(Packet.Update.newBuilder().addSnakes(Packet.Update.Snake.newBuilder().setDir(Constants.RIGHT).build()).build());
         } else if (keycode == Input.Keys.DOWN) {
             direction.set(Constants.DOWN);
-            this.app.getAgent().send(Packet.Update.newBuilder().addSnakes(Packet.Update.Snake.newBuilder().setDir(Constants.DOWN).build()).build());
+            _app.getAgent().send(Packet.Update.newBuilder().addSnakes(Packet.Update.Snake.newBuilder().setDir(Constants.DOWN).build()).build());
         }
         return true;
     }

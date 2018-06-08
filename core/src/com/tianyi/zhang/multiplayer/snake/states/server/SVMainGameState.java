@@ -14,7 +14,7 @@ public class SVMainGameState extends GameState {
 
     public SVMainGameState(App app) {
         super(app);
-        this.app.getAgent().setListener(new Listener() {
+        _app.getAgent().setListener(new Listener() {
             @Override
             public void received(Connection connection, Object object) {
                 if (!(object instanceof FrameworkMessage.KeepAlive)) {
@@ -28,7 +28,7 @@ public class SVMainGameState extends GameState {
         // Send SERVER_READY packet to all clients
         Packet.Update update = Packet.Update.newBuilder()
                 .setServerState(Packet.Update.ServerState.SERVER_READY).build();
-        this.app.getAgent().send(update);
+        _app.getAgent().send(update);
 
         Gdx.app.debug(TAG, "Server main game loaded");
     }

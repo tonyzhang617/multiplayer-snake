@@ -48,7 +48,7 @@ public class BroadcastState extends GameState {
                         }
                     }
                 }
-                BroadcastState.this.app.pushState(new SVMainGameState(BroadcastState.this.app));
+                _app.pushState(new SVMainGameState(_app));
             }
         });
         table.row();
@@ -57,7 +57,7 @@ public class BroadcastState extends GameState {
 
         // Start broadcasting
         try {
-            this.app.getAgent().broadcast(new Listener() {
+            _app.getAgent().broadcast(new Listener() {
                 @Override
                 public void connected(Connection connection) {
                     Gdx.app.debug(TAG, "connected");

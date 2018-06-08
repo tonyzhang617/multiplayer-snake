@@ -11,11 +11,11 @@ public class LookForServerState extends GameState {
 
     public LookForServerState(App app) {
         super(app);
-        this.app.getAgent().lookForServer(new Listener() {
+        _app.getAgent().lookForServer(new Listener() {
             @Override
             public void connected(Connection connection) {
                 Gdx.app.debug(TAG, "started");
-                LookForServerState.this.app.pushState(new MainGameState(LookForServerState.this.app));
+                _app.pushState(new MainGameState(_app));
             }
 
             @Override
