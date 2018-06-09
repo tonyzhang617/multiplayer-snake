@@ -9,19 +9,25 @@ import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
+import com.tianyi.zhang.multiplayer.snake.elements.Snapshot;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainGameState extends GameState implements InputProcessor {
     private static final String TAG = MainGameState.class.getCanonicalName();
+    private final List<Snapshot> snapshots;
     private AtomicInteger direction;
     private volatile boolean serverReady = false;
     private final int connectionId;
 
     public MainGameState(App app, int id) {
         super(app);
+        snapshots = Collections.synchronizedList(new LinkedList<Snapshot>());
         connectionId = id;
 
         Gdx.input.setInputProcessor(this);
@@ -31,6 +37,7 @@ public class MainGameState extends GameState implements InputProcessor {
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
                     Packet.Update update = Client.parseReceived(object);
+                    // TODO: receive a snapshot of all snakes and initiate snapshots
                     if (update.hasServerState() && update.getServerState().getNumber() == Packet.Update.ServerState.SERVER_READY_VALUE) {
                         serverReady = true;
                     }

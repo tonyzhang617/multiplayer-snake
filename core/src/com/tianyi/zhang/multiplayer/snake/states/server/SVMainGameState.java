@@ -7,24 +7,22 @@ import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
-import com.tianyi.zhang.multiplayer.snake.elements.Snapshots;
+import com.tianyi.zhang.multiplayer.snake.elements.Snapshot;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class SVMainGameState extends GameState {
     private static final String TAG = SVMainGameState.class.getCanonicalName();
-    private final Map<Integer, Snapshots> clientSnapshots;
+    private final List<Snapshot> snapshots;
 
     public SVMainGameState(App app, List<Integer> connectionIds) {
         super(app);
 
-        clientSnapshots = new HashMap<Integer, Snapshots>();
-        for (Integer i : connectionIds) {
-            clientSnapshots.put(new Integer(i), new Snapshots());
-        }
+        snapshots = Collections.synchronizedList(new LinkedList<Snapshot>());
+        snapshots.set(0, new Snapshot(connectionIds));
 
         _app.getAgent().setListener(new Listener() {
             @Override
@@ -37,6 +35,7 @@ public class SVMainGameState extends GameState {
             }
         });
 
+        // TODO: Send a snapshot of all snakes to clients
         // Send SERVER_READY packet to all clients
         Packet.Update update = Packet.Update.newBuilder()
                 .setServerState(Packet.Update.ServerState.SERVER_READY).build();
