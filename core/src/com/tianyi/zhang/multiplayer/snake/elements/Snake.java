@@ -13,10 +13,10 @@ import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.*;
 public class Snake {
     public final int ID;
     public final List<Integer> COORDS;
-    public final byte DIRECTION;
+    public final int DIRECTION;
     public final int INPUT_ID;
 
-    public Snake(int id, int[] coords, byte direction, int inputId) {
+    public Snake(int id, int[] coords, int direction, int inputId) {
         ID = id;
         List<Integer> tmpCoords = new ArrayList<Integer>(coords.length);
         for (int i = 0; i < coords.length; ++i) {
@@ -27,14 +27,14 @@ public class Snake {
         INPUT_ID = inputId;
     }
 
-    private Snake(int id, List<Integer> coords, byte direction, int inputId) {
+    private Snake(int id, List<Integer> coords, int direction, int inputId) {
         ID = id;
         COORDS = coords;
         DIRECTION = direction;
         INPUT_ID = inputId;
     }
 
-    public Snake changeDirection(byte direction, int inputId) {
+    public Snake changeDirection(int direction, int inputId) {
         if (DIRECTION == direction || DIRECTION + direction == 5 || inputId <= INPUT_ID) {
             return this;
         }

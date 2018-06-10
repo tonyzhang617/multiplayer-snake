@@ -23,7 +23,7 @@ public class Snapshot {
         this.step = step;
     }
 
-    public synchronized void updateDirection(int snakeId, byte direction, int inputId) {
+    public synchronized void updateDirection(int snakeId, int direction, int inputId) {
         snakes.put(new Integer(snakeId), snakes.get(new Integer(snakeId)).changeDirection(direction, inputId));
     }
 
