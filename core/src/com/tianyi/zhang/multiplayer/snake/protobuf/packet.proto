@@ -6,22 +6,24 @@ option java_package = "com.tianyi.zhang.multiplayer.snake.agents.messages";
 option java_outer_classname = "Packet";
 
 message Update {
-    enum ServerState {
-        WAITING_FOR_CLIENTS = 0;
-        SERVER_READY = 1;
+    enum PState {
+        READY = 0;
+        GAME_IN_PROGRESS = 1;
     }
 
-    enum ClientState {
-        CLIENT_READY = 0;
+    required PState state = 1;
+
+    message PSnake {
+        required int32 id = 1;
+        required int32 inputId = 2;
+        required int32 direction = 3;
+        repeated int32 coords = 4;
     }
 
-    optional ServerState serverState = 1;
-    optional ClientState clientState = 2;
-
-    message Snake {
-        optional int32 dir = 1;
-        repeated int32 coords = 2;
+    message PSnapshot {
+        required int32 step = 1;
+        repeated PSnake snakes = 2;
     }
 
-    repeated Snake snakes = 3;
+    repeated PSnapshot snapshots = 2;
 }

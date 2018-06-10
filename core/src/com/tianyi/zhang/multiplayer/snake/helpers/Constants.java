@@ -11,4 +11,8 @@ public class Constants {
 
     public static final int PAST_STATES = 4;
     public static final int FUTURE_STATES = 4;
+
+    public static final int MOVE_EVERY_MS = 100;
+    public static final int CLIENT_SEND_EVERY_MS = 50;
+    public static final int SERVER_SEND_EVERY_MS = 80;
 }

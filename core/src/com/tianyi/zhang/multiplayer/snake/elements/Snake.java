@@ -12,22 +12,22 @@ import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.*;
  */
 public class Snake {
     public final int ID;
-    public final List<Short> COORDS;
+    public final List<Integer> COORDS;
     public final byte DIRECTION;
     public final int INPUT_ID;
 
-    public Snake(int id, short[] coords, byte direction, int inputId) {
+    public Snake(int id, int[] coords, byte direction, int inputId) {
         ID = id;
-        List<Short> tmpCoords = new ArrayList<Short>(coords.length);
+        List<Integer> tmpCoords = new ArrayList<Integer>(coords.length);
         for (int i = 0; i < coords.length; ++i) {
-            tmpCoords.set(i, new Short(coords[i]));
+            tmpCoords.add(new Integer(coords[i]));
         }
         COORDS = Collections.unmodifiableList(tmpCoords);
         DIRECTION = direction;
         INPUT_ID = inputId;
     }
 
-    private Snake(int id, List<Short> coords, byte direction, int inputId) {
+    private Snake(int id, List<Integer> coords, byte direction, int inputId) {
         ID = id;
         COORDS = coords;
         DIRECTION = direction;
@@ -42,11 +42,11 @@ public class Snake {
     }
 
     public Snake next() {
-        short[] coords = new short[COORDS.size()];
+        int[] coords = new int[COORDS.size()];
         for (int i = 0; i < COORDS.size()-2; ++i) {
-            coords[i+2] = COORDS.get(i).shortValue();
+            coords[i+2] = COORDS.get(i).intValue();
         }
-        short x0 = COORDS.get(0).shortValue(), y0 = COORDS.get(1).shortValue();
+        int x0 = COORDS.get(0).intValue(), y0 = COORDS.get(1).intValue();
         switch (DIRECTION) {
             case LEFT:
                 --x0;

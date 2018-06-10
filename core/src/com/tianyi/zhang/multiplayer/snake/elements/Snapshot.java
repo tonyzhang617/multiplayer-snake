@@ -8,11 +8,11 @@ public class Snapshot {
     private final Map<Integer, Snake> snakes;
     private final int step;
 
-    public Snapshot(List<Integer> snakeIds) {
-        snakes = new HashMap<Integer, Snake>(snakeIds.size());
+    public Snapshot(int[] snakeIds) {
+        snakes = new HashMap<Integer, Snake>(snakeIds.length);
         // TODO: Coordinates of snake are hard-coded for now
-        short[] coords = {3, 3, 2, 3};
-        for (Integer i : snakeIds) {
+        int[] coords = {3, 3, 2, 3};
+        for (int i : snakeIds) {
             snakes.put(new Integer(i), new Snake(i, coords, RIGHT, 0));
         }
         step = 0;
