@@ -27,8 +27,16 @@ public class Snapshot {
         snakes.put(new Integer(snakeId), snakes.get(new Integer(snakeId)).changeDirection(direction, inputId));
     }
 
-    public synchronized Snake[] getSnakes() {
-        return snakes.values().toArray(new Snake[snakes.size()]);
+    public synchronized Set<Integer> getSnakeIds() {
+        return snakes.keySet();
+    }
+
+    public synchronized Snake getSnakeById(int id) {
+        return snakes.get(new Integer(id));
+    }
+
+    public synchronized Snake getSnakeById(Integer id) {
+        return snakes.get(id);
     }
 
     public int getStep() {

@@ -1,6 +1,9 @@
 package com.tianyi.zhang.multiplayer.snake.states.server;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.GL20;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
@@ -13,19 +16,24 @@ import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.FUTURE_STATES;
+import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.*;
 
-public class SVMainGameState extends GameState {
+public class SVMainGameState extends GameState implements InputProcessor {
     private static final String TAG = SVMainGameState.class.getCanonicalName();
     private final List<Snapshot> snapshots;
     private final Object snapshotsLock;
+    private long lastUpdateTime;
+    private AtomicInteger inputId;
 
     public SVMainGameState(App app, List<Integer> connectionIds) {
         super(app);
+        Gdx.input.setInputProcessor(this);
 
         int[] snakeIds = new int[connectionIds.size()+1];
         // Server has snake ID 0
@@ -47,7 +55,7 @@ public class SVMainGameState extends GameState {
             @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
-                    processClientPacket(Server.parseReceived(object));
+//                    processClientPacket(Server.parseReceived(object));
                 } else {
                     Gdx.app.debug(TAG, "KeepAlive object received");
                 }
@@ -65,21 +73,47 @@ public class SVMainGameState extends GameState {
             }
         }, Constants.SERVER_SEND_EVERY_MS, Constants.SERVER_SEND_EVERY_MS, TimeUnit.MILLISECONDS);
 
+        lastUpdateTime = 0;
+        inputId = new AtomicInteger(0);
+
         Gdx.app.debug(TAG, "Server main game loaded");
     }
 
+    private Snapshot getCurrentSnapshot() {
+        synchronized (snapshotsLock) {
+            return snapshots.get(snapshots.size() - FUTURE_STATES);
+        }
+    }
+
+    private void nextStep() {
+        synchronized (snapshotsLock) {
+            int size = snapshots.size();
+            snapshots.add(snapshots.get(size-1).next());
+            if (size == PAST_STATES + 1 + FUTURE_STATES) {
+                snapshots.remove(0);
+            }
+        }
+    }
+
     private Packet.Update buildFirstPacket() {
-        Snake[] snakes = snapshots.get(0).getSnakes();
         Packet.Update.PSnapshot.Builder snapshotBuilder= Packet.Update.PSnapshot.newBuilder();
         snapshotBuilder.setStep(0);
-        for (Snake s : snakes) {
-            snapshotBuilder.addSnakes(Packet.Update.PSnake.newBuilder().setId(s.ID).setInputId(0).setDirection(s.DIRECTION).addAllCoords(s.COORDS).build());
+
+        Snapshot firstSnapshot = null;
+        synchronized (snapshotsLock) {
+            firstSnapshot = snapshots.get(0);
+        }
+        Set<Integer> keys = firstSnapshot.getSnakeIds();
+        for (Integer i : keys) {
+            Snake s = firstSnapshot.getSnakeById(i);
+            snapshotBuilder.addSnakes(Packet.Update.PSnake.newBuilder().setId(s.ID)
+                    .setInputId(0).setDirection(s.DIRECTION).addAllCoords(s.COORDS).build());
         }
         return Packet.Update.newBuilder().setState(Packet.Update.PState.READY).addSnapshots(snapshotBuilder).build();
     }
 
     private void processClientPacket(Packet.Update update) {
-        // TODO: Very inefficient implementation; should store incoming packets in a priority queue and process them later
+        // TODO: Implement Server reconciliation
         int step = update.getSnapshots(0).getStep();
         Packet.Update.PSnake pSnake = update.getSnapshots(0).getSnakes(0);
         synchronized (snapshotsLock) {
@@ -87,7 +121,7 @@ public class SVMainGameState extends GameState {
             int lastStep = snapshots.get(size-1).getStep();
             int index = size - lastStep + step - 1;
             if (index >= 0 && index < size) {
-                Snake snake = snapshots.get(index).getSnakes()[pSnake.getId()];
+                Snake snake = snapshots.get(index).getSnakeById(pSnake.getId());
                 if (pSnake.getInputId() > snake.INPUT_ID) {
                     snapshots.get(index).updateDirection(pSnake.getId(), pSnake.getDirection(), pSnake.getInputId());
                     if (pSnake.getDirection() != snake.DIRECTION) {
@@ -101,22 +135,41 @@ public class SVMainGameState extends GameState {
     }
 
     private void sendUpdate() {
-        Packet.Update.Builder builder = Packet.Update.newBuilder();
-        builder.setState(Packet.Update.PState.GAME_IN_PROGRESS);
-        synchronized (snapshotsLock) {
-            int size = snapshots.size();
-            for (int i = 0; i < size - FUTURE_STATES; ++i) {
-                Snapshot snapshot = snapshots.get(i);
-                Packet.Update.PSnapshot.Builder snapshotBuilder = Packet.Update.PSnapshot.newBuilder();
-                snapshotBuilder.setStep(snapshot.getStep());
-                Snake[] snakes = snapshot.getSnakes();
-                for (int j = 0; j < snakes.length; ++j) {
-                    snapshotBuilder.addSnakes(Packet.Update.PSnake.newBuilder().setId(snakes[j].ID).setInputId(snakes[j].INPUT_ID).setDirection(snakes[j].DIRECTION).build());
+        try {
+            Packet.Update.Builder builder = Packet.Update.newBuilder();
+            builder.setState(Packet.Update.PState.GAME_IN_PROGRESS);
+            synchronized (snapshotsLock) {
+                int size = snapshots.size();
+                for (int i = 0; i < size - FUTURE_STATES; ++i) {
+                    Snapshot snapshot = snapshots.get(i);
+                    Set<Integer> keys = snapshot.getSnakeIds();
+                    Packet.Update.PSnapshot.Builder snapshotBuilder = Packet.Update.PSnapshot.newBuilder();
+                    snapshotBuilder.setStep(snapshot.getStep());
+                    for (Integer k : keys) {
+                        Snake s = snapshot.getSnakeById(k);
+                        // TODO: remove
+                        if (i == size - FUTURE_STATES - 1 && k.intValue() == 0) {
+                            Gdx.app.debug(TAG, String.valueOf(s.DIRECTION));
+                        }
+                        snapshotBuilder.addSnakes(Packet.Update.PSnake.newBuilder().setId(s.ID).setInputId(s.INPUT_ID).setDirection(s.DIRECTION).build());
+                    }
+                    builder.addSnapshots(snapshotBuilder.build());
                 }
-                builder.addSnapshots(snapshotBuilder.build());
             }
+            _app.getAgent().send(builder.build());
+        } catch (Exception e) {
+            Gdx.app.error(TAG, "Error while sending update", e);
         }
-        _app.getAgent().send(builder.build());
+    }
+
+    @Override
+    public void render(float delta) {
+        if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastUpdateTime) > MOVE_EVERY_MS || lastUpdateTime == 0) {
+            nextStep();
+            Gdx.gl.glClearColor(0, 0, 1, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            lastUpdateTime = System.nanoTime();
+        }
     }
 
     @Override
@@ -147,5 +200,56 @@ public class SVMainGameState extends GameState {
     @Override
     public void dispose() {
 
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        Snapshot snapshot = getCurrentSnapshot();
+        if (keycode == Input.Keys.LEFT) {
+            snapshot.updateDirection(0, LEFT, inputId.incrementAndGet());
+        } else if (keycode == Input.Keys.UP) {
+            Gdx.app.debug(TAG, "Up pressed");
+            snapshot.updateDirection(0, UP, inputId.incrementAndGet());
+        } else if (keycode == Input.Keys.RIGHT) {
+            snapshot.updateDirection(0, RIGHT, inputId.incrementAndGet());
+        } else if (keycode == Input.Keys.DOWN) {
+            snapshot.updateDirection(0, DOWN, inputId.incrementAndGet());
+        }
+        return true;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        return false;
     }
 }
