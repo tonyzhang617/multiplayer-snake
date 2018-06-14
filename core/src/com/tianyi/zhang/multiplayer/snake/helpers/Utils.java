@@ -1,6 +1,6 @@
 package com.tianyi.zhang.multiplayer.snake.helpers;
 
-public class Helpers {
+public class Utils {
     private static final Object timeLock = new Object();
 
     /**

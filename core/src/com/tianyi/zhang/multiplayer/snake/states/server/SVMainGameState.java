@@ -1,29 +1,15 @@
 package com.tianyi.zhang.multiplayer.snake.states.server;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
-import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
-import com.tianyi.zhang.multiplayer.snake.elements.Snake;
-import com.tianyi.zhang.multiplayer.snake.elements.Snapshot;
-import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
-import com.tianyi.zhang.multiplayer.snake.helpers.Helpers;
+import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.*;
 
 public class SVMainGameState extends GameState implements InputProcessor {
     private static final String TAG = SVMainGameState.class.getCanonicalName();
@@ -64,7 +50,7 @@ public class SVMainGameState extends GameState implements InputProcessor {
 //        inputId = new AtomicInteger(0);
 
         _app.getAgent().send(Packet.Update.newBuilder().setState(Packet.Update.PState.READY).build());
-        Gdx.app.debug(TAG, String.valueOf(Helpers.getNanoTime()));
+        Gdx.app.debug(TAG, String.valueOf(Utils.getNanoTime()));
 
         Gdx.app.debug(TAG, "Server main game loaded");
     }

@@ -45,12 +45,12 @@ public class Server extends IAgent {
     }
 
     @Override
-    public void updateReturnTripTime() {
+    public void updateRoundTripTime() {
 
     }
 
     @Override
-    public int getReturnTripTime() {
+    public int getRoundTripTime() {
         return 0;
     }
 

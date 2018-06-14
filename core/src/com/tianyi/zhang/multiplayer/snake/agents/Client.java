@@ -34,8 +34,8 @@ public class Client extends IAgent {
     }
 
     @Override
-    public int getReturnTripTime() {
-        return client.getReturnTripTime() / 2;
+    public int getRoundTripTime() {
+        return client.getReturnTripTime();
     }
 
     @Override
@@ -65,7 +65,7 @@ public class Client extends IAgent {
     }
 
     @Override
-    public void updateReturnTripTime() {
+    public void updateRoundTripTime() {
         client.updateReturnTripTime();
     }
 

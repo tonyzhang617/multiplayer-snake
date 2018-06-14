@@ -8,7 +8,7 @@ import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.elements.Snapshot;
-import com.tianyi.zhang.multiplayer.snake.helpers.Helpers;
+import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.util.LinkedList;
@@ -22,7 +22,7 @@ public class MainGameState extends GameState implements InputProcessor {
     private volatile boolean serverReady = false;
     private final int snakeId;
     private long lastUpdateTime;
-    private volatile int returnTripTime;
+    private volatile int roundTripMs;
 
     public MainGameState(App app, int id) {
         super(app);
@@ -30,14 +30,14 @@ public class MainGameState extends GameState implements InputProcessor {
         snakeId = id;
 
         Gdx.input.setInputProcessor(this);
-        _app.getAgent().updateReturnTripTime();
+        _app.getAgent().updateRoundTripTime();
         _app.getAgent().setListener(new Listener() {
             @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof FrameworkMessage.Ping) {
-                    returnTripTime = _app.getAgent().getReturnTripTime();
+                    roundTripMs = _app.getAgent().getRoundTripTime();
                 } else if (object instanceof byte[]) {
-                    Gdx.app.debug(TAG, String.valueOf(Helpers.getNanoTime() - TimeUnit.MILLISECONDS.toNanos(returnTripTime)));
+                    Gdx.app.debug(TAG, String.valueOf(Utils.getNanoTime() - TimeUnit.MILLISECONDS.toNanos(roundTripMs) / 2));
                 }
             }
         });
