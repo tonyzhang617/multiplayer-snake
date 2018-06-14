@@ -14,13 +14,7 @@ public class LookForServerState extends GameState {
         _app.getAgent().lookForServer(new Listener() {
             @Override
             public void connected(Connection connection) {
-                Gdx.app.debug(TAG, "started");
                 _app.pushState(new MainGameState(_app, connection.getID()));
-            }
-
-            @Override
-            public void disconnected(Connection connection) {
-                Gdx.app.debug(TAG, "disconnected");
             }
         });
     }
