@@ -1,9 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
 public abstract class Snapshot {
-    public abstract void onTimeElapsed(int ms);
-
-    public abstract boolean shouldRenderNewFrame();
+    public abstract boolean update();
 
     public void onClientInput(int direction) {
 

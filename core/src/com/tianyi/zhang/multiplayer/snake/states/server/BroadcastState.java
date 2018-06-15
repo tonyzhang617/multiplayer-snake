@@ -68,14 +68,14 @@ public class BroadcastState extends GameState {
                 @Override
                 public void connected(Connection connection) {
                     synchronized (connectionIdsLock) {
-                        connectionIds.add(new Integer(connection.getID()));
+                        connectionIds.add(Integer.valueOf(connection.getID()));
                     }
                 }
 
                 @Override
                 public void disconnected(Connection connection) {
                     synchronized (connectionIdsLock) {
-                        connectionIds.remove(new Integer(connection.getID()));
+                        connectionIds.remove(Integer.valueOf(connection.getID()));
                     }
                 }
             });

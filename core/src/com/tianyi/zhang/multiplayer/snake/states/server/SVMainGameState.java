@@ -4,10 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.tianyi.zhang.multiplayer.snake.App;
+import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
+import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,6 +21,7 @@ public class SVMainGameState extends GameState implements InputProcessor {
 //    private final Object snapshotsLock;
     private long lastUpdateTime;
     private AtomicInteger inputId;
+    private final long startTimestamp;
 
     /**
      *
@@ -49,8 +54,11 @@ public class SVMainGameState extends GameState implements InputProcessor {
 //        lastUpdateTime = 0;
 //        inputId = new AtomicInteger(0);
 
-        _app.getAgent().send(Packet.Update.newBuilder().setState(Packet.Update.PState.READY).build());
-        Gdx.app.debug(TAG, String.valueOf(Utils.getNanoTime()));
+        List<Integer> tmpIds = new LinkedList<Integer>(connectionIds);
+        tmpIds.add(0, Integer.valueOf(0));
+
+        _app.getAgent().send(buildFirstPacket(tmpIds));
+        startTimestamp = Utils.getNanoTime();
 
         Gdx.app.debug(TAG, "Server main game loaded");
     }
@@ -71,22 +79,21 @@ public class SVMainGameState extends GameState implements InputProcessor {
 //        }
 //    }
 //
-//    private Packet.Update buildFirstPacket() {
-//        Packet.Update.PSnapshot.Builder snapshotBuilder= Packet.Update.PSnapshot.newBuilder();
-//        snapshotBuilder.setStep(0);
-//
-//        Snapshot firstSnapshot = null;
-//        synchronized (snapshotsLock) {
-//            firstSnapshot = snapshots.get(0);
-//        }
-//        Set<Integer> keys = firstSnapshot.getSnakeIds();
-//        for (Integer i : keys) {
-//            Snake s = firstSnapshot.getSnakeById(i);
-//            snapshotBuilder.addSnakes(Packet.Update.PSnake.newBuilder().setId(s.ID)
-//                    .setInputId(0).setDirection(s.DIRECTION).addAllCoords(s.COORDS).build());
-//        }
-//        return Packet.Update.newBuilder().setState(Packet.Update.PState.READY).addSnapshots(snapshotBuilder).build();
-//    }
+    private Packet.Update buildFirstPacket(List<Integer> snakeIds) {
+        Packet.Update.Builder builder = Packet.Update.newBuilder();
+        int id = 0;
+        for (int index = 0; index < snakeIds.size(); ++index) {
+            while (id <= snakeIds.get(index)) {
+                Packet.Update.PSnake.Builder snakeBuilder = Packet.Update.PSnake.newBuilder();
+                // TODO: add actual coordinates
+                snakeBuilder.setId(id).setDirection(Constants.RIGHT).setLastInputId(0).addAllCoords(new ArrayList());
+                builder.addSnakes(snakeBuilder.build());
+                id += 1;
+            }
+        }
+        builder.setState(Packet.Update.PState.READY).setTimestamp(0);
+        return builder.build();
+    }
 //
 //    private void processClientPacket(Packet.Update update) {
 //        // TODO: Implement Server reconciliation

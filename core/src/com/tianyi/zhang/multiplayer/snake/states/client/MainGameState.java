@@ -7,27 +7,28 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
-import com.tianyi.zhang.multiplayer.snake.elements.Snapshot;
+import com.tianyi.zhang.multiplayer.snake.agents.Client;
+import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
+import com.tianyi.zhang.multiplayer.snake.elements.ClientSnapshot;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MainGameState extends GameState implements InputProcessor {
     private static final String TAG = MainGameState.class.getCanonicalName();
-    private final List<Snapshot> snapshots;
-    private final Object snapshotsLock;
+//    private final List<Snapshot> snapshots;
+//    private final Object snapshotsLock;
     private volatile boolean serverReady = false;
-    private final int snakeId;
+//    private final int snakeId;
     private long lastUpdateTime;
     private volatile int roundTripMs;
+    private final ClientSnapshot snapshot;
 
     public MainGameState(App app, int id) {
         super(app);
-        snapshots = new LinkedList<Snapshot>();
-        snakeId = id;
+        snapshot = new ClientSnapshot(id);
 
         Gdx.input.setInputProcessor(this);
         _app.getAgent().updateRoundTripTime();
@@ -37,7 +38,17 @@ public class MainGameState extends GameState implements InputProcessor {
                 if (object instanceof FrameworkMessage.Ping) {
                     roundTripMs = _app.getAgent().getRoundTripTime();
                 } else if (object instanceof byte[]) {
-                    Gdx.app.debug(TAG, String.valueOf(Utils.getNanoTime() - TimeUnit.MILLISECONDS.toNanos(roundTripMs) / 2));
+                    long startTimestamp = Utils.getNanoTime() - TimeUnit.MILLISECONDS.toNanos(roundTripMs) / 2;
+                    Packet.Update update = Client.parseReceived(object);
+                    if (update.getState() == Packet.Update.PState.READY) {
+                        List<Packet.Update.PSnake> pSnakes = update.getSnakesList();
+                        // TODO: Pass snakes as argument to constructor of ClientSnapshot
+                        int[] snakeIds = new int[pSnakes.size()];
+                        for (int i = 0; i < pSnakes.size(); ++i) {
+                            snakeIds[i] = pSnakes.get(i).getId();
+                        }
+                        snapshot.init(startTimestamp, snakeIds);
+                    }
                 }
             }
         });
@@ -76,9 +87,6 @@ public class MainGameState extends GameState implements InputProcessor {
 //                }
 //            }
 //        });
-
-        snapshotsLock = new Object();
-        lastUpdateTime = 0;
 
         Gdx.app.debug(TAG, "Main game loaded");
     }
@@ -140,14 +148,16 @@ public class MainGameState extends GameState implements InputProcessor {
 
     @Override
     public void render(float delta) {
+        if (snapshot.update()) {
+            Gdx.gl.glClearColor(0, 0, 1, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        }
+
 //        if (TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastUpdateTime) > MOVE_EVERY_MS || lastUpdateTime == 0) {
 //            if (!serverReady) {
 //                super.render(delta);
 //            } else {
 //                nextStep();
-                Gdx.gl.glClearColor(0, 0, 1, 1);
-                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 //                Snake snake = getCurrentSnapshot().getSnakeById(snakeId);
 //                StringBuilder builder = new StringBuilder();
 //                for (Integer i : snake.COORDS) {
