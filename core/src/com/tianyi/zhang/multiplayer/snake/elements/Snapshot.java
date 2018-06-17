@@ -1,5 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
+import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
+
 public abstract class Snapshot {
     public abstract boolean update();
 
@@ -11,11 +13,11 @@ public abstract class Snapshot {
 
     }
 
-    public void onClientUpdate(int id, int direction, int msAgo) {
+    public void onClientUpdate(Packet.Update update) {
 
     }
 
-    public void onServerUpdate(Snake[] snakes, int msAgo) {
+    public void onServerUpdate(Packet.Update update) {
 
     }
 

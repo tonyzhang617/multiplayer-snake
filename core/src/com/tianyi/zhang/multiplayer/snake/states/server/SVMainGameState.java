@@ -3,6 +3,7 @@ package com.tianyi.zhang.multiplayer.snake.states.server;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
+import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
@@ -31,6 +32,7 @@ public class SVMainGameState extends GameState implements InputProcessor {
     public SVMainGameState(App app, List<Integer> connectionIds) {
         super(app);
         Gdx.input.setInputProcessor(this);
+        _app.getAgent().setListener(new Listener());
 
 //        int[] snakeIds = new int[connectionIds.size()+1];
 //        // Server has snake ID 0
