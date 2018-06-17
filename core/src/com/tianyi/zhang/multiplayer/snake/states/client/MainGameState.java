@@ -38,7 +38,7 @@ public class MainGameState extends GameState implements InputProcessor {
         snapshot = new ClientSnapshot(id);
         clientId = id;
 
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(2);
 
         Gdx.input.setInputProcessor(this);
         Gdx.graphics.setContinuousRendering(false);
@@ -62,8 +62,12 @@ public class MainGameState extends GameState implements InputProcessor {
                         executor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
-                                if (snapshot.update()) {
-                                    Gdx.graphics.requestRendering();
+                                try {
+                                    if (snapshot.update()) {
+                                        Gdx.graphics.requestRendering();
+                                    }
+                                } catch (Exception e) {
+                                    Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
                                 }
                             }
                         }, 0, 30, TimeUnit.MILLISECONDS);
