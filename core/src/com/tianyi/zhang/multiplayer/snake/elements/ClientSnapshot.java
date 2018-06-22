@@ -112,20 +112,22 @@ public class ClientSnapshot extends Snapshot {
                 results = new Snake[snakes.size()];
                 results = snakes.toArray(results);
                 int index = 0;
-                for (int j = 0; j < results.length; ++j) {
-                    Snake newSnake = results[j];
-                    for (int i = 0; i < stepsBehind; ++i) {
-                        if (j == clientId) {
-                            while (unackInputs.size() > index && unackInputs.get(index).step == stateStep + i) {
-                                newSnake = newSnake.changeDirection(unackInputs.get(index));
-                                index += 1;
+                if (stepsBehind > 0) {
+                    for (int j = 0; j < results.length; ++j) {
+                        Snake newSnake = results[j];
+                        for (int i = 0; i < stepsBehind; ++i) {
+                            if (j == clientId) {
+                                while (unackInputs.size() > index && unackInputs.get(index).step == stateStep + i) {
+                                    newSnake = newSnake.changeDirection(unackInputs.get(index));
+                                    index += 1;
+                                }
+                                newSnake = newSnake.next();
+                            } else {
+                                newSnake = newSnake.next();
                             }
-                            newSnake = newSnake.next();
-                        } else {
-                            newSnake = newSnake.next();
                         }
+                        results[j] = newSnake;
                     }
-                    results[j] = newSnake;
                 }
             }
             return results;

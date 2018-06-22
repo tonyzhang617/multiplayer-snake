@@ -28,34 +28,43 @@ public final class Packet {
     com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState getState();
 
     /**
-     * <code>required int64 timestamp = 2;</code>
+     * <code>required int32 version = 2;</code>
+     */
+    boolean hasVersion();
+    /**
+     * <code>required int32 version = 2;</code>
+     */
+    int getVersion();
+
+    /**
+     * <code>required int64 timestamp = 3;</code>
      */
     boolean hasTimestamp();
     /**
-     * <code>required int64 timestamp = 2;</code>
+     * <code>required int64 timestamp = 3;</code>
      */
     long getTimestamp();
 
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> 
         getSnakesList();
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake getSnakes(int index);
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     int getSnakesCount();
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder> 
         getSnakesOrBuilderList();
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder getSnakesOrBuilder(
         int index);
@@ -74,6 +83,7 @@ public final class Packet {
     }
     private Update() {
       state_ = 0;
+      version_ = 0;
       timestamp_ = 0L;
       snakes_ = java.util.Collections.emptyList();
     }
@@ -122,13 +132,18 @@ public final class Packet {
             }
             case 16: {
               bitField0_ |= 0x00000002;
+              version_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
               timestamp_ = input.readInt64();
               break;
             }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 snakes_ = new java.util.ArrayList<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake>();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000008;
               }
               snakes_.add(
                   input.readMessage(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.PARSER, extensionRegistry));
@@ -142,7 +157,7 @@ public final class Packet {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
           snakes_ = java.util.Collections.unmodifiableList(snakes_);
         }
         this.unknownFields = unknownFields.build();
@@ -1104,50 +1119,65 @@ public final class Packet {
       return result == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState.READY : result;
     }
 
-    public static final int TIMESTAMP_FIELD_NUMBER = 2;
-    private long timestamp_;
+    public static final int VERSION_FIELD_NUMBER = 2;
+    private int version_;
     /**
-     * <code>required int64 timestamp = 2;</code>
+     * <code>required int32 version = 2;</code>
      */
-    public boolean hasTimestamp() {
+    public boolean hasVersion() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required int64 timestamp = 2;</code>
+     * <code>required int32 version = 2;</code>
+     */
+    public int getVersion() {
+      return version_;
+    }
+
+    public static final int TIMESTAMP_FIELD_NUMBER = 3;
+    private long timestamp_;
+    /**
+     * <code>required int64 timestamp = 3;</code>
+     */
+    public boolean hasTimestamp() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required int64 timestamp = 3;</code>
      */
     public long getTimestamp() {
       return timestamp_;
     }
 
-    public static final int SNAKES_FIELD_NUMBER = 3;
+    public static final int SNAKES_FIELD_NUMBER = 4;
     private java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> snakes_;
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> getSnakesList() {
       return snakes_;
     }
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     public java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder> 
         getSnakesOrBuilderList() {
       return snakes_;
     }
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     public int getSnakesCount() {
       return snakes_.size();
     }
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake getSnakes(int index) {
       return snakes_.get(index);
     }
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
      */
     public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder getSnakesOrBuilder(
         int index) {
@@ -1161,6 +1191,10 @@ public final class Packet {
       if (isInitialized == 0) return false;
 
       if (!hasState()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasVersion()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -1184,10 +1218,13 @@ public final class Packet {
         output.writeEnum(1, state_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt64(2, timestamp_);
+        output.writeInt32(2, version_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, timestamp_);
       }
       for (int i = 0; i < snakes_.size(); i++) {
-        output.writeMessage(3, snakes_.get(i));
+        output.writeMessage(4, snakes_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -1203,11 +1240,15 @@ public final class Packet {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, timestamp_);
+          .computeInt32Size(2, version_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, timestamp_);
       }
       for (int i = 0; i < snakes_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, snakes_.get(i));
+          .computeMessageSize(4, snakes_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1228,6 +1269,11 @@ public final class Packet {
       result = result && (hasState() == other.hasState());
       if (hasState()) {
         result = result && state_ == other.state_;
+      }
+      result = result && (hasVersion() == other.hasVersion());
+      if (hasVersion()) {
+        result = result && (getVersion()
+            == other.getVersion());
       }
       result = result && (hasTimestamp() == other.hasTimestamp());
       if (hasTimestamp()) {
@@ -1250,6 +1296,10 @@ public final class Packet {
       if (hasState()) {
         hash = (37 * hash) + STATE_FIELD_NUMBER;
         hash = (53 * hash) + state_;
+      }
+      if (hasVersion()) {
+        hash = (37 * hash) + VERSION_FIELD_NUMBER;
+        hash = (53 * hash) + getVersion();
       }
       if (hasTimestamp()) {
         hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
@@ -1392,11 +1442,13 @@ public final class Packet {
         super.clear();
         state_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
-        timestamp_ = 0L;
+        version_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
+        timestamp_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
         if (snakesBuilder_ == null) {
           snakes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
           snakesBuilder_.clear();
         }
@@ -1431,11 +1483,15 @@ public final class Packet {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
+        result.version_ = version_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
         result.timestamp_ = timestamp_;
         if (snakesBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
             snakes_ = java.util.Collections.unmodifiableList(snakes_);
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.snakes_ = snakes_;
         } else {
@@ -1486,6 +1542,9 @@ public final class Packet {
         if (other.hasState()) {
           setState(other.getState());
         }
+        if (other.hasVersion()) {
+          setVersion(other.getVersion());
+        }
         if (other.hasTimestamp()) {
           setTimestamp(other.getTimestamp());
         }
@@ -1493,7 +1552,7 @@ public final class Packet {
           if (!other.snakes_.isEmpty()) {
             if (snakes_.isEmpty()) {
               snakes_ = other.snakes_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000008);
             } else {
               ensureSnakesIsMutable();
               snakes_.addAll(other.snakes_);
@@ -1506,7 +1565,7 @@ public final class Packet {
               snakesBuilder_.dispose();
               snakesBuilder_ = null;
               snakes_ = other.snakes_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000008);
               snakesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getSnakesFieldBuilder() : null;
@@ -1522,6 +1581,9 @@ public final class Packet {
 
       public final boolean isInitialized() {
         if (!hasState()) {
+          return false;
+        }
+        if (!hasVersion()) {
           return false;
         }
         if (!hasTimestamp()) {
@@ -1590,33 +1652,65 @@ public final class Packet {
         return this;
       }
 
-      private long timestamp_ ;
+      private int version_ ;
       /**
-       * <code>required int64 timestamp = 2;</code>
+       * <code>required int32 version = 2;</code>
        */
-      public boolean hasTimestamp() {
+      public boolean hasVersion() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required int64 timestamp = 2;</code>
+       * <code>required int32 version = 2;</code>
+       */
+      public int getVersion() {
+        return version_;
+      }
+      /**
+       * <code>required int32 version = 2;</code>
+       */
+      public Builder setVersion(int value) {
+        bitField0_ |= 0x00000002;
+        version_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 version = 2;</code>
+       */
+      public Builder clearVersion() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        version_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long timestamp_ ;
+      /**
+       * <code>required int64 timestamp = 3;</code>
+       */
+      public boolean hasTimestamp() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int64 timestamp = 3;</code>
        */
       public long getTimestamp() {
         return timestamp_;
       }
       /**
-       * <code>required int64 timestamp = 2;</code>
+       * <code>required int64 timestamp = 3;</code>
        */
       public Builder setTimestamp(long value) {
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000004;
         timestamp_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int64 timestamp = 2;</code>
+       * <code>required int64 timestamp = 3;</code>
        */
       public Builder clearTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         timestamp_ = 0L;
         onChanged();
         return this;
@@ -1625,9 +1719,9 @@ public final class Packet {
       private java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> snakes_ =
         java.util.Collections.emptyList();
       private void ensureSnakesIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           snakes_ = new java.util.ArrayList<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake>(snakes_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000008;
          }
       }
 
@@ -1635,7 +1729,7 @@ public final class Packet {
           com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder> snakesBuilder_;
 
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> getSnakesList() {
         if (snakesBuilder_ == null) {
@@ -1645,7 +1739,7 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public int getSnakesCount() {
         if (snakesBuilder_ == null) {
@@ -1655,7 +1749,7 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake getSnakes(int index) {
         if (snakesBuilder_ == null) {
@@ -1665,7 +1759,7 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder setSnakes(
           int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake value) {
@@ -1682,7 +1776,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder setSnakes(
           int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder builderForValue) {
@@ -1696,7 +1790,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder addSnakes(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake value) {
         if (snakesBuilder_ == null) {
@@ -1712,7 +1806,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder addSnakes(
           int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake value) {
@@ -1729,7 +1823,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder addSnakes(
           com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder builderForValue) {
@@ -1743,7 +1837,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder addSnakes(
           int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder builderForValue) {
@@ -1757,7 +1851,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder addAllSnakes(
           java.lang.Iterable<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> values) {
@@ -1772,12 +1866,12 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder clearSnakes() {
         if (snakesBuilder_ == null) {
           snakes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
         } else {
           snakesBuilder_.clear();
@@ -1785,7 +1879,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public Builder removeSnakes(int index) {
         if (snakesBuilder_ == null) {
@@ -1798,14 +1892,14 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder getSnakesBuilder(
           int index) {
         return getSnakesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder getSnakesOrBuilder(
           int index) {
@@ -1815,7 +1909,7 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder> 
            getSnakesOrBuilderList() {
@@ -1826,14 +1920,14 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder addSnakesBuilder() {
         return getSnakesFieldBuilder().addBuilder(
             com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.getDefaultInstance());
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder addSnakesBuilder(
           int index) {
@@ -1841,7 +1935,7 @@ public final class Packet {
             index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.getDefaultInstance());
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 3;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
        */
       public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder> 
            getSnakesBuilderList() {
@@ -1854,7 +1948,7 @@ public final class Packet {
           snakesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder>(
                   snakes_,
-                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
                   isClean());
           snakes_ = null;
@@ -1929,14 +2023,15 @@ public final class Packet {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014packet.proto\022\010messages\"\345\001\n\006Update\022&\n\005s" +
-      "tate\030\001 \002(\0162\027.messages.Update.PState\022\021\n\tt" +
-      "imestamp\030\002 \002(\003\022\'\n\006snakes\030\003 \003(\0132\027.message" +
-      "s.Update.PSnake\032L\n\006PSnake\022\n\n\002id\030\001 \002(\005\022\023\n" +
-      "\013lastInputId\030\002 \002(\005\022\021\n\tdirection\030\003 \002(\005\022\016\n" +
-      "\006coords\030\004 \003(\005\")\n\006PState\022\t\n\005READY\020\000\022\024\n\020GA" +
-      "ME_IN_PROGRESS\020\001B<\n2com.tianyi.zhang.mul" +
-      "tiplayer.snake.agents.messagesB\006Packet"
+      "\n\014packet.proto\022\010messages\"\366\001\n\006Update\022&\n\005s" +
+      "tate\030\001 \002(\0162\027.messages.Update.PState\022\017\n\007v" +
+      "ersion\030\002 \002(\005\022\021\n\ttimestamp\030\003 \002(\003\022\'\n\006snake" +
+      "s\030\004 \003(\0132\027.messages.Update.PSnake\032L\n\006PSna" +
+      "ke\022\n\n\002id\030\001 \002(\005\022\023\n\013lastInputId\030\002 \002(\005\022\021\n\td" +
+      "irection\030\003 \002(\005\022\016\n\006coords\030\004 \003(\005\")\n\006PState" +
+      "\022\t\n\005READY\020\000\022\024\n\020GAME_IN_PROGRESS\020\001B<\n2com" +
+      ".tianyi.zhang.multiplayer.snake.agents.m" +
+      "essagesB\006Packet"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1955,7 +2050,7 @@ public final class Packet {
     internal_static_messages_Update_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_messages_Update_descriptor,
-        new java.lang.String[] { "State", "Timestamp", "Snakes", });
+        new java.lang.String[] { "State", "Version", "Timestamp", "Snakes", });
     internal_static_messages_Update_PSnake_descriptor =
       internal_static_messages_Update_descriptor.getNestedTypes().get(0);
     internal_static_messages_Update_PSnake_fieldAccessorTable = new

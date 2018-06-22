@@ -11,9 +11,9 @@ public class Constants {
     public static final byte DOWN = 3;
 
     /**
-     * Snapshot maintains the last TOLERANCE_STEPS to be tolerant of network latency
+     * Server would acknowledge inputs sent within LAG_TOLERANCE_MS
      */
-    public static final int TOLERANCE_STEPS = 2;
+    public static final int LAG_TOLERANCE_MS = 100;
 
     public static final int MOVE_EVERY_MS = 500;
     public static final int CLIENT_SEND_EVERY_MS = 50;

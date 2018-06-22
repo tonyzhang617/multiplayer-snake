@@ -12,7 +12,8 @@ message Update {
     }
 
     required PState state = 1;
-    required int64 timestamp = 2;
+    required int32 version = 2;
+    required int64 timestamp = 3;
 
     message PSnake {
         required int32 id = 1;
@@ -21,5 +22,5 @@ message Update {
         repeated int32 coords = 4;
     }
 
-    repeated PSnake snakes = 3;
+    repeated PSnake snakes = 4;
 }
