@@ -33,7 +33,7 @@ public class MainGameState extends GameState implements InputProcessor {
     private volatile int roundTripMs;
     private final ClientSnapshot snapshot;
 
-    public MainGameState(App app, int id) {
+    public MainGameState(App app, final int id) {
         super(app);
         snapshot = new ClientSnapshot(id);
         clientId = id;
@@ -65,6 +65,15 @@ public class MainGameState extends GameState implements InputProcessor {
                                 try {
                                     if (snapshot.update()) {
                                         Gdx.graphics.requestRendering();
+                                    }
+                                    com.tianyi.zhang.multiplayer.snake.elements.Input[] inputs = snapshot.getNewInputs();
+                                    if (inputs.length > 0) {
+                                        Packet.Update.Builder builder = Packet.Update.newBuilder();
+                                        builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setSnakeId(id);
+                                        for (com.tianyi.zhang.multiplayer.snake.elements.Input tmpInput : inputs) {
+                                            builder.addInputs(Packet.Update.PInput.newBuilder().setId(tmpInput.id).setDirection(tmpInput.direction).setTimestamp(tmpInput.timestamp).setStep(tmpInput.step));
+                                        }
+                                        _app.getAgent().send(builder.build());
                                     }
                                 } catch (Exception e) {
                                     Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);

@@ -9,8 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.RIGHT;
 
@@ -25,8 +24,8 @@ public class ClientSnapshot extends Snapshot {
 
 
     private final Object lock;
-    private AtomicInteger currentStep;
-    private AtomicBoolean gameInitialized;
+    private final AtomicLong lastUpdateNsSinceStart;
+    private final AtomicBoolean gameInitialized;
     /**
      * Makes up the last game step, guarded by stateLock
      */
@@ -35,15 +34,13 @@ public class ClientSnapshot extends Snapshot {
     private int nextInputId;
     private List<Input> unackInputs;
 
-    private AtomicReference<Input> newInput;
-
     public ClientSnapshot(int clientId) {
         this.clientId = clientId;
         lock = new Object();
         snakes = new LinkedList<Snake>();
         nextInputId = 1;
         unackInputs = new LinkedList<Input>();
-        newInput = new AtomicReference<Input>(null);
+        lastUpdateNsSinceStart = new AtomicLong(0);
         gameInitialized = new AtomicBoolean(false);
     }
 
@@ -56,11 +53,11 @@ public class ClientSnapshot extends Snapshot {
         // TODO: Take snakes as an argument and initialize the snakes
         this.startTimestamp = startTimestamp;
         this.stateStep = 0;
-        this.currentStep = new AtomicInteger(0);
+        this.lastUpdateNsSinceStart.set(0);
         int id = 0;
         for (int index = 0; index < snakeIds.length; ++index) {
             while (id <= snakeIds[index]) {
-                snakes.add(new Snake(id, new int[]{3, 3, 2, 3}, new Input(RIGHT, 0, startTimestamp, 0, true)));
+                snakes.add(new Snake(id, new int[]{3, 3, 2, 3}, new Input(RIGHT, 0, 0, 0, true)));
                 id += 1;
             }
         }
@@ -73,9 +70,11 @@ public class ClientSnapshot extends Snapshot {
      */
     @Override
     public boolean update() {
-        int tmpStep = (int) ((Utils.getNanoTime() - startTimestamp) / SNAKE_MOVE_EVERY_NS);
-        if (tmpStep - currentStep.get() > 0) {
-            currentStep.set(tmpStep);
+        long currentNs = Utils.getNanoTime() - startTimestamp;
+        int tmpStep = (int) (currentNs / SNAKE_MOVE_EVERY_NS);
+        int lastUpdateStep = (int) (lastUpdateNsSinceStart.get() / SNAKE_MOVE_EVERY_NS);
+        if (tmpStep - lastUpdateStep > 0) {
+            lastUpdateNsSinceStart.set(currentNs);
             return true;
         } else {
             return false;
@@ -86,12 +85,11 @@ public class ClientSnapshot extends Snapshot {
     public void onClientInput(int direction) {
         Input input;
         synchronized (lock) {
-            long tmpTimestamp = Utils.getNanoTime();
-            int tmpStep = (int) ((tmpTimestamp - startTimestamp) / SNAKE_MOVE_EVERY_NS);
-            input = new Input(direction, nextInputId++, tmpTimestamp, tmpStep, false);
+            long tmpNs = Utils.getNanoTime() - startTimestamp;
+            int tmpStep = (int) (tmpNs / SNAKE_MOVE_EVERY_NS);
+            input = new Input(direction, nextInputId++, tmpNs, tmpStep, false);
             unackInputs.add(input);
         }
-        newInput.set(input);
     }
 
     @Override
@@ -99,8 +97,12 @@ public class ClientSnapshot extends Snapshot {
 
     }
 
-    public Input getNewInput() {
-        return newInput.get();
+    public Input[] getNewInputs() {
+        synchronized (lock) {
+            Input[] inputs = new Input[unackInputs.size()];
+            inputs = unackInputs.toArray(inputs);
+            return inputs;
+        }
     }
 
     @Override
@@ -108,7 +110,8 @@ public class ClientSnapshot extends Snapshot {
         if (gameInitialized.get()) {
             Snake[] results;
             synchronized (lock) {
-                int stepsBehind = currentStep.get() - stateStep;
+                int currentStep = (int) (lastUpdateNsSinceStart.get() / SNAKE_MOVE_EVERY_NS);
+                int stepsBehind = currentStep - stateStep;
                 results = new Snake[snakes.size()];
                 results = snakes.toArray(results);
                 int index = 0;

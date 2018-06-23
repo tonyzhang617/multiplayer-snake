@@ -28,43 +28,76 @@ public final class Packet {
     com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState getState();
 
     /**
-     * <code>required int32 version = 2;</code>
+     * <code>optional int32 snakeId = 2;</code>
+     */
+    boolean hasSnakeId();
+    /**
+     * <code>optional int32 snakeId = 2;</code>
+     */
+    int getSnakeId();
+
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput> 
+        getInputsList();
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getInputs(int index);
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    int getInputsCount();
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder> 
+        getInputsOrBuilderList();
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder getInputsOrBuilder(
+        int index);
+
+    /**
+     * <code>optional int32 version = 4;</code>
      */
     boolean hasVersion();
     /**
-     * <code>required int32 version = 2;</code>
+     * <code>optional int32 version = 4;</code>
      */
     int getVersion();
 
     /**
-     * <code>required int64 timestamp = 3;</code>
+     * <code>optional int64 timestamp = 5;</code>
      */
     boolean hasTimestamp();
     /**
-     * <code>required int64 timestamp = 3;</code>
+     * <code>optional int64 timestamp = 5;</code>
      */
     long getTimestamp();
 
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> 
         getSnakesList();
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake getSnakes(int index);
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     int getSnakesCount();
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder> 
         getSnakesOrBuilderList();
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder getSnakesOrBuilder(
         int index);
@@ -83,6 +116,8 @@ public final class Packet {
     }
     private Update() {
       state_ = 0;
+      snakeId_ = 0;
+      inputs_ = java.util.Collections.emptyList();
       version_ = 0;
       timestamp_ = 0L;
       snakes_ = java.util.Collections.emptyList();
@@ -132,18 +167,32 @@ public final class Packet {
             }
             case 16: {
               bitField0_ |= 0x00000002;
+              snakeId_ = input.readInt32();
+              break;
+            }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                inputs_ = new java.util.ArrayList<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput>();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              inputs_.add(
+                  input.readMessage(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.PARSER, extensionRegistry));
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000004;
               version_ = input.readInt32();
               break;
             }
-            case 24: {
-              bitField0_ |= 0x00000004;
+            case 40: {
+              bitField0_ |= 0x00000008;
               timestamp_ = input.readInt64();
               break;
             }
-            case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+            case 50: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
                 snakes_ = new java.util.ArrayList<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake>();
-                mutable_bitField0_ |= 0x00000008;
+                mutable_bitField0_ |= 0x00000020;
               }
               snakes_.add(
                   input.readMessage(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.PARSER, extensionRegistry));
@@ -157,7 +206,10 @@ public final class Packet {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          inputs_ = java.util.Collections.unmodifiableList(inputs_);
+        }
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           snakes_ = java.util.Collections.unmodifiableList(snakes_);
         }
         this.unknownFields = unknownFields.build();
@@ -266,6 +318,776 @@ public final class Packet {
       // @@protoc_insertion_point(enum_scope:messages.Update.PState)
     }
 
+    public interface PInputOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:messages.Update.PInput)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      boolean hasId();
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      int getId();
+
+      /**
+       * <code>required int32 direction = 2;</code>
+       */
+      boolean hasDirection();
+      /**
+       * <code>required int32 direction = 2;</code>
+       */
+      int getDirection();
+
+      /**
+       * <code>required int64 timestamp = 3;</code>
+       */
+      boolean hasTimestamp();
+      /**
+       * <code>required int64 timestamp = 3;</code>
+       */
+      long getTimestamp();
+
+      /**
+       * <code>required int32 step = 4;</code>
+       */
+      boolean hasStep();
+      /**
+       * <code>required int32 step = 4;</code>
+       */
+      int getStep();
+    }
+    /**
+     * Protobuf type {@code messages.Update.PInput}
+     */
+    public  static final class PInput extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:messages.Update.PInput)
+        PInputOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use PInput.newBuilder() to construct.
+      private PInput(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private PInput() {
+        id_ = 0;
+        direction_ = 0;
+        timestamp_ = 0L;
+        step_ = 0;
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private PInput(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                bitField0_ |= 0x00000001;
+                id_ = input.readInt32();
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                direction_ = input.readInt32();
+                break;
+              }
+              case 24: {
+                bitField0_ |= 0x00000004;
+                timestamp_ = input.readInt64();
+                break;
+              }
+              case 32: {
+                bitField0_ |= 0x00000008;
+                step_ = input.readInt32();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.internal_static_messages_Update_PInput_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.internal_static_messages_Update_PInput_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.class, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder.class);
+      }
+
+      private int bitField0_;
+      public static final int ID_FIELD_NUMBER = 1;
+      private int id_;
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public int getId() {
+        return id_;
+      }
+
+      public static final int DIRECTION_FIELD_NUMBER = 2;
+      private int direction_;
+      /**
+       * <code>required int32 direction = 2;</code>
+       */
+      public boolean hasDirection() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required int32 direction = 2;</code>
+       */
+      public int getDirection() {
+        return direction_;
+      }
+
+      public static final int TIMESTAMP_FIELD_NUMBER = 3;
+      private long timestamp_;
+      /**
+       * <code>required int64 timestamp = 3;</code>
+       */
+      public boolean hasTimestamp() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required int64 timestamp = 3;</code>
+       */
+      public long getTimestamp() {
+        return timestamp_;
+      }
+
+      public static final int STEP_FIELD_NUMBER = 4;
+      private int step_;
+      /**
+       * <code>required int32 step = 4;</code>
+       */
+      public boolean hasStep() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 step = 4;</code>
+       */
+      public int getStep() {
+        return step_;
+      }
+
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasDirection()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasTimestamp()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasStep()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeInt32(1, id_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeInt32(2, direction_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeInt64(3, timestamp_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeInt32(4, step_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(1, id_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(2, direction_);
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(3, timestamp_);
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(4, step_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput)) {
+          return super.equals(obj);
+        }
+        com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput other = (com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput) obj;
+
+        boolean result = true;
+        result = result && (hasId() == other.hasId());
+        if (hasId()) {
+          result = result && (getId()
+              == other.getId());
+        }
+        result = result && (hasDirection() == other.hasDirection());
+        if (hasDirection()) {
+          result = result && (getDirection()
+              == other.getDirection());
+        }
+        result = result && (hasTimestamp() == other.hasTimestamp());
+        if (hasTimestamp()) {
+          result = result && (getTimestamp()
+              == other.getTimestamp());
+        }
+        result = result && (hasStep() == other.hasStep());
+        if (hasStep()) {
+          result = result && (getStep()
+              == other.getStep());
+        }
+        result = result && unknownFields.equals(other.unknownFields);
+        return result;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasId()) {
+          hash = (37 * hash) + ID_FIELD_NUMBER;
+          hash = (53 * hash) + getId();
+        }
+        if (hasDirection()) {
+          hash = (37 * hash) + DIRECTION_FIELD_NUMBER;
+          hash = (53 * hash) + getDirection();
+        }
+        if (hasTimestamp()) {
+          hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
+          hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+              getTimestamp());
+        }
+        if (hasStep()) {
+          hash = (37 * hash) + STEP_FIELD_NUMBER;
+          hash = (53 * hash) + getStep();
+        }
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code messages.Update.PInput}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:messages.Update.PInput)
+          com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.internal_static_messages_Update_PInput_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.internal_static_messages_Update_PInput_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.class, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder.class);
+        }
+
+        // Construct using com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        public Builder clear() {
+          super.clear();
+          id_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          direction_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          timestamp_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000004);
+          step_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          return this;
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.internal_static_messages_Update_PInput_descriptor;
+        }
+
+        public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getDefaultInstanceForType() {
+          return com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance();
+        }
+
+        public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput build() {
+          com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput buildPartial() {
+          com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput result = new com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.id_ = id_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.direction_ = direction_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.timestamp_ = timestamp_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.step_ = step_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder clone() {
+          return (Builder) super.clone();
+        }
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return (Builder) super.setField(field, value);
+        }
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return (Builder) super.clearField(field);
+        }
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return (Builder) super.clearOneof(oneof);
+        }
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return (Builder) super.setRepeatedField(field, index, value);
+        }
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return (Builder) super.addRepeatedField(field, value);
+        }
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput) {
+            return mergeFrom((com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput other) {
+          if (other == com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance()) return this;
+          if (other.hasId()) {
+            setId(other.getId());
+          }
+          if (other.hasDirection()) {
+            setDirection(other.getDirection());
+          }
+          if (other.hasTimestamp()) {
+            setTimestamp(other.getTimestamp());
+          }
+          if (other.hasStep()) {
+            setStep(other.getStep());
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasId()) {
+            return false;
+          }
+          if (!hasDirection()) {
+            return false;
+          }
+          if (!hasTimestamp()) {
+            return false;
+          }
+          if (!hasStep()) {
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private int id_ ;
+        /**
+         * <code>required int32 id = 1;</code>
+         */
+        public boolean hasId() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required int32 id = 1;</code>
+         */
+        public int getId() {
+          return id_;
+        }
+        /**
+         * <code>required int32 id = 1;</code>
+         */
+        public Builder setId(int value) {
+          bitField0_ |= 0x00000001;
+          id_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 id = 1;</code>
+         */
+        public Builder clearId() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          id_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private int direction_ ;
+        /**
+         * <code>required int32 direction = 2;</code>
+         */
+        public boolean hasDirection() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required int32 direction = 2;</code>
+         */
+        public int getDirection() {
+          return direction_;
+        }
+        /**
+         * <code>required int32 direction = 2;</code>
+         */
+        public Builder setDirection(int value) {
+          bitField0_ |= 0x00000002;
+          direction_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 direction = 2;</code>
+         */
+        public Builder clearDirection() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          direction_ = 0;
+          onChanged();
+          return this;
+        }
+
+        private long timestamp_ ;
+        /**
+         * <code>required int64 timestamp = 3;</code>
+         */
+        public boolean hasTimestamp() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>required int64 timestamp = 3;</code>
+         */
+        public long getTimestamp() {
+          return timestamp_;
+        }
+        /**
+         * <code>required int64 timestamp = 3;</code>
+         */
+        public Builder setTimestamp(long value) {
+          bitField0_ |= 0x00000004;
+          timestamp_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int64 timestamp = 3;</code>
+         */
+        public Builder clearTimestamp() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          timestamp_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        private int step_ ;
+        /**
+         * <code>required int32 step = 4;</code>
+         */
+        public boolean hasStep() {
+          return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        /**
+         * <code>required int32 step = 4;</code>
+         */
+        public int getStep() {
+          return step_;
+        }
+        /**
+         * <code>required int32 step = 4;</code>
+         */
+        public Builder setStep(int value) {
+          bitField0_ |= 0x00000008;
+          step_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required int32 step = 4;</code>
+         */
+        public Builder clearStep() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          step_ = 0;
+          onChanged();
+          return this;
+        }
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:messages.Update.PInput)
+      }
+
+      // @@protoc_insertion_point(class_scope:messages.Update.PInput)
+      private static final com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput();
+      }
+
+      public static com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<PInput>
+          PARSER = new com.google.protobuf.AbstractParser<PInput>() {
+        public PInput parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new PInput(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<PInput> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<PInput> getParserForType() {
+        return PARSER;
+      }
+
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
     public interface PSnakeOrBuilder extends
         // @@protoc_insertion_point(interface_extends:messages.Update.PSnake)
         com.google.protobuf.MessageOrBuilder {
@@ -280,35 +1102,30 @@ public final class Packet {
       int getId();
 
       /**
-       * <code>required int32 lastInputId = 2;</code>
-       */
-      boolean hasLastInputId();
-      /**
-       * <code>required int32 lastInputId = 2;</code>
-       */
-      int getLastInputId();
-
-      /**
-       * <code>required int32 direction = 3;</code>
-       */
-      boolean hasDirection();
-      /**
-       * <code>required int32 direction = 3;</code>
-       */
-      int getDirection();
-
-      /**
-       * <code>repeated int32 coords = 4;</code>
+       * <code>repeated int32 coords = 2;</code>
        */
       java.util.List<java.lang.Integer> getCoordsList();
       /**
-       * <code>repeated int32 coords = 4;</code>
+       * <code>repeated int32 coords = 2;</code>
        */
       int getCoordsCount();
       /**
-       * <code>repeated int32 coords = 4;</code>
+       * <code>repeated int32 coords = 2;</code>
        */
       int getCoords(int index);
+
+      /**
+       * <code>required .messages.Update.PInput lastInput = 3;</code>
+       */
+      boolean hasLastInput();
+      /**
+       * <code>required .messages.Update.PInput lastInput = 3;</code>
+       */
+      com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getLastInput();
+      /**
+       * <code>required .messages.Update.PInput lastInput = 3;</code>
+       */
+      com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder getLastInputOrBuilder();
     }
     /**
      * Protobuf type {@code messages.Update.PSnake}
@@ -324,8 +1141,6 @@ public final class Packet {
       }
       private PSnake() {
         id_ = 0;
-        lastInputId_ = 0;
-        direction_ = 0;
         coords_ = java.util.Collections.emptyList();
       }
 
@@ -366,34 +1181,37 @@ public final class Packet {
                 break;
               }
               case 16: {
-                bitField0_ |= 0x00000002;
-                lastInputId_ = input.readInt32();
-                break;
-              }
-              case 24: {
-                bitField0_ |= 0x00000004;
-                direction_ = input.readInt32();
-                break;
-              }
-              case 32: {
-                if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
                   coords_ = new java.util.ArrayList<java.lang.Integer>();
-                  mutable_bitField0_ |= 0x00000008;
+                  mutable_bitField0_ |= 0x00000002;
                 }
                 coords_.add(input.readInt32());
                 break;
               }
-              case 34: {
+              case 18: {
                 int length = input.readRawVarint32();
                 int limit = input.pushLimit(length);
-                if (!((mutable_bitField0_ & 0x00000008) == 0x00000008) && input.getBytesUntilLimit() > 0) {
+                if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
                   coords_ = new java.util.ArrayList<java.lang.Integer>();
-                  mutable_bitField0_ |= 0x00000008;
+                  mutable_bitField0_ |= 0x00000002;
                 }
                 while (input.getBytesUntilLimit() > 0) {
                   coords_.add(input.readInt32());
                 }
                 input.popLimit(limit);
+                break;
+              }
+              case 26: {
+                com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                  subBuilder = lastInput_.toBuilder();
+                }
+                lastInput_ = input.readMessage(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(lastInput_);
+                  lastInput_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000002;
                 break;
               }
             }
@@ -404,7 +1222,7 @@ public final class Packet {
           throw new com.google.protobuf.InvalidProtocolBufferException(
               e).setUnfinishedMessage(this);
         } finally {
-          if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
             coords_ = java.util.Collections.unmodifiableList(coords_);
           }
           this.unknownFields = unknownFields.build();
@@ -439,56 +1257,47 @@ public final class Packet {
         return id_;
       }
 
-      public static final int LASTINPUTID_FIELD_NUMBER = 2;
-      private int lastInputId_;
-      /**
-       * <code>required int32 lastInputId = 2;</code>
-       */
-      public boolean hasLastInputId() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required int32 lastInputId = 2;</code>
-       */
-      public int getLastInputId() {
-        return lastInputId_;
-      }
-
-      public static final int DIRECTION_FIELD_NUMBER = 3;
-      private int direction_;
-      /**
-       * <code>required int32 direction = 3;</code>
-       */
-      public boolean hasDirection() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>required int32 direction = 3;</code>
-       */
-      public int getDirection() {
-        return direction_;
-      }
-
-      public static final int COORDS_FIELD_NUMBER = 4;
+      public static final int COORDS_FIELD_NUMBER = 2;
       private java.util.List<java.lang.Integer> coords_;
       /**
-       * <code>repeated int32 coords = 4;</code>
+       * <code>repeated int32 coords = 2;</code>
        */
       public java.util.List<java.lang.Integer>
           getCoordsList() {
         return coords_;
       }
       /**
-       * <code>repeated int32 coords = 4;</code>
+       * <code>repeated int32 coords = 2;</code>
        */
       public int getCoordsCount() {
         return coords_.size();
       }
       /**
-       * <code>repeated int32 coords = 4;</code>
+       * <code>repeated int32 coords = 2;</code>
        */
       public int getCoords(int index) {
         return coords_.get(index);
+      }
+
+      public static final int LASTINPUT_FIELD_NUMBER = 3;
+      private com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput lastInput_;
+      /**
+       * <code>required .messages.Update.PInput lastInput = 3;</code>
+       */
+      public boolean hasLastInput() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required .messages.Update.PInput lastInput = 3;</code>
+       */
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getLastInput() {
+        return lastInput_ == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance() : lastInput_;
+      }
+      /**
+       * <code>required .messages.Update.PInput lastInput = 3;</code>
+       */
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder getLastInputOrBuilder() {
+        return lastInput_ == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance() : lastInput_;
       }
 
       private byte memoizedIsInitialized = -1;
@@ -501,11 +1310,11 @@ public final class Packet {
           memoizedIsInitialized = 0;
           return false;
         }
-        if (!hasLastInputId()) {
+        if (!hasLastInput()) {
           memoizedIsInitialized = 0;
           return false;
         }
-        if (!hasDirection()) {
+        if (!getLastInput().isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -518,14 +1327,11 @@ public final class Packet {
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           output.writeInt32(1, id_);
         }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          output.writeInt32(2, lastInputId_);
-        }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          output.writeInt32(3, direction_);
-        }
         for (int i = 0; i < coords_.size(); i++) {
-          output.writeInt32(4, coords_.get(i));
+          output.writeInt32(2, coords_.get(i));
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeMessage(3, getLastInput());
         }
         unknownFields.writeTo(output);
       }
@@ -539,14 +1345,6 @@ public final class Packet {
           size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(1, id_);
         }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(2, lastInputId_);
-        }
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(3, direction_);
-        }
         {
           int dataSize = 0;
           for (int i = 0; i < coords_.size(); i++) {
@@ -555,6 +1353,10 @@ public final class Packet {
           }
           size += dataSize;
           size += 1 * getCoordsList().size();
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(3, getLastInput());
         }
         size += unknownFields.getSerializedSize();
         memoizedSize = size;
@@ -577,18 +1379,13 @@ public final class Packet {
           result = result && (getId()
               == other.getId());
         }
-        result = result && (hasLastInputId() == other.hasLastInputId());
-        if (hasLastInputId()) {
-          result = result && (getLastInputId()
-              == other.getLastInputId());
-        }
-        result = result && (hasDirection() == other.hasDirection());
-        if (hasDirection()) {
-          result = result && (getDirection()
-              == other.getDirection());
-        }
         result = result && getCoordsList()
             .equals(other.getCoordsList());
+        result = result && (hasLastInput() == other.hasLastInput());
+        if (hasLastInput()) {
+          result = result && getLastInput()
+              .equals(other.getLastInput());
+        }
         result = result && unknownFields.equals(other.unknownFields);
         return result;
       }
@@ -604,17 +1401,13 @@ public final class Packet {
           hash = (37 * hash) + ID_FIELD_NUMBER;
           hash = (53 * hash) + getId();
         }
-        if (hasLastInputId()) {
-          hash = (37 * hash) + LASTINPUTID_FIELD_NUMBER;
-          hash = (53 * hash) + getLastInputId();
-        }
-        if (hasDirection()) {
-          hash = (37 * hash) + DIRECTION_FIELD_NUMBER;
-          hash = (53 * hash) + getDirection();
-        }
         if (getCoordsCount() > 0) {
           hash = (37 * hash) + COORDS_FIELD_NUMBER;
           hash = (53 * hash) + getCoordsList().hashCode();
+        }
+        if (hasLastInput()) {
+          hash = (37 * hash) + LASTINPUT_FIELD_NUMBER;
+          hash = (53 * hash) + getLastInput().hashCode();
         }
         hash = (29 * hash) + unknownFields.hashCode();
         memoizedHashCode = hash;
@@ -741,18 +1534,21 @@ public final class Packet {
         private void maybeForceBuilderInitialization() {
           if (com.google.protobuf.GeneratedMessageV3
                   .alwaysUseFieldBuilders) {
+            getLastInputFieldBuilder();
           }
         }
         public Builder clear() {
           super.clear();
           id_ = 0;
           bitField0_ = (bitField0_ & ~0x00000001);
-          lastInputId_ = 0;
-          bitField0_ = (bitField0_ & ~0x00000002);
-          direction_ = 0;
-          bitField0_ = (bitField0_ & ~0x00000004);
           coords_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000002);
+          if (lastInputBuilder_ == null) {
+            lastInput_ = null;
+          } else {
+            lastInputBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000004);
           return this;
         }
 
@@ -781,19 +1577,19 @@ public final class Packet {
             to_bitField0_ |= 0x00000001;
           }
           result.id_ = id_;
-          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-            to_bitField0_ |= 0x00000002;
-          }
-          result.lastInputId_ = lastInputId_;
-          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-            to_bitField0_ |= 0x00000004;
-          }
-          result.direction_ = direction_;
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((bitField0_ & 0x00000002) == 0x00000002)) {
             coords_ = java.util.Collections.unmodifiableList(coords_);
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.coords_ = coords_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          if (lastInputBuilder_ == null) {
+            result.lastInput_ = lastInput_;
+          } else {
+            result.lastInput_ = lastInputBuilder_.build();
+          }
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -839,21 +1635,18 @@ public final class Packet {
           if (other.hasId()) {
             setId(other.getId());
           }
-          if (other.hasLastInputId()) {
-            setLastInputId(other.getLastInputId());
-          }
-          if (other.hasDirection()) {
-            setDirection(other.getDirection());
-          }
           if (!other.coords_.isEmpty()) {
             if (coords_.isEmpty()) {
               coords_ = other.coords_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000002);
             } else {
               ensureCoordsIsMutable();
               coords_.addAll(other.coords_);
             }
             onChanged();
+          }
+          if (other.hasLastInput()) {
+            mergeLastInput(other.getLastInput());
           }
           this.mergeUnknownFields(other.unknownFields);
           onChanged();
@@ -864,10 +1657,10 @@ public final class Packet {
           if (!hasId()) {
             return false;
           }
-          if (!hasLastInputId()) {
+          if (!hasLastInput()) {
             return false;
           }
-          if (!hasDirection()) {
+          if (!getLastInput().isInitialized()) {
             return false;
           }
           return true;
@@ -924,98 +1717,34 @@ public final class Packet {
           return this;
         }
 
-        private int lastInputId_ ;
-        /**
-         * <code>required int32 lastInputId = 2;</code>
-         */
-        public boolean hasLastInputId() {
-          return ((bitField0_ & 0x00000002) == 0x00000002);
-        }
-        /**
-         * <code>required int32 lastInputId = 2;</code>
-         */
-        public int getLastInputId() {
-          return lastInputId_;
-        }
-        /**
-         * <code>required int32 lastInputId = 2;</code>
-         */
-        public Builder setLastInputId(int value) {
-          bitField0_ |= 0x00000002;
-          lastInputId_ = value;
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>required int32 lastInputId = 2;</code>
-         */
-        public Builder clearLastInputId() {
-          bitField0_ = (bitField0_ & ~0x00000002);
-          lastInputId_ = 0;
-          onChanged();
-          return this;
-        }
-
-        private int direction_ ;
-        /**
-         * <code>required int32 direction = 3;</code>
-         */
-        public boolean hasDirection() {
-          return ((bitField0_ & 0x00000004) == 0x00000004);
-        }
-        /**
-         * <code>required int32 direction = 3;</code>
-         */
-        public int getDirection() {
-          return direction_;
-        }
-        /**
-         * <code>required int32 direction = 3;</code>
-         */
-        public Builder setDirection(int value) {
-          bitField0_ |= 0x00000004;
-          direction_ = value;
-          onChanged();
-          return this;
-        }
-        /**
-         * <code>required int32 direction = 3;</code>
-         */
-        public Builder clearDirection() {
-          bitField0_ = (bitField0_ & ~0x00000004);
-          direction_ = 0;
-          onChanged();
-          return this;
-        }
-
         private java.util.List<java.lang.Integer> coords_ = java.util.Collections.emptyList();
         private void ensureCoordsIsMutable() {
-          if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (!((bitField0_ & 0x00000002) == 0x00000002)) {
             coords_ = new java.util.ArrayList<java.lang.Integer>(coords_);
-            bitField0_ |= 0x00000008;
+            bitField0_ |= 0x00000002;
            }
         }
         /**
-         * <code>repeated int32 coords = 4;</code>
+         * <code>repeated int32 coords = 2;</code>
          */
         public java.util.List<java.lang.Integer>
             getCoordsList() {
           return java.util.Collections.unmodifiableList(coords_);
         }
         /**
-         * <code>repeated int32 coords = 4;</code>
+         * <code>repeated int32 coords = 2;</code>
          */
         public int getCoordsCount() {
           return coords_.size();
         }
         /**
-         * <code>repeated int32 coords = 4;</code>
+         * <code>repeated int32 coords = 2;</code>
          */
         public int getCoords(int index) {
           return coords_.get(index);
         }
         /**
-         * <code>repeated int32 coords = 4;</code>
+         * <code>repeated int32 coords = 2;</code>
          */
         public Builder setCoords(
             int index, int value) {
@@ -1025,7 +1754,7 @@ public final class Packet {
           return this;
         }
         /**
-         * <code>repeated int32 coords = 4;</code>
+         * <code>repeated int32 coords = 2;</code>
          */
         public Builder addCoords(int value) {
           ensureCoordsIsMutable();
@@ -1034,7 +1763,7 @@ public final class Packet {
           return this;
         }
         /**
-         * <code>repeated int32 coords = 4;</code>
+         * <code>repeated int32 coords = 2;</code>
          */
         public Builder addAllCoords(
             java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -1045,13 +1774,131 @@ public final class Packet {
           return this;
         }
         /**
-         * <code>repeated int32 coords = 4;</code>
+         * <code>repeated int32 coords = 2;</code>
          */
         public Builder clearCoords() {
           coords_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
           return this;
+        }
+
+        private com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput lastInput_ = null;
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder> lastInputBuilder_;
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        public boolean hasLastInput() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getLastInput() {
+          if (lastInputBuilder_ == null) {
+            return lastInput_ == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance() : lastInput_;
+          } else {
+            return lastInputBuilder_.getMessage();
+          }
+        }
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        public Builder setLastInput(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput value) {
+          if (lastInputBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            lastInput_ = value;
+            onChanged();
+          } else {
+            lastInputBuilder_.setMessage(value);
+          }
+          bitField0_ |= 0x00000004;
+          return this;
+        }
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        public Builder setLastInput(
+            com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder builderForValue) {
+          if (lastInputBuilder_ == null) {
+            lastInput_ = builderForValue.build();
+            onChanged();
+          } else {
+            lastInputBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000004;
+          return this;
+        }
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        public Builder mergeLastInput(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput value) {
+          if (lastInputBuilder_ == null) {
+            if (((bitField0_ & 0x00000004) == 0x00000004) &&
+                lastInput_ != null &&
+                lastInput_ != com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance()) {
+              lastInput_ =
+                com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.newBuilder(lastInput_).mergeFrom(value).buildPartial();
+            } else {
+              lastInput_ = value;
+            }
+            onChanged();
+          } else {
+            lastInputBuilder_.mergeFrom(value);
+          }
+          bitField0_ |= 0x00000004;
+          return this;
+        }
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        public Builder clearLastInput() {
+          if (lastInputBuilder_ == null) {
+            lastInput_ = null;
+            onChanged();
+          } else {
+            lastInputBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000004);
+          return this;
+        }
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder getLastInputBuilder() {
+          bitField0_ |= 0x00000004;
+          onChanged();
+          return getLastInputFieldBuilder().getBuilder();
+        }
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder getLastInputOrBuilder() {
+          if (lastInputBuilder_ != null) {
+            return lastInputBuilder_.getMessageOrBuilder();
+          } else {
+            return lastInput_ == null ?
+                com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance() : lastInput_;
+          }
+        }
+        /**
+         * <code>required .messages.Update.PInput lastInput = 3;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder> 
+            getLastInputFieldBuilder() {
+          if (lastInputBuilder_ == null) {
+            lastInputBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder>(
+                    getLastInput(),
+                    getParentForChildren(),
+                    isClean());
+            lastInput_ = null;
+          }
+          return lastInputBuilder_;
         }
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1119,65 +1966,115 @@ public final class Packet {
       return result == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState.READY : result;
     }
 
-    public static final int VERSION_FIELD_NUMBER = 2;
-    private int version_;
+    public static final int SNAKEID_FIELD_NUMBER = 2;
+    private int snakeId_;
     /**
-     * <code>required int32 version = 2;</code>
+     * <code>optional int32 snakeId = 2;</code>
      */
-    public boolean hasVersion() {
+    public boolean hasSnakeId() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required int32 version = 2;</code>
+     * <code>optional int32 snakeId = 2;</code>
+     */
+    public int getSnakeId() {
+      return snakeId_;
+    }
+
+    public static final int INPUTS_FIELD_NUMBER = 3;
+    private java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput> inputs_;
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput> getInputsList() {
+      return inputs_;
+    }
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    public java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder> 
+        getInputsOrBuilderList() {
+      return inputs_;
+    }
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    public int getInputsCount() {
+      return inputs_.size();
+    }
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getInputs(int index) {
+      return inputs_.get(index);
+    }
+    /**
+     * <code>repeated .messages.Update.PInput inputs = 3;</code>
+     */
+    public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder getInputsOrBuilder(
+        int index) {
+      return inputs_.get(index);
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 4;
+    private int version_;
+    /**
+     * <code>optional int32 version = 4;</code>
+     */
+    public boolean hasVersion() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int32 version = 4;</code>
      */
     public int getVersion() {
       return version_;
     }
 
-    public static final int TIMESTAMP_FIELD_NUMBER = 3;
+    public static final int TIMESTAMP_FIELD_NUMBER = 5;
     private long timestamp_;
     /**
-     * <code>required int64 timestamp = 3;</code>
+     * <code>optional int64 timestamp = 5;</code>
      */
     public boolean hasTimestamp() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>required int64 timestamp = 3;</code>
+     * <code>optional int64 timestamp = 5;</code>
      */
     public long getTimestamp() {
       return timestamp_;
     }
 
-    public static final int SNAKES_FIELD_NUMBER = 4;
+    public static final int SNAKES_FIELD_NUMBER = 6;
     private java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> snakes_;
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> getSnakesList() {
       return snakes_;
     }
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     public java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder> 
         getSnakesOrBuilderList() {
       return snakes_;
     }
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     public int getSnakesCount() {
       return snakes_.size();
     }
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake getSnakes(int index) {
       return snakes_.get(index);
     }
     /**
-     * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+     * <code>repeated .messages.Update.PSnake snakes = 6;</code>
      */
     public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder getSnakesOrBuilder(
         int index) {
@@ -1194,13 +2091,11 @@ public final class Packet {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasVersion()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasTimestamp()) {
-        memoizedIsInitialized = 0;
-        return false;
+      for (int i = 0; i < getInputsCount(); i++) {
+        if (!getInputs(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
       for (int i = 0; i < getSnakesCount(); i++) {
         if (!getSnakes(i).isInitialized()) {
@@ -1218,13 +2113,19 @@ public final class Packet {
         output.writeEnum(1, state_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt32(2, version_);
+        output.writeInt32(2, snakeId_);
+      }
+      for (int i = 0; i < inputs_.size(); i++) {
+        output.writeMessage(3, inputs_.get(i));
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt64(3, timestamp_);
+        output.writeInt32(4, version_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(5, timestamp_);
       }
       for (int i = 0; i < snakes_.size(); i++) {
-        output.writeMessage(4, snakes_.get(i));
+        output.writeMessage(6, snakes_.get(i));
       }
       unknownFields.writeTo(output);
     }
@@ -1240,15 +2141,23 @@ public final class Packet {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, version_);
+          .computeInt32Size(2, snakeId_);
+      }
+      for (int i = 0; i < inputs_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, inputs_.get(i));
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, timestamp_);
+          .computeInt32Size(4, version_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, timestamp_);
       }
       for (int i = 0; i < snakes_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, snakes_.get(i));
+          .computeMessageSize(6, snakes_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1270,6 +2179,13 @@ public final class Packet {
       if (hasState()) {
         result = result && state_ == other.state_;
       }
+      result = result && (hasSnakeId() == other.hasSnakeId());
+      if (hasSnakeId()) {
+        result = result && (getSnakeId()
+            == other.getSnakeId());
+      }
+      result = result && getInputsList()
+          .equals(other.getInputsList());
       result = result && (hasVersion() == other.hasVersion());
       if (hasVersion()) {
         result = result && (getVersion()
@@ -1296,6 +2212,14 @@ public final class Packet {
       if (hasState()) {
         hash = (37 * hash) + STATE_FIELD_NUMBER;
         hash = (53 * hash) + state_;
+      }
+      if (hasSnakeId()) {
+        hash = (37 * hash) + SNAKEID_FIELD_NUMBER;
+        hash = (53 * hash) + getSnakeId();
+      }
+      if (getInputsCount() > 0) {
+        hash = (37 * hash) + INPUTS_FIELD_NUMBER;
+        hash = (53 * hash) + getInputsList().hashCode();
       }
       if (hasVersion()) {
         hash = (37 * hash) + VERSION_FIELD_NUMBER;
@@ -1435,6 +2359,7 @@ public final class Packet {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
+          getInputsFieldBuilder();
           getSnakesFieldBuilder();
         }
       }
@@ -1442,13 +2367,21 @@ public final class Packet {
         super.clear();
         state_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
-        version_ = 0;
+        snakeId_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
+        if (inputsBuilder_ == null) {
+          inputs_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        } else {
+          inputsBuilder_.clear();
+        }
+        version_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
         timestamp_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000010);
         if (snakesBuilder_ == null) {
           snakes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000020);
         } else {
           snakesBuilder_.clear();
         }
@@ -1483,15 +2416,28 @@ public final class Packet {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.version_ = version_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+        result.snakeId_ = snakeId_;
+        if (inputsBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+            inputs_ = java.util.Collections.unmodifiableList(inputs_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.inputs_ = inputs_;
+        } else {
+          result.inputs_ = inputsBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000004;
+        }
+        result.version_ = version_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000008;
         }
         result.timestamp_ = timestamp_;
         if (snakesBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((bitField0_ & 0x00000020) == 0x00000020)) {
             snakes_ = java.util.Collections.unmodifiableList(snakes_);
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000020);
           }
           result.snakes_ = snakes_;
         } else {
@@ -1542,6 +2488,35 @@ public final class Packet {
         if (other.hasState()) {
           setState(other.getState());
         }
+        if (other.hasSnakeId()) {
+          setSnakeId(other.getSnakeId());
+        }
+        if (inputsBuilder_ == null) {
+          if (!other.inputs_.isEmpty()) {
+            if (inputs_.isEmpty()) {
+              inputs_ = other.inputs_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+            } else {
+              ensureInputsIsMutable();
+              inputs_.addAll(other.inputs_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.inputs_.isEmpty()) {
+            if (inputsBuilder_.isEmpty()) {
+              inputsBuilder_.dispose();
+              inputsBuilder_ = null;
+              inputs_ = other.inputs_;
+              bitField0_ = (bitField0_ & ~0x00000004);
+              inputsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getInputsFieldBuilder() : null;
+            } else {
+              inputsBuilder_.addAllMessages(other.inputs_);
+            }
+          }
+        }
         if (other.hasVersion()) {
           setVersion(other.getVersion());
         }
@@ -1552,7 +2527,7 @@ public final class Packet {
           if (!other.snakes_.isEmpty()) {
             if (snakes_.isEmpty()) {
               snakes_ = other.snakes_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000020);
             } else {
               ensureSnakesIsMutable();
               snakes_.addAll(other.snakes_);
@@ -1565,7 +2540,7 @@ public final class Packet {
               snakesBuilder_.dispose();
               snakesBuilder_ = null;
               snakes_ = other.snakes_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000020);
               snakesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getSnakesFieldBuilder() : null;
@@ -1583,11 +2558,10 @@ public final class Packet {
         if (!hasState()) {
           return false;
         }
-        if (!hasVersion()) {
-          return false;
-        }
-        if (!hasTimestamp()) {
-          return false;
+        for (int i = 0; i < getInputsCount(); i++) {
+          if (!getInputs(i).isInitialized()) {
+            return false;
+          }
         }
         for (int i = 0; i < getSnakesCount(); i++) {
           if (!getSnakes(i).isInitialized()) {
@@ -1652,33 +2626,305 @@ public final class Packet {
         return this;
       }
 
-      private int version_ ;
+      private int snakeId_ ;
       /**
-       * <code>required int32 version = 2;</code>
+       * <code>optional int32 snakeId = 2;</code>
        */
-      public boolean hasVersion() {
+      public boolean hasSnakeId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required int32 version = 2;</code>
+       * <code>optional int32 snakeId = 2;</code>
+       */
+      public int getSnakeId() {
+        return snakeId_;
+      }
+      /**
+       * <code>optional int32 snakeId = 2;</code>
+       */
+      public Builder setSnakeId(int value) {
+        bitField0_ |= 0x00000002;
+        snakeId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 snakeId = 2;</code>
+       */
+      public Builder clearSnakeId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        snakeId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput> inputs_ =
+        java.util.Collections.emptyList();
+      private void ensureInputsIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          inputs_ = new java.util.ArrayList<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput>(inputs_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder> inputsBuilder_;
+
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput> getInputsList() {
+        if (inputsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(inputs_);
+        } else {
+          return inputsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public int getInputsCount() {
+        if (inputsBuilder_ == null) {
+          return inputs_.size();
+        } else {
+          return inputsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput getInputs(int index) {
+        if (inputsBuilder_ == null) {
+          return inputs_.get(index);
+        } else {
+          return inputsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder setInputs(
+          int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput value) {
+        if (inputsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInputsIsMutable();
+          inputs_.set(index, value);
+          onChanged();
+        } else {
+          inputsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder setInputs(
+          int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder builderForValue) {
+        if (inputsBuilder_ == null) {
+          ensureInputsIsMutable();
+          inputs_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          inputsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder addInputs(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput value) {
+        if (inputsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInputsIsMutable();
+          inputs_.add(value);
+          onChanged();
+        } else {
+          inputsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder addInputs(
+          int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput value) {
+        if (inputsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureInputsIsMutable();
+          inputs_.add(index, value);
+          onChanged();
+        } else {
+          inputsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder addInputs(
+          com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder builderForValue) {
+        if (inputsBuilder_ == null) {
+          ensureInputsIsMutable();
+          inputs_.add(builderForValue.build());
+          onChanged();
+        } else {
+          inputsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder addInputs(
+          int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder builderForValue) {
+        if (inputsBuilder_ == null) {
+          ensureInputsIsMutable();
+          inputs_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          inputsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder addAllInputs(
+          java.lang.Iterable<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput> values) {
+        if (inputsBuilder_ == null) {
+          ensureInputsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, inputs_);
+          onChanged();
+        } else {
+          inputsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder clearInputs() {
+        if (inputsBuilder_ == null) {
+          inputs_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+          onChanged();
+        } else {
+          inputsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public Builder removeInputs(int index) {
+        if (inputsBuilder_ == null) {
+          ensureInputsIsMutable();
+          inputs_.remove(index);
+          onChanged();
+        } else {
+          inputsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder getInputsBuilder(
+          int index) {
+        return getInputsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder getInputsOrBuilder(
+          int index) {
+        if (inputsBuilder_ == null) {
+          return inputs_.get(index);  } else {
+          return inputsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder> 
+           getInputsOrBuilderList() {
+        if (inputsBuilder_ != null) {
+          return inputsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(inputs_);
+        }
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder addInputsBuilder() {
+        return getInputsFieldBuilder().addBuilder(
+            com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder addInputsBuilder(
+          int index) {
+        return getInputsFieldBuilder().addBuilder(
+            index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .messages.Update.PInput inputs = 3;</code>
+       */
+      public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder> 
+           getInputsBuilderList() {
+        return getInputsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder> 
+          getInputsFieldBuilder() {
+        if (inputsBuilder_ == null) {
+          inputsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInput.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PInputOrBuilder>(
+                  inputs_,
+                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  getParentForChildren(),
+                  isClean());
+          inputs_ = null;
+        }
+        return inputsBuilder_;
+      }
+
+      private int version_ ;
+      /**
+       * <code>optional int32 version = 4;</code>
+       */
+      public boolean hasVersion() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int32 version = 4;</code>
        */
       public int getVersion() {
         return version_;
       }
       /**
-       * <code>required int32 version = 2;</code>
+       * <code>optional int32 version = 4;</code>
        */
       public Builder setVersion(int value) {
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000008;
         version_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int32 version = 2;</code>
+       * <code>optional int32 version = 4;</code>
        */
       public Builder clearVersion() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000008);
         version_ = 0;
         onChanged();
         return this;
@@ -1686,31 +2932,31 @@ public final class Packet {
 
       private long timestamp_ ;
       /**
-       * <code>required int64 timestamp = 3;</code>
+       * <code>optional int64 timestamp = 5;</code>
        */
       public boolean hasTimestamp() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>required int64 timestamp = 3;</code>
+       * <code>optional int64 timestamp = 5;</code>
        */
       public long getTimestamp() {
         return timestamp_;
       }
       /**
-       * <code>required int64 timestamp = 3;</code>
+       * <code>optional int64 timestamp = 5;</code>
        */
       public Builder setTimestamp(long value) {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000010;
         timestamp_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int64 timestamp = 3;</code>
+       * <code>optional int64 timestamp = 5;</code>
        */
       public Builder clearTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000010);
         timestamp_ = 0L;
         onChanged();
         return this;
@@ -1719,9 +2965,9 @@ public final class Packet {
       private java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> snakes_ =
         java.util.Collections.emptyList();
       private void ensureSnakesIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
           snakes_ = new java.util.ArrayList<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake>(snakes_);
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000020;
          }
       }
 
@@ -1729,7 +2975,7 @@ public final class Packet {
           com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder> snakesBuilder_;
 
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> getSnakesList() {
         if (snakesBuilder_ == null) {
@@ -1739,7 +2985,7 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public int getSnakesCount() {
         if (snakesBuilder_ == null) {
@@ -1749,7 +2995,7 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake getSnakes(int index) {
         if (snakesBuilder_ == null) {
@@ -1759,7 +3005,7 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder setSnakes(
           int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake value) {
@@ -1776,7 +3022,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder setSnakes(
           int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder builderForValue) {
@@ -1790,7 +3036,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder addSnakes(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake value) {
         if (snakesBuilder_ == null) {
@@ -1806,7 +3052,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder addSnakes(
           int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake value) {
@@ -1823,7 +3069,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder addSnakes(
           com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder builderForValue) {
@@ -1837,7 +3083,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder addSnakes(
           int index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder builderForValue) {
@@ -1851,7 +3097,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder addAllSnakes(
           java.lang.Iterable<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake> values) {
@@ -1866,12 +3112,12 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder clearSnakes() {
         if (snakesBuilder_ == null) {
           snakes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000020);
           onChanged();
         } else {
           snakesBuilder_.clear();
@@ -1879,7 +3125,7 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public Builder removeSnakes(int index) {
         if (snakesBuilder_ == null) {
@@ -1892,14 +3138,14 @@ public final class Packet {
         return this;
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder getSnakesBuilder(
           int index) {
         return getSnakesFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder getSnakesOrBuilder(
           int index) {
@@ -1909,7 +3155,7 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public java.util.List<? extends com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder> 
            getSnakesOrBuilderList() {
@@ -1920,14 +3166,14 @@ public final class Packet {
         }
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder addSnakesBuilder() {
         return getSnakesFieldBuilder().addBuilder(
             com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.getDefaultInstance());
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder addSnakesBuilder(
           int index) {
@@ -1935,7 +3181,7 @@ public final class Packet {
             index, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.getDefaultInstance());
       }
       /**
-       * <code>repeated .messages.Update.PSnake snakes = 4;</code>
+       * <code>repeated .messages.Update.PSnake snakes = 6;</code>
        */
       public java.util.List<com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder> 
            getSnakesBuilderList() {
@@ -1948,7 +3194,7 @@ public final class Packet {
           snakesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnake.Builder, com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PSnakeOrBuilder>(
                   snakes_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  ((bitField0_ & 0x00000020) == 0x00000020),
                   getParentForChildren(),
                   isClean());
           snakes_ = null;
@@ -2010,6 +3256,11 @@ public final class Packet {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_messages_Update_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_messages_Update_PInput_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_messages_Update_PInput_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_messages_Update_PSnake_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -2023,15 +3274,18 @@ public final class Packet {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014packet.proto\022\010messages\"\366\001\n\006Update\022&\n\005s" +
-      "tate\030\001 \002(\0162\027.messages.Update.PState\022\017\n\007v" +
-      "ersion\030\002 \002(\005\022\021\n\ttimestamp\030\003 \002(\003\022\'\n\006snake" +
-      "s\030\004 \003(\0132\027.messages.Update.PSnake\032L\n\006PSna" +
-      "ke\022\n\n\002id\030\001 \002(\005\022\023\n\013lastInputId\030\002 \002(\005\022\021\n\td" +
-      "irection\030\003 \002(\005\022\016\n\006coords\030\004 \003(\005\")\n\006PState" +
-      "\022\t\n\005READY\020\000\022\024\n\020GAME_IN_PROGRESS\020\001B<\n2com" +
-      ".tianyi.zhang.multiplayer.snake.agents.m" +
-      "essagesB\006Packet"
+      "\n\014packet.proto\022\010messages\"\376\002\n\006Update\022&\n\005s" +
+      "tate\030\001 \002(\0162\027.messages.Update.PState\022\017\n\007s" +
+      "nakeId\030\002 \001(\005\022\'\n\006inputs\030\003 \003(\0132\027.messages." +
+      "Update.PInput\022\017\n\007version\030\004 \001(\005\022\021\n\ttimest" +
+      "amp\030\005 \001(\003\022\'\n\006snakes\030\006 \003(\0132\027.messages.Upd" +
+      "ate.PSnake\032H\n\006PInput\022\n\n\002id\030\001 \002(\005\022\021\n\tdire" +
+      "ction\030\002 \002(\005\022\021\n\ttimestamp\030\003 \002(\003\022\014\n\004step\030\004" +
+      " \002(\005\032P\n\006PSnake\022\n\n\002id\030\001 \002(\005\022\016\n\006coords\030\002 \003" +
+      "(\005\022*\n\tlastInput\030\003 \002(\0132\027.messages.Update." +
+      "PInput\")\n\006PState\022\t\n\005READY\020\000\022\024\n\020GAME_IN_P" +
+      "ROGRESS\020\001B<\n2com.tianyi.zhang.multiplaye" +
+      "r.snake.agents.messagesB\006Packet"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2050,13 +3304,19 @@ public final class Packet {
     internal_static_messages_Update_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_messages_Update_descriptor,
-        new java.lang.String[] { "State", "Version", "Timestamp", "Snakes", });
-    internal_static_messages_Update_PSnake_descriptor =
+        new java.lang.String[] { "State", "SnakeId", "Inputs", "Version", "Timestamp", "Snakes", });
+    internal_static_messages_Update_PInput_descriptor =
       internal_static_messages_Update_descriptor.getNestedTypes().get(0);
+    internal_static_messages_Update_PInput_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_messages_Update_PInput_descriptor,
+        new java.lang.String[] { "Id", "Direction", "Timestamp", "Step", });
+    internal_static_messages_Update_PSnake_descriptor =
+      internal_static_messages_Update_descriptor.getNestedTypes().get(1);
     internal_static_messages_Update_PSnake_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_messages_Update_PSnake_descriptor,
-        new java.lang.String[] { "Id", "LastInputId", "Direction", "Coords", });
+        new java.lang.String[] { "Id", "Coords", "LastInput", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

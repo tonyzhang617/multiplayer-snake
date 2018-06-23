@@ -13,7 +13,7 @@ public class Constants {
     /**
      * Server would acknowledge inputs sent within LAG_TOLERANCE_MS
      */
-    public static final int LAG_TOLERANCE_MS = 100;
+    public static final int LAG_TOLERANCE_MS = 1500;
 
     public static final int MOVE_EVERY_MS = 500;
     public static final int CLIENT_SEND_EVERY_MS = 50;

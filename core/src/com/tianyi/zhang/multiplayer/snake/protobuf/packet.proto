@@ -12,15 +12,25 @@ message Update {
     }
 
     required PState state = 1;
-    required int32 version = 2;
-    required int64 timestamp = 3;
+
+    message PInput {
+        required int32 id = 1;
+        required int32 direction = 2;
+        required int64 timestamp = 3;
+        required int32 step = 4;
+    }
+
+    optional int32 snakeId = 2;
+    repeated PInput inputs = 3;
+
+    optional int32 version = 4;
+    optional int64 timestamp = 5;
 
     message PSnake {
         required int32 id = 1;
-        required int32 lastInputId = 2;
-        required int32 direction = 3;
-        repeated int32 coords = 4;
+        repeated int32 coords = 2;
+        required PInput lastInput = 3;
     }
 
-    repeated PSnake snakes = 4;
+    repeated PSnake snakes = 6;
 }

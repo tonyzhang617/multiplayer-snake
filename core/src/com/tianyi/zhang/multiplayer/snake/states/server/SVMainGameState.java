@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
+import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
@@ -15,7 +16,6 @@ import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,7 +41,6 @@ public class SVMainGameState extends GameState implements InputProcessor {
         super(app);
         Gdx.input.setInputProcessor(this);
         Gdx.graphics.setContinuousRendering(false);
-        _app.getAgent().setListener(new Listener());
 
 //        int[] snakeIds = new int[connectionIds.size()+1];
 //        // Server has snake ID 0
@@ -74,6 +73,14 @@ public class SVMainGameState extends GameState implements InputProcessor {
         _app.getAgent().send(buildFirstPacket(tmpIds));
         startTimestamp = Utils.getNanoTime();
         serverSnapshot = new ServerSnapshot(startTimestamp, tmpIds);
+        _app.getAgent().setListener(new Listener() {
+            @Override
+            public void received(Connection connection, Object object) {
+                if (object instanceof byte[]) {
+                    serverSnapshot.onClientUpdate(Server.parseReceived(object));
+                }
+            }
+        });
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -114,8 +121,9 @@ public class SVMainGameState extends GameState implements InputProcessor {
             while (id <= snakeIds[index]) {
                 Packet.Update.PSnake.Builder snakeBuilder = Packet.Update.PSnake.newBuilder();
                 // TODO: add actual coordinates
-                snakeBuilder.setId(id).setDirection(Constants.RIGHT).setLastInputId(0).addAllCoords(new ArrayList());
-                builder.addSnakes(snakeBuilder.build());
+                snakeBuilder.setId(id).addAllCoords(new ArrayList());
+                snakeBuilder.setLastInput(Packet.Update.PInput.newBuilder().setId(0).setDirection(Constants.RIGHT).setTimestamp(0).setStep(0));
+                builder.addSnakes(snakeBuilder);
                 id += 1;
             }
         }
@@ -180,7 +188,7 @@ public class SVMainGameState extends GameState implements InputProcessor {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         Snake[] snakes = serverSnapshot.getSnakes();
-        Snake mySnake = snakes[0];
+        Snake mySnake = snakes[1];
         StringBuilder builder = new StringBuilder();
         for (int i : mySnake.COORDS) {
             builder.append(i);
