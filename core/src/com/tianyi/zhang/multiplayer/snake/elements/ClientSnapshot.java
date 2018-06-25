@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.RIGHT;
@@ -22,6 +23,7 @@ public class ClientSnapshot extends Snapshot {
     private final int clientId;
     private static final long SNAKE_MOVE_EVERY_NS = TimeUnit.MILLISECONDS.toNanos(Constants.MOVE_EVERY_MS);
 
+    private final AtomicInteger serverUpdateVersion;
 
     private final Object lock;
     private final AtomicLong lastUpdateNsSinceStart;
@@ -42,6 +44,7 @@ public class ClientSnapshot extends Snapshot {
         unackInputs = new LinkedList<Input>();
         lastUpdateNsSinceStart = new AtomicLong(0);
         gameInitialized = new AtomicBoolean(false);
+        serverUpdateVersion = new AtomicInteger(Integer.MIN_VALUE);
     }
 
     /**
@@ -94,7 +97,31 @@ public class ClientSnapshot extends Snapshot {
 
     @Override
     public void onServerUpdate(Packet.Update update) {
+        if (update.getState() == Packet.Update.PState.GAME_IN_PROGRESS && update.getVersion() > serverUpdateVersion.get()) {
+            Gdx.app.debug(TAG, "Server update version " + update.getVersion() + " received.");
+            Gdx.app.debug(TAG, update.toString());
+            serverUpdateVersion.set(update.getVersion());
+            synchronized (lock) {
+                List<Packet.Update.PSnake> pSnakes = update.getSnakesList();
+                for (int i = 0; i < pSnakes.size(); ++i) {
+                    Packet.Update.PSnake pSnake = pSnakes.get(i);
+                    int tmpId = pSnake.getId();
+                    Packet.Update.PInput pInput = pSnake.getLastInput();
+                    Input newInput = new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp(), pInput.getStep(), true);
+                    Snake newSnake = new Snake(tmpId, pSnake.getCoordsList(), newInput);
+                    snakes.set(tmpId, newSnake);
 
+                    stateStep = (int) (update.getTimestamp() / SNAKE_MOVE_EVERY_NS);
+
+                    if (tmpId == clientId) {
+                        int lastAckInputId = pInput.getId();
+                        while (!unackInputs.isEmpty() && lastAckInputId <= unackInputs.get(0).id) {
+                            unackInputs.remove(0);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public Input[] getNewInputs() {
@@ -114,23 +141,24 @@ public class ClientSnapshot extends Snapshot {
                 int stepsBehind = currentStep - stateStep;
                 results = new Snake[snakes.size()];
                 results = snakes.toArray(results);
-                int index = 0;
-                if (stepsBehind > 0) {
-                    for (int j = 0; j < results.length; ++j) {
-                        Snake newSnake = results[j];
-                        for (int i = 0; i < stepsBehind; ++i) {
-                            if (j == clientId) {
-                                while (unackInputs.size() > index && unackInputs.get(index).step == stateStep + i) {
-                                    newSnake = newSnake.changeDirection(unackInputs.get(index));
-                                    index += 1;
-                                }
-                                newSnake = newSnake.next();
-                            } else {
-                                newSnake = newSnake.next();
+                for (int j = 0; j < results.length; ++j) {
+                    int index = 0;
+                    Snake newSnake = results[j];
+                    for (int i = 0; i <= stepsBehind; ++i) {
+                        if (j == clientId) {
+                            while (unackInputs.size() > index && unackInputs.get(index).step < stateStep + i) {
+                                index += 1;
+                            }
+                            while (unackInputs.size() > index && unackInputs.get(index).step == stateStep + i) {
+                                newSnake = newSnake.changeDirection(unackInputs.get(index));
+                                index += 1;
                             }
                         }
-                        results[j] = newSnake;
+                        if (i != stepsBehind){
+                            newSnake = newSnake.next();
+                        }
                     }
+                    results[j] = newSnake;
                 }
             }
             return results;

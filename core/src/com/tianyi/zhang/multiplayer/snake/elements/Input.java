@@ -67,4 +67,10 @@ public class Input implements Comparable<Input> {
             return false;
         }
     }
+
+    @Override
+    public String toString() {
+        String str = String.format("Input: ID %d, direction %d, step %d", id, direction, step);
+        return str;
+    }
 }

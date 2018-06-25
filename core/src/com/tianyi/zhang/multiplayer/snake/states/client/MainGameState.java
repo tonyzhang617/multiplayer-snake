@@ -75,6 +75,8 @@ public class MainGameState extends GameState implements InputProcessor {
                                 }
                             }
                         }, 0, 30, TimeUnit.MILLISECONDS);
+                    } else {
+                        snapshot.onServerUpdate(update);
                     }
                 }
             }
@@ -90,12 +92,7 @@ public class MainGameState extends GameState implements InputProcessor {
         Snake[] snakes = snapshot.getSnakes();
         if (snakes.length > clientId) {
             Snake mySnake = snapshot.getSnakes()[clientId];
-            StringBuilder builder = new StringBuilder();
-            for (int i : mySnake.COORDS) {
-                builder.append(i);
-                builder.append(' ');
-            }
-            Gdx.app.debug(TAG, builder.toString());
+            Gdx.app.debug(TAG, mySnake.toString());
         }
     }
 

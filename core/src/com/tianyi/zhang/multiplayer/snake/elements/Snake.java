@@ -25,9 +25,13 @@ public class Snake {
         LAST_INPUT = lastInput;
     }
 
-    private Snake(int id, List<Integer> coords, Input lastInput) {
+    public Snake(int id, List<Integer> coords, Input lastInput) {
         ID = id;
-        COORDS = coords;
+        if (coords.getClass().getSimpleName().equals("UnmodifiableCollection")) {
+            COORDS = coords;
+        } else {
+            COORDS = Collections.unmodifiableList(coords);
+        }
         LAST_INPUT = lastInput;
     }
 
@@ -62,5 +66,12 @@ public class Snake {
         coords[0] = x0;
         coords[1] = y0;
         return new Snake(ID, coords, LAST_INPUT);
+    }
+
+    @Override
+    public String toString() {
+        String str = String.format("Snake: ID %d, direction %d, last input ID %d, head coordinates (%d, %d).",
+                ID, LAST_INPUT.direction, LAST_INPUT.id, COORDS.get(0), COORDS.get(1));
+        return str;
     }
 }

@@ -15,7 +15,7 @@ public class Constants {
      */
     public static final int LAG_TOLERANCE_MS = 1500;
 
-    public static final int MOVE_EVERY_MS = 500;
+    public static final int MOVE_EVERY_MS = 1000;
     public static final int CLIENT_SEND_EVERY_MS = 50;
     public static final int SERVER_SEND_EVERY_MS = 80;
 }

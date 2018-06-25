@@ -62,6 +62,7 @@ public class SVMainGameState extends GameState implements InputProcessor {
                     if (serverSnapshot.update()) {
                         Gdx.graphics.requestRendering();
                     }
+                    _app.getAgent().send(serverSnapshot.buildUpdate());
                 } catch (Exception e) {
                     Gdx.app.error(TAG, "Error encountered inside scheduled task: ", e);
                 }
@@ -94,13 +95,7 @@ public class SVMainGameState extends GameState implements InputProcessor {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         Snake[] snakes = serverSnapshot.getSnakes();
-        Snake mySnake = snakes[1];
-        StringBuilder builder = new StringBuilder();
-        for (int i : mySnake.COORDS) {
-            builder.append(i);
-            builder.append(' ');
-        }
-        Gdx.app.debug(TAG, builder.toString());
+        Gdx.app.debug(TAG, snakes[1].toString());
     }
 
     @Override
