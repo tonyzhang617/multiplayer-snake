@@ -60,7 +60,7 @@ public class ClientSnapshot extends Snapshot {
         int id = 0;
         for (int index = 0; index < snakeIds.length; ++index) {
             while (id <= snakeIds[index]) {
-                snakes.add(new Snake(id, new int[]{3, 3, 2, 3}, new Input(RIGHT, 0, 0, 0, true)));
+                snakes.add(new Snake(id, new int[]{3, 3, 2, 3}, new Input(RIGHT, 0, 0, true)));
                 id += 1;
             }
         }
@@ -76,6 +76,7 @@ public class ClientSnapshot extends Snapshot {
         long currentNs = Utils.getNanoTime() - startTimestamp;
         int tmpStep = (int) (currentNs / SNAKE_MOVE_EVERY_NS);
         int lastUpdateStep = (int) (lastUpdateNsSinceStart.get() / SNAKE_MOVE_EVERY_NS);
+        // TODO: remove unacknowledged inputs
         if (tmpStep - lastUpdateStep > 0) {
             lastUpdateNsSinceStart.set(currentNs);
             return true;
@@ -90,7 +91,7 @@ public class ClientSnapshot extends Snapshot {
         synchronized (lock) {
             long tmpNs = Utils.getNanoTime() - startTimestamp;
             int tmpStep = (int) (tmpNs / SNAKE_MOVE_EVERY_NS);
-            input = new Input(direction, nextInputId++, tmpNs, tmpStep, false);
+            input = new Input(direction, nextInputId++, tmpNs, false);
             unackInputs.add(input);
         }
     }
@@ -107,7 +108,7 @@ public class ClientSnapshot extends Snapshot {
                     Packet.Update.PSnake pSnake = pSnakes.get(i);
                     int tmpId = pSnake.getId();
                     Packet.Update.PInput pInput = pSnake.getLastInput();
-                    Input newInput = new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp(), pInput.getStep(), true);
+                    Input newInput = new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp(), true);
                     Snake newSnake = new Snake(tmpId, pSnake.getCoordsList(), newInput);
                     snakes.set(tmpId, newSnake);
 

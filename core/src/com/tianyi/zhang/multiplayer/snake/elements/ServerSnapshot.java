@@ -96,7 +96,7 @@ public class ServerSnapshot extends Snapshot {
         synchronized (lock) {
             long nsSinceStart = Utils.getNanoTime() - startTimestamp;
             int currentStep = (int) (nsSinceStart / SNAKE_MOVE_EVERY_NS);
-            Input newInput = new Input(direction, nextInputId++, nsSinceStart, currentStep, true);
+            Input newInput = new Input(direction, nextInputId++, nsSinceStart, true);
             inputBuffers.get(serverId).add(newInput);
             version += 1;
         }
@@ -110,7 +110,7 @@ public class ServerSnapshot extends Snapshot {
         List<Input> newInputs = new ArrayList<Input>(newPInputs.size());
         for (Packet.Update.PInput pInput : newPInputs) {
             if (currentTs - pInput.getTimestamp() < LAG_TOLERANCE_NS) {
-                newInputs.add(new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp(), pInput.getStep(), true));
+                newInputs.add(new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp(), true));
             }
         }
         int id = update.getSnakeId();
@@ -131,7 +131,6 @@ public class ServerSnapshot extends Snapshot {
             int currentStep = (int) (lastUpdateNsSinceStart / SNAKE_MOVE_EVERY_NS);
             Snake[] newSnakes = new Snake[snakes.size()];
             newSnakes = snakes.toArray(newSnakes);
-            Gdx.app.debug(TAG, "Snake before: " + newSnakes[1].toString());
 
             int diff = currentStep - stateStep;
             for (int i = 0; i < newSnakes.length; ++i) {
@@ -140,7 +139,6 @@ public class ServerSnapshot extends Snapshot {
                 Input[] inputs = new Input[inputBuffer.size()];
                 inputs = inputBuffer.toArray(inputs);
                 Arrays.sort(inputs);
-                Gdx.app.debug(TAG, Arrays.toString(inputs));
 
                 Input tmpInput;
                 int index = 0;
@@ -178,7 +176,7 @@ public class ServerSnapshot extends Snapshot {
                     pSnakeBuilder.setId(snake.ID).addAllCoords(snake.COORDS).setLastInput(pInputBuilder);
                     builder.addSnakes(pSnakeBuilder);
                 }
-                Gdx.app.debug(TAG, builder.toString());
+                Gdx.app.debug(TAG, "New update sent to clients: " + builder.toString());
                 lastPacket.set(builder);
                 return builder.build();
             }

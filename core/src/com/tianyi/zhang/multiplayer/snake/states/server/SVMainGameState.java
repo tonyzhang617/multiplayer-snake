@@ -3,7 +3,9 @@ package com.tianyi.zhang.multiplayer.snake.states.server;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
@@ -26,6 +28,8 @@ public class SVMainGameState extends GameState implements InputProcessor {
     private final ServerSnapshot serverSnapshot;
     private final ScheduledExecutorService executor;
     private final long startTimestamp;
+
+    private final ShapeRenderer renderer;
 
     /**
      *
@@ -70,6 +74,7 @@ public class SVMainGameState extends GameState implements InputProcessor {
         }, 0, 30, TimeUnit.MILLISECONDS);
 
         Gdx.app.debug(TAG, "Server main game loaded");
+        renderer = new ShapeRenderer();
     }
 
     private Packet.Update buildFirstPacket(int[] snakeIds) {
@@ -95,7 +100,20 @@ public class SVMainGameState extends GameState implements InputProcessor {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         Snake[] snakes = serverSnapshot.getSnakes();
-        Gdx.app.debug(TAG, snakes[1].toString());
+        for (Snake snake : snakes) {
+            Gdx.app.debug(TAG, snake.toString());
+        }
+
+        renderer.setColor(Color.WHITE);
+        renderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        for (int s = 0; s < snakes.length; ++s) {
+            List<Integer> coords = snakes[s].COORDS;
+            for (int c = 0; c < coords.size() / 2; ++c) {
+                renderer.rect(coords.get(2*c)*Constants.UNIT_WIDTH, coords.get(2*c+1)*Constants.UNIT_HEIGHT, Constants.UNIT_WIDTH, Constants.UNIT_HEIGHT);
+            }
+        }
+        renderer.end();
     }
 
     @Override

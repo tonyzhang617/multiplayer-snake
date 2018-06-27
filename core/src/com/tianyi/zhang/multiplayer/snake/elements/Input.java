@@ -1,5 +1,9 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
+import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+
+import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Input implements Comparable<Input> {
@@ -8,13 +12,16 @@ public class Input implements Comparable<Input> {
     public final long timestamp;
     public final int step;
 
+    public static final Comparator<Input> comparator = new InputComparator();
+    private static final long STEP_LENGTH = TimeUnit.MILLISECONDS.toNanos(Constants.MOVE_EVERY_MS);
+
     private AtomicBoolean isAck;
 
-    public Input(int direction, int id, long timestamp, int step, boolean isAck) {
+    public Input(int direction, int id, long timestamp, boolean isAck) {
         this.direction = direction;
         this.id = id;
         this.timestamp = timestamp;
-        this.step = step;
+        this.step = (int) (timestamp / STEP_LENGTH);
         this.isAck = new AtomicBoolean(isAck);
     }
 
@@ -47,6 +54,13 @@ public class Input implements Comparable<Input> {
             return 1;
         } else {
             return 0;
+        }
+    }
+
+    private static final class InputComparator implements Comparator<Input> {
+        @Override
+        public int compare(Input input, Input t1) {
+            return input.compareTo(t1);
         }
     }
 
