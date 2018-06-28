@@ -42,7 +42,7 @@ public class ServerSnapshot extends Snapshot {
         snakes = new ArrayList<Snake>(tmpSize);
         inputBuffers = new ArrayList<SortedSet<Input>>(tmpSize);
         for (int i = 0; i < tmpSize; ++i) {
-            snakes.add(new Snake(i, new int[]{3, 3, 2, 3}, new Input(Constants.RIGHT, 0, 0, true)));
+            snakes.add(new Snake(i, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(Constants.RIGHT, 0, 0, true)));
             inputBuffers.add(new TreeSet<Input>(Input.comparator));
         }
         lastPacket = new AtomicReference<Packet.Update.Builder>(null);

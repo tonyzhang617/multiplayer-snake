@@ -3,7 +3,9 @@ package com.tianyi.zhang.multiplayer.snake.states.client;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
@@ -27,8 +29,9 @@ public class MainGameState extends GameState implements InputProcessor {
     private final int clientId;
     private volatile int roundTripMs;
     private final ClientSnapshot snapshot;
+    private final ShapeRenderer renderer;
 
-    public MainGameState(App app, final int id) {
+    public MainGameState(App app, int id) {
         super(app);
         snapshot = new ClientSnapshot(id);
         clientId = id;
@@ -49,7 +52,7 @@ public class MainGameState extends GameState implements InputProcessor {
                     if (update.getState() == Packet.Update.PState.READY) {
                         List<Packet.Update.PSnake> pSnakes = update.getSnakesList();
                         // TODO: Pass snakes as argument to constructor of ClientSnapshot
-                        int[] snakeIds = new int[pSnakes.size()];
+                        final int[] snakeIds = new int[pSnakes.size()];
                         for (int i = 0; i < pSnakes.size(); ++i) {
                             snakeIds[i] = pSnakes.get(i).getId();
                         }
@@ -64,7 +67,7 @@ public class MainGameState extends GameState implements InputProcessor {
                                     com.tianyi.zhang.multiplayer.snake.elements.Input[] inputs = snapshot.getNewInputs();
                                     if (inputs.length > 0) {
                                         Packet.Update.Builder builder = Packet.Update.newBuilder();
-                                        builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setSnakeId(id);
+                                        builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setSnakeId(clientId);
                                         for (com.tianyi.zhang.multiplayer.snake.elements.Input tmpInput : inputs) {
                                             builder.addInputs(Packet.Update.PInput.newBuilder().setId(tmpInput.id).setDirection(tmpInput.direction).setTimestamp(tmpInput.timestamp).setStep(tmpInput.step));
                                         }
@@ -82,6 +85,7 @@ public class MainGameState extends GameState implements InputProcessor {
             }
         });
         Gdx.app.debug(TAG, "Main game loaded");
+        renderer = new ShapeRenderer();
     }
 
     @Override
@@ -94,6 +98,17 @@ public class MainGameState extends GameState implements InputProcessor {
         for (Snake snake : snakes) {
             Gdx.app.debug(TAG, snake.toString());
         }
+
+        renderer.setColor(Color.WHITE);
+        renderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        for (int s = 0; s < snakes.length; ++s) {
+            List<Integer> coords = snakes[s].COORDS;
+            for (int c = 0; c < coords.size() / 2; ++c) {
+                renderer.rect(coords.get(2 * c) * Constants.UNIT_WIDTH, coords.get(2 * c + 1) * Constants.UNIT_HEIGHT, Constants.UNIT_WIDTH, Constants.UNIT_HEIGHT);
+            }
+        }
+        renderer.end();
     }
 
     @Override

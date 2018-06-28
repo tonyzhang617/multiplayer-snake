@@ -14,7 +14,16 @@ public class LookForServerState extends GameState {
         _app.getAgent().lookForServer(new Listener() {
             @Override
             public void connected(Connection connection) {
-                _app.pushState(new MainGameState(_app, connection.getID()));
+                final int tmpId = connection.getID();
+
+                // The MainGameState instance must be created by Gdx, because it initializes an OpenGL renderer,
+                // which must be created on the thread that has an OpenGL context.
+                Gdx.app.postRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        _app.pushState(new MainGameState(_app, tmpId));
+                    }
+                });
             }
         });
     }

@@ -60,7 +60,7 @@ public class ClientSnapshot extends Snapshot {
         int id = 0;
         for (int index = 0; index < snakeIds.length; ++index) {
             while (id <= snakeIds[index]) {
-                snakes.add(new Snake(id, new int[]{3, 3, 2, 3}, new Input(RIGHT, 0, 0, true)));
+                snakes.add(new Snake(id, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(RIGHT, 0, 0, true)));
                 id += 1;
             }
         }
