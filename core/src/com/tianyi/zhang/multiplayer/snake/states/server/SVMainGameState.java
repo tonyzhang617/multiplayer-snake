@@ -66,12 +66,12 @@ public class SVMainGameState extends GameState implements InputProcessor {
                     if (serverSnapshot.update()) {
                         Gdx.graphics.requestRendering();
                     }
-                    _app.getAgent().send(serverSnapshot.buildUpdate());
+                    _app.getAgent().send(serverSnapshot.buildPacket());
                 } catch (Exception e) {
                     Gdx.app.error(TAG, "Error encountered inside scheduled task: ", e);
                 }
             }
-        }, 0, 30, TimeUnit.MILLISECONDS);
+        }, 0, 100, TimeUnit.MILLISECONDS);
 
         Gdx.app.debug(TAG, "Server main game loaded");
         renderer = new ShapeRenderer();

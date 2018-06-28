@@ -7,6 +7,7 @@ import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ServerSnapshot extends Snapshot {
@@ -18,14 +19,15 @@ public class ServerSnapshot extends Snapshot {
 
     private final AtomicReference<Packet.Update.Builder> lastPacket;
 
+    private final AtomicLong nextRenderTime;
+
     private final Object lock;
     /**
-     * Makes up the last game step, guarded by stateLock
+     * Makes up the last game step, guarded by lock
      */
     private final List<Snake> snakes;
-    private final List<Set<Input>> inputBuffers;
-    private long lastUpdateNsSinceStart;
-    private int stateStep;
+    private final List<SortedSet<Input>> inputBuffers;
+    private long stateTime;
     private int nextInputId;
     private int version;
 
@@ -33,70 +35,35 @@ public class ServerSnapshot extends Snapshot {
         this.startTimestamp = startTimestamp;
         serverId = 0;
         lock = new Object();
-        lastUpdateNsSinceStart = 0;
-        stateStep = 0;
+        stateTime = 0;
         nextInputId = 1;
         version = 0;
         int tmpSize = snakeIds[snakeIds.length-1]+1;
         snakes = new ArrayList<Snake>(tmpSize);
-        inputBuffers = new ArrayList<Set<Input>>(tmpSize);
+        inputBuffers = new ArrayList<SortedSet<Input>>(tmpSize);
         for (int i = 0; i < tmpSize; ++i) {
-            snakes.add(new Snake(i, new int[]{3, 3, 2, 3}, new Input(Constants.RIGHT, 0, 0, 0, true)));
-            inputBuffers.add(new HashSet<Input>());
+            snakes.add(new Snake(i, new int[]{3, 3, 2, 3}, new Input(Constants.RIGHT, 0, 0, true)));
+            inputBuffers.add(new TreeSet<Input>(Input.comparator));
         }
         lastPacket = new AtomicReference<Packet.Update.Builder>(null);
+        nextRenderTime = new AtomicLong(0);
     }
 
     @Override
     public boolean update() {
-        synchronized (lock) {
-            long currentNsSinceStart = Utils.getNanoTime() - startTimestamp;
-            int currentStep = (int) (currentNsSinceStart / SNAKE_MOVE_EVERY_NS);
-            int lastUpdateStep = (int) (lastUpdateNsSinceStart / SNAKE_MOVE_EVERY_NS);
-            if (currentStep > lastUpdateStep) {
-                Gdx.app.debug(TAG, "Step: " + currentStep);
-                long newStateNsSinceStart = currentNsSinceStart - LAG_TOLERANCE_NS;
-                int newStateStep = (int) (newStateNsSinceStart / SNAKE_MOVE_EVERY_NS);
-                int stepDiff = newStateStep - stateStep;
-
-                if (stepDiff > 0) {
-                    for (int i = 0; i < snakes.size(); ++i) {
-                        Snake tmpSnake = snakes.get(i);
-                        Set<Input> inputBuffer = inputBuffers.get(i);
-                        Input[] inputs = new Input[inputBuffer.size()];
-                        inputs = inputBuffer.toArray(inputs);
-                        Arrays.sort(inputs);
-                        Input tmpInput;
-                        int index = 0;
-                        for (int j = 0; j < stepDiff; ++j) {
-                            while (inputs.length > index && (tmpInput = inputs[index]).step <= stateStep + j) {
-                                if (tmpInput.step == stateStep + j) {
-                                    // TODO: Remove processed inputs
-                                    tmpSnake = tmpSnake.changeDirection(tmpInput);
-                                }
-                                index += 1;
-                            }
-                            tmpSnake = tmpSnake.next();
-                        }
-                        snakes.set(i, tmpSnake);
-                    }
-                    stateStep = newStateStep;
-                }
-
-                lastUpdateNsSinceStart = currentNsSinceStart;
-                return true;
-            } else {
-                return false;
-            }
+        long currentTime = Utils.getNanoTime() - startTimestamp;
+        if (currentTime >= nextRenderTime.get()) {
+            return true;
+        } else {
+            return false;
         }
     }
 
     @Override
     public void onServerInput(int direction) {
         synchronized (lock) {
-            long nsSinceStart = Utils.getNanoTime() - startTimestamp;
-            int currentStep = (int) (nsSinceStart / SNAKE_MOVE_EVERY_NS);
-            Input newInput = new Input(direction, nextInputId++, nsSinceStart, true);
+            long inputTime = Utils.getNanoTime() - startTimestamp;
+            Input newInput = new Input(direction, nextInputId++, inputTime, true);
             inputBuffers.get(serverId).add(newInput);
             version += 1;
         }
@@ -104,12 +71,12 @@ public class ServerSnapshot extends Snapshot {
 
     @Override
     public void onClientUpdate(Packet.Update update) {
-        long currentTs = Utils.getNanoTime() - startTimestamp;
+        long currentTime = Utils.getNanoTime() - startTimestamp;
 
         List<Packet.Update.PInput> newPInputs = update.getInputsList();
         List<Input> newInputs = new ArrayList<Input>(newPInputs.size());
         for (Packet.Update.PInput pInput : newPInputs) {
-            if (currentTs - pInput.getTimestamp() < LAG_TOLERANCE_NS) {
+            if (currentTime - pInput.getTimestamp() <= LAG_TOLERANCE_NS) {
                 newInputs.add(new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp(), true));
             }
         }
@@ -127,47 +94,73 @@ public class ServerSnapshot extends Snapshot {
 
     @Override
     public Snake[] getSnakes() {
+        long currentTime = Utils.getNanoTime() - startTimestamp;
+        int currentStep = (int) (currentTime / SNAKE_MOVE_EVERY_NS);
+        Gdx.app.debug(TAG, "Step " + currentStep);
+        long updatedStateTime = (currentTime - LAG_TOLERANCE_NS) > stateTime ? currentTime - LAG_TOLERANCE_NS : stateTime;
+        int updatedStateStep = (int) (updatedStateTime / SNAKE_MOVE_EVERY_NS);
+        Snake[] resultSnakes;
+
         synchronized (lock) {
-            int currentStep = (int) (lastUpdateNsSinceStart / SNAKE_MOVE_EVERY_NS);
-            Snake[] newSnakes = new Snake[snakes.size()];
-            newSnakes = snakes.toArray(newSnakes);
-
-            int diff = currentStep - stateStep;
-            for (int i = 0; i < newSnakes.length; ++i) {
-                Snake newSnake = newSnakes[i];
-                Set<Input> inputBuffer = inputBuffers.get(i);
-                Input[] inputs = new Input[inputBuffer.size()];
-                inputs = inputBuffer.toArray(inputs);
-                Arrays.sort(inputs);
-
-                Input tmpInput;
-                int index = 0;
-                for (int j = 0; j <= diff; ++j) {
-                    while (inputs.length > index && (tmpInput = inputs[index]).step <= stateStep + j) {
-                        if (tmpInput.step == stateStep + j) {
-                            newSnake = newSnake.changeDirection(tmpInput);
-                        }
-                        index += 1;
+            resultSnakes = new Snake[snakes.size()];
+            resultSnakes = snakes.toArray(resultSnakes);
+            int stateStep = (int) (stateTime / SNAKE_MOVE_EVERY_NS);
+            int stepDiff = updatedStateStep - stateStep;
+            for (int i = 0; i <= stepDiff; ++i) {
+                for (int j = 0; j < resultSnakes.length; ++j) {
+                    // apply and remove inputs
+                    Input tmpInput;
+                    long upper = (i == stepDiff ? updatedStateTime : SNAKE_MOVE_EVERY_NS * (stateStep + i + 1));
+                    while (!inputBuffers.get(j).isEmpty() && (tmpInput = inputBuffers.get(j).first()).timestamp < upper) {
+                        resultSnakes[j] = resultSnakes[j].changeDirection(tmpInput);
+                        inputBuffers.get(j).remove(tmpInput);
                     }
-                    if (j != diff) {
-                        newSnake = newSnake.next();
+                    if (i != stepDiff) {
+                        // move forward
+                        resultSnakes[j] = resultSnakes[j].next();
                     }
                 }
-                newSnakes[i] = newSnake;
             }
-            return newSnakes;
+            // Assign snakes
+            for (int j = 0; j < resultSnakes.length; ++j) {
+                snakes.set(j, resultSnakes[j]);
+            }
+
+            stepDiff = currentStep - updatedStateStep;
+            Queue<Input>[] inputQueues = new Queue[inputBuffers.size()];
+            for (int i = 0; i < inputQueues.length; ++i) {
+                inputQueues[i] = new ArrayDeque<Input>(inputBuffers.get(i));
+            }
+            for (int i = 0; i <= stepDiff; ++i) {
+                for (int j = 0; j < resultSnakes.length; ++j) {
+                    // only apply inputs
+                    long upper = (i == stepDiff ? currentTime : SNAKE_MOVE_EVERY_NS * (updatedStateStep + i + 1));
+                    while (!inputQueues[j].isEmpty() && inputQueues[j].peek().timestamp < upper) {
+                        resultSnakes[j] = resultSnakes[j].changeDirection(inputQueues[j].poll());
+                    }
+                    if (i != stepDiff) {
+                        // move forward
+                        resultSnakes[j] = resultSnakes[j].next();
+                    }
+                }
+            }
+            stateTime = updatedStateTime;
         }
+
+        nextRenderTime.set((currentStep + 1) * SNAKE_MOVE_EVERY_NS);
+        return resultSnakes;
     }
 
-    public Packet.Update buildUpdate() {
+    public Packet.Update buildPacket() {
+        long currentTime = Utils.getNanoTime() - startTimestamp;
         Packet.Update.Builder tmpPacket = lastPacket.get();
         synchronized (lock) {
             if (tmpPacket != null && tmpPacket.getVersion() == version) {
-                tmpPacket.setTimestamp(lastUpdateNsSinceStart);
+                tmpPacket.setTimestamp(currentTime);
                 return tmpPacket.build();
             } else {
                 Packet.Update.Builder builder = Packet.Update.newBuilder();
-                builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setVersion(version).setTimestamp(lastUpdateNsSinceStart);
+                builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setVersion(version).setTimestamp(currentTime);
                 for (Snake snake : getSnakes()) {
                     Input input = snake.LAST_INPUT;
                     Packet.Update.PSnake.Builder pSnakeBuilder = Packet.Update.PSnake.newBuilder();
