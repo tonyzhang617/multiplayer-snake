@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BroadcastState extends GameState {
+    private final Object connectionIdsLock;
     private final List<Integer> connectionIds;
     private static final String TAG = BroadcastState.class.getCanonicalName();
 
@@ -27,6 +28,7 @@ public class BroadcastState extends GameState {
     public BroadcastState(App app) {
         super(app);
 
+        connectionIdsLock = new Object();
         connectionIds = new ArrayList<Integer>();
 
         // Set up UI element layout
@@ -42,16 +44,10 @@ public class BroadcastState extends GameState {
             public void clicked(InputEvent event, float x, float y) {
                 super.clicked(event, x, y);
                 Gdx.app.debug(TAG, "START GAME button clicked");
-
-                synchronized (connectionIds) {
-                    while (connectionIds.size() == 0) {
-                        try {
-                            connectionIds.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                synchronized (connectionIdsLock) {
+                    if (connectionIds.size() > 0) {
+                        _app.pushState(new SVMainGameState(_app, connectionIds));
                     }
-                    _app.pushState(new SVMainGameState(_app, connectionIds));
                 }
             }
         });
@@ -64,18 +60,15 @@ public class BroadcastState extends GameState {
             _app.getAgent().broadcast(new Listener() {
                 @Override
                 public void connected(Connection connection) {
-                    Gdx.app.debug(TAG, "connected");
-                    synchronized (connectionIds) {
-                        connectionIds.add(new Integer(connection.getID()));
-                        connectionIds.notify();
+                    synchronized (connectionIdsLock) {
+                        connectionIds.add(Integer.valueOf(connection.getID()));
                     }
                 }
 
                 @Override
                 public void disconnected(Connection connection) {
-                    Gdx.app.debug(TAG, "disconnected");
-                    synchronized (connectionIds) {
-                        connectionIds.remove(new Integer(connection.getID()));
+                    synchronized (connectionIdsLock) {
+                        connectionIds.remove(Integer.valueOf(connection.getID()));
                     }
                 }
             });

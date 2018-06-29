@@ -1,5 +1,6 @@
 package com.tianyi.zhang.multiplayer.snake.agents;
 
+import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
@@ -7,12 +8,14 @@ import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import java.io.IOException;
 
 public class Server extends IAgent {
+    private static final String TAG = Server.class.getCanonicalName();
     private com.esotericsoftware.kryonet.Server server;
     private Listener listener;
 
     public Server() {
         server = new com.esotericsoftware.kryonet.Server();
         server.getKryo().register(byte[].class);
+        server.getKryo().register(FrameworkMessage.Ping.class);
         server.start();
     }
 
@@ -39,6 +42,16 @@ public class Server extends IAgent {
     @Override
     public void send(Packet.Update update) {
         server.sendToAllUDP(update.toByteArray());
+    }
+
+    @Override
+    public void updateRoundTripTime() {
+
+    }
+
+    @Override
+    public int getRoundTripTime() {
+        return 0;
     }
 
     @Override

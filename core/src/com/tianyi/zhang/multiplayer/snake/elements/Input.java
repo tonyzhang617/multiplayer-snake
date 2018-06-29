@@ -1,0 +1,90 @@
+package com.tianyi.zhang.multiplayer.snake.elements;
+
+import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+
+import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class Input implements Comparable<Input> {
+    public final int direction;
+    public final int id;
+    public final long timestamp;
+    public final int step;
+
+    public static final Comparator<Input> comparator = new InputComparator();
+    private static final long STEP_LENGTH = TimeUnit.MILLISECONDS.toNanos(Constants.MOVE_EVERY_MS);
+
+    private AtomicBoolean isAck;
+
+    public Input(int direction, int id, long timestamp, boolean isAck) {
+        this.direction = direction;
+        this.id = id;
+        this.timestamp = timestamp;
+        this.step = (int) (timestamp / STEP_LENGTH);
+        this.isAck = new AtomicBoolean(isAck);
+    }
+
+    public boolean isAcknowledged() {
+        return isAck.get();
+    }
+
+    public void setAcknowledged(boolean isAcknowledged) {
+        this.isAck.set(isAcknowledged);
+    }
+
+    public boolean isValidNewInput(Input newInput) {
+        if (newInput == null) {
+            return false;
+        }
+
+        if (this.direction == newInput.direction || this.direction + newInput.direction == 5 || this.id >= newInput.id
+                || this.step > newInput.step || this.timestamp >= newInput.timestamp) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int compareTo(Input input) {
+        if (this.id < input.id) {
+            return -1;
+        } else if (this.id > input.id) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    private static final class InputComparator implements Comparator<Input> {
+        @Override
+        public int compare(Input input, Input t1) {
+            return input.compareTo(t1);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        } else if (this == o) {
+            return true;
+        } else if (o instanceof Input) {
+            return this.id == ((Input) o).id;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        String str = String.format("Input: ID %d, direction %d, step %d", id, direction, step);
+        return str;
+    }
+}

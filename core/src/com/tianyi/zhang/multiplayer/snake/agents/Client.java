@@ -11,6 +11,7 @@ import java.net.InetAddress;
 public class Client extends IAgent {
     private com.esotericsoftware.kryonet.Client client;
     private Listener listener;
+    private static final String TAG = Client.class.getCanonicalName();
 
     public Client() {
         client = new com.esotericsoftware.kryonet.Client();
@@ -33,6 +34,11 @@ public class Client extends IAgent {
     }
 
     @Override
+    public int getRoundTripTime() {
+        return client.getReturnTripTime();
+    }
+
+    @Override
     public void lookForServer(Listener listener) {
         setListener(listener);
         new Thread(new Runnable() {
@@ -40,14 +46,14 @@ public class Client extends IAgent {
             public void run() {
                 InetAddress serverAddress = client.discoverHost(Constants.UDP_PORT, 5000);
                 if (serverAddress != null) {
-                    Gdx.app.log("LOOK FOR SERVER ERROR", "Server discovered at " + serverAddress.getHostAddress());
+                    Gdx.app.debug(TAG, "Server discovered at " + serverAddress.getHostAddress());
                     try {
                         client.connect(5000, serverAddress, Constants.TCP_PORT, Constants.UDP_PORT);
                     } catch (IOException e) {
-                        Gdx.app.error("LOOK FOR SERVER ERROR", e.getMessage());
+                        Gdx.app.error(TAG, e.getMessage());
                     }
                 } else {
-                    Gdx.app.log("LOOK FOR SERVER ERROR", "No server found");
+                    Gdx.app.debug(TAG, "No server found");
                 }
             }
         }).start();
@@ -55,7 +61,12 @@ public class Client extends IAgent {
 
     @Override
     public void send(Packet.Update update) {
-        client.sendTCP(update.toByteArray());
+        client.sendUDP(update.toByteArray());
+    }
+
+    @Override
+    public void updateRoundTripTime() {
+        client.updateReturnTripTime();
     }
 
     @Override

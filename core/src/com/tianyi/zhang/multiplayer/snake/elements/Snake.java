@@ -8,37 +8,39 @@ import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.*;
 
 /**
  * Immutable class encapsulating coordinates and direction of a snake,
- * as well as the id of the input.
+ * as well as the last user input.
  */
 public class Snake {
     public final int ID;
     public final List<Integer> COORDS;
-    public final int DIRECTION;
-    public final int INPUT_ID;
+    public final Input LAST_INPUT;
 
-    public Snake(int id, int[] coords, int direction, int inputId) {
+    public Snake(int id, int[] coords, Input lastInput) {
         ID = id;
         List<Integer> tmpCoords = new ArrayList<Integer>(coords.length);
         for (int i = 0; i < coords.length; ++i) {
             tmpCoords.add(new Integer(coords[i]));
         }
         COORDS = Collections.unmodifiableList(tmpCoords);
-        DIRECTION = direction;
-        INPUT_ID = inputId;
+        LAST_INPUT = lastInput;
     }
 
-    private Snake(int id, List<Integer> coords, int direction, int inputId) {
+    public Snake(int id, List<Integer> coords, Input lastInput) {
         ID = id;
-        COORDS = coords;
-        DIRECTION = direction;
-        INPUT_ID = inputId;
+        if (coords.getClass().getSimpleName().equals("UnmodifiableCollection")) {
+            COORDS = coords;
+        } else {
+            COORDS = Collections.unmodifiableList(coords);
+        }
+        LAST_INPUT = lastInput;
     }
 
-    public Snake changeDirection(int direction, int inputId) {
-        if (DIRECTION == direction || DIRECTION + direction == 5 || inputId <= INPUT_ID) {
+    public Snake changeDirection(Input newInput) {
+        if (LAST_INPUT.isValidNewInput(newInput)) {
+            return new Snake(ID, COORDS, newInput);
+        } else {
             return this;
         }
-        return new Snake(ID, COORDS, direction, inputId);
     }
 
     public Snake next() {
@@ -47,7 +49,7 @@ public class Snake {
             coords[i+2] = COORDS.get(i).intValue();
         }
         int x0 = COORDS.get(0).intValue(), y0 = COORDS.get(1).intValue();
-        switch (DIRECTION) {
+        switch (LAST_INPUT.direction) {
             case LEFT:
                 --x0;
                 break;
@@ -63,6 +65,13 @@ public class Snake {
         }
         coords[0] = x0;
         coords[1] = y0;
-        return new Snake(ID, coords, DIRECTION, INPUT_ID);
+        return new Snake(ID, coords, LAST_INPUT);
+    }
+
+    @Override
+    public String toString() {
+        String str = String.format("Snake: ID %d, direction %d, last input ID %d, head coordinates (%d, %d).",
+                ID, LAST_INPUT.direction, LAST_INPUT.id, COORDS.get(0), COORDS.get(1));
+        return str;
     }
 }
