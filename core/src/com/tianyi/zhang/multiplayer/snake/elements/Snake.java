@@ -14,6 +14,7 @@ public class Snake {
     public final int ID;
     public final List<Integer> COORDS;
     public final Input LAST_INPUT;
+    public final boolean DEAD;
 
     public Snake(int id, int[] coords, Input lastInput) {
         ID = id;
@@ -23,6 +24,7 @@ public class Snake {
         }
         COORDS = Collections.unmodifiableList(tmpCoords);
         LAST_INPUT = lastInput;
+        DEAD = false;
     }
 
     public Snake(int id, List<Integer> coords, Input lastInput) {
@@ -33,10 +35,22 @@ public class Snake {
             COORDS = Collections.unmodifiableList(coords);
         }
         LAST_INPUT = lastInput;
+        DEAD = false;
+    }
+
+    public Snake(int id, List<Integer> coords, Input lastInput, boolean dead) {
+        ID = id;
+        if (coords.getClass().getSimpleName().equals("UnmodifiableCollection")) {
+            COORDS = coords;
+        } else {
+            COORDS = Collections.unmodifiableList(coords);
+        }
+        LAST_INPUT = lastInput;
+        DEAD = dead;
     }
 
     public Snake changeDirection(Input newInput) {
-        if (LAST_INPUT.isValidNewInput(newInput)) {
+        if (!DEAD && LAST_INPUT.isValidNewInput(newInput)) {
             return new Snake(ID, COORDS, newInput);
         } else {
             return this;
@@ -44,6 +58,8 @@ public class Snake {
     }
 
     public Snake next() {
+        if (DEAD) return this;
+
         int[] coords = new int[COORDS.size()];
         for (int i = 0; i < COORDS.size()-2; ++i) {
             coords[i+2] = COORDS.get(i).intValue();
@@ -68,10 +84,14 @@ public class Snake {
         return new Snake(ID, coords, LAST_INPUT);
     }
 
+    public Snake die() {
+        return new Snake(ID, COORDS, LAST_INPUT, true);
+    }
+
     @Override
     public String toString() {
-        String str = String.format("Snake: ID %d, direction %d, last input ID %d, head coordinates (%d, %d).",
-                ID, LAST_INPUT.direction, LAST_INPUT.id, COORDS.get(0), COORDS.get(1));
+        String str = String.format("%s snake %d, direction %d, last input ID %d, head coordinates (%d, %d).",
+                DEAD ? "Dead" : "Live", ID, LAST_INPUT.direction, LAST_INPUT.id, COORDS.get(0), COORDS.get(1));
         return str;
     }
 }

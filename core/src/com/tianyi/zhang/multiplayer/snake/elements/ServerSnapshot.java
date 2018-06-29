@@ -42,7 +42,7 @@ public class ServerSnapshot extends Snapshot {
         snakes = new ArrayList<Snake>(tmpSize);
         inputBuffers = new ArrayList<SortedSet<Input>>(tmpSize);
         for (int i = 0; i < tmpSize; ++i) {
-            snakes.add(new Snake(i, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(Constants.RIGHT, 0, 0, true)));
+            snakes.add(new Snake(i, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(Constants.RIGHT, 0, 0)));
             inputBuffers.add(new TreeSet<Input>(Input.comparator));
         }
         lastPacket = new AtomicReference<Packet.Update.Builder>(null);
@@ -63,9 +63,13 @@ public class ServerSnapshot extends Snapshot {
     public void onServerInput(int direction) {
         synchronized (lock) {
             long inputTime = Utils.getNanoTime() - startTimestamp;
-            Input newInput = new Input(direction, nextInputId++, inputTime, true);
-            inputBuffers.get(serverId).add(newInput);
-            version += 1;
+            Input newInput = new Input(direction, nextInputId++, inputTime);
+            SortedSet<Input> serverInputBuffer = inputBuffers.get(serverId);
+            Input lastInput = serverInputBuffer.isEmpty() ? snakes.get(serverId).LAST_INPUT : serverInputBuffer.last();
+            if (lastInput.isValidNewInput(newInput)) {
+                serverInputBuffer.add(newInput);
+                version += 1;
+            }
         }
     }
 
@@ -77,7 +81,7 @@ public class ServerSnapshot extends Snapshot {
         List<Input> newInputs = new ArrayList<Input>(newPInputs.size());
         for (Packet.Update.PInput pInput : newPInputs) {
             if (currentTime - pInput.getTimestamp() <= LAG_TOLERANCE_NS) {
-                newInputs.add(new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp(), true));
+                newInputs.add(new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp()));
             }
         }
         int id = update.getSnakeId();

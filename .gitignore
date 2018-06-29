@@ -126,3 +126,5 @@ Thumbs.db
 
 ## Helper scripts
 proto_generate.sh
+
+out/

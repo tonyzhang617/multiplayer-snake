@@ -61,7 +61,7 @@ public class ClientSnapshot extends Snapshot {
         int id = 0;
         for (int index = 0; index < snakeIds.length; ++index) {
             while (id <= snakeIds[index]) {
-                snakes.add(new Snake(id, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(RIGHT, 0, 0, true)));
+                snakes.add(new Snake(id, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(RIGHT, 0, 0)));
                 id += 1;
             }
         }
@@ -86,7 +86,7 @@ public class ClientSnapshot extends Snapshot {
     public void onClientInput(int direction) {
         synchronized (lock) {
             long tmpNs = Utils.getNanoTime() - startTimestamp;
-            Input input = new Input(direction, nextInputId++, tmpNs, false);
+            Input input = new Input(direction, nextInputId++, tmpNs);
             Input lastInput = (unackInputs.isEmpty() ? snakes.get(clientId).LAST_INPUT : unackInputs.get(unackInputs.size()-1));
             if (lastInput.isValidNewInput(input)) {
                 unackInputs.add(input);
@@ -109,7 +109,7 @@ public class ClientSnapshot extends Snapshot {
                         Packet.Update.PSnake pSnake = pSnakes.get(i);
                         int tmpId = pSnake.getId();
                         Packet.Update.PInput pInput = pSnake.getLastInput();
-                        Input newInput = new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp(), true);
+                        Input newInput = new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp());
                         Snake newSnake = new Snake(tmpId, pSnake.getCoordsList(), newInput);
                         snakes.set(tmpId, newSnake);
 

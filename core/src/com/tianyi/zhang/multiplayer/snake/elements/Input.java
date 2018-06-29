@@ -4,7 +4,6 @@ import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 
 import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Input implements Comparable<Input> {
     public final int direction;
@@ -15,22 +14,11 @@ public class Input implements Comparable<Input> {
     public static final Comparator<Input> comparator = new InputComparator();
     private static final long STEP_LENGTH = TimeUnit.MILLISECONDS.toNanos(Constants.MOVE_EVERY_MS);
 
-    private AtomicBoolean isAck;
-
-    public Input(int direction, int id, long timestamp, boolean isAck) {
+    public Input(int direction, int id, long timestamp) {
         this.direction = direction;
         this.id = id;
         this.timestamp = timestamp;
         this.step = (int) (timestamp / STEP_LENGTH);
-        this.isAck = new AtomicBoolean(isAck);
-    }
-
-    public boolean isAcknowledged() {
-        return isAck.get();
-    }
-
-    public void setAcknowledged(boolean isAcknowledged) {
-        this.isAck.set(isAcknowledged);
     }
 
     public boolean isValidNewInput(Input newInput) {

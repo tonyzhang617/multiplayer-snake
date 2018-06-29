@@ -2,10 +2,13 @@ package com.tianyi.zhang.multiplayer.snake.states.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
@@ -23,22 +26,134 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class MainGameState extends GameState implements InputProcessor {
+public class MainGameState extends GameState {
     private static final String TAG = MainGameState.class.getCanonicalName();
     private final ScheduledExecutorService executor;
     private final int clientId;
     private volatile int roundTripMs;
-    private final ClientSnapshot snapshot;
+    private final ClientSnapshot clientSnapshot;
     private final ShapeRenderer renderer;
 
     public MainGameState(App app, int id) {
         super(app);
-        snapshot = new ClientSnapshot(id);
+        clientSnapshot = new ClientSnapshot(id);
         clientId = id;
+
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(new GestureDetector(new GestureDetector.GestureListener() {
+            @Override
+            public boolean touchDown(float x, float y, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean tap(float x, float y, int count, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean longPress(float x, float y) {
+                return false;
+            }
+
+            @Override
+            public boolean fling(float velocityX, float velocityY, int button) {
+                if (Math.abs(velocityX) > Math.abs(velocityY)) {
+                    if (velocityX > 0) {
+                        clientSnapshot.onClientInput(Constants.RIGHT);
+                    } else {
+                        clientSnapshot.onClientInput(Constants.LEFT);
+                    }
+                } else {
+                    if (velocityY > 0) {
+                        clientSnapshot.onClientInput(Constants.DOWN);
+                    } else {
+                        clientSnapshot.onClientInput(Constants.UP);
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public boolean pan(float x, float y, float deltaX, float deltaY) {
+                return false;
+            }
+
+            @Override
+            public boolean panStop(float x, float y, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean zoom(float initialDistance, float distance) {
+                return false;
+            }
+
+            @Override
+            public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
+                return false;
+            }
+
+            @Override
+            public void pinchStop() {
+
+            }
+        }));
+        inputMultiplexer.addProcessor(new InputProcessor() {
+            @Override
+            public boolean keyDown(int keycode) {
+                Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
+                if (keycode == Input.Keys.LEFT) {
+                    clientSnapshot.onClientInput(Constants.LEFT);
+                } else if (keycode == Input.Keys.UP) {
+                    clientSnapshot.onClientInput(Constants.UP);
+                } else if (keycode == Input.Keys.RIGHT) {
+                    clientSnapshot.onClientInput(Constants.RIGHT);
+                } else if (keycode == Input.Keys.DOWN) {
+                    clientSnapshot.onClientInput(Constants.DOWN);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean keyUp(int keycode) {
+                return false;
+            }
+
+            @Override
+            public boolean keyTyped(char character) {
+                return false;
+            }
+
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean touchDragged(int screenX, int screenY, int pointer) {
+                return false;
+            }
+
+            @Override
+            public boolean mouseMoved(int screenX, int screenY) {
+                return false;
+            }
+
+            @Override
+            public boolean scrolled(int amount) {
+                return false;
+            }
+        });
+        Gdx.input.setInputProcessor(inputMultiplexer);
 
         executor = Executors.newScheduledThreadPool(2);
 
-        Gdx.input.setInputProcessor(this);
         Gdx.graphics.setContinuousRendering(false);
         _app.getAgent().updateRoundTripTime();
         _app.getAgent().setListener(new Listener() {
@@ -56,15 +171,15 @@ public class MainGameState extends GameState implements InputProcessor {
                         for (int i = 0; i < pSnakes.size(); ++i) {
                             snakeIds[i] = pSnakes.get(i).getId();
                         }
-                        snapshot.init(startTimestamp, snakeIds);
+                        clientSnapshot.init(startTimestamp, snakeIds);
                         executor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    if (snapshot.update()) {
+                                    if (clientSnapshot.update()) {
                                         Gdx.graphics.requestRendering();
                                     }
-                                    com.tianyi.zhang.multiplayer.snake.elements.Input[] inputs = snapshot.getNewInputs();
+                                    com.tianyi.zhang.multiplayer.snake.elements.Input[] inputs = clientSnapshot.getNewInputs();
                                     if (inputs.length > 0) {
                                         Packet.Update.Builder builder = Packet.Update.newBuilder();
                                         builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setSnakeId(clientId);
@@ -79,7 +194,7 @@ public class MainGameState extends GameState implements InputProcessor {
                             }
                         }, 0, 30, TimeUnit.MILLISECONDS);
                     } else {
-                        snapshot.onServerUpdate(update);
+                        clientSnapshot.onServerUpdate(update);
                     }
                 }
             }
@@ -93,7 +208,7 @@ public class MainGameState extends GameState implements InputProcessor {
         Gdx.gl.glClearColor(0, 0, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        Snake[] snakes = snapshot.getSnakes();
+        Snake[] snakes = clientSnapshot.getSnakes();
 
         for (Snake snake : snakes) {
             Gdx.app.debug(TAG, snake.toString());
@@ -141,53 +256,17 @@ public class MainGameState extends GameState implements InputProcessor {
 
     }
 
-    @Override
     public boolean keyDown(int keycode) {
         Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
         if (keycode == Input.Keys.LEFT) {
-            snapshot.onClientInput(Constants.LEFT);
+            clientSnapshot.onClientInput(Constants.LEFT);
         } else if (keycode == Input.Keys.UP) {
-            snapshot.onClientInput(Constants.UP);
+            clientSnapshot.onClientInput(Constants.UP);
         } else if (keycode == Input.Keys.RIGHT) {
-            snapshot.onClientInput(Constants.RIGHT);
+            clientSnapshot.onClientInput(Constants.RIGHT);
         } else if (keycode == Input.Keys.DOWN) {
-            snapshot.onClientInput(Constants.DOWN);
+            clientSnapshot.onClientInput(Constants.DOWN);
         }
         return true;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
     }
 }
