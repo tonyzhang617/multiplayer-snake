@@ -2,10 +2,13 @@ package com.tianyi.zhang.multiplayer.snake.states.server;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
@@ -23,7 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class SVMainGameState extends GameState implements InputProcessor {
+public class SVMainGameState extends GameState {
     private static final String TAG = SVMainGameState.class.getCanonicalName();
     private final ServerSnapshot serverSnapshot;
     private final ScheduledExecutorService executor;
@@ -38,7 +41,120 @@ public class SVMainGameState extends GameState implements InputProcessor {
      */
     public SVMainGameState(App app, List<Integer> connectionIds) {
         super(app);
-        Gdx.input.setInputProcessor(this);
+
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(new GestureDetector(new GestureDetector.GestureListener() {
+            @Override
+            public boolean touchDown(float x, float y, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean tap(float x, float y, int count, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean longPress(float x, float y) {
+                return false;
+            }
+
+            @Override
+            public boolean fling(float velocityX, float velocityY, int button) {
+                if (Math.abs(velocityX) > Math.abs(velocityY)) {
+                    if (velocityX > 0) {
+                        serverSnapshot.onServerInput(Constants.RIGHT);
+                    } else {
+                        serverSnapshot.onServerInput(Constants.LEFT);
+                    }
+                } else {
+                    if (velocityY > 0) {
+                        serverSnapshot.onServerInput(Constants.DOWN);
+                    } else {
+                        serverSnapshot.onServerInput(Constants.UP);
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public boolean pan(float x, float y, float deltaX, float deltaY) {
+                return false;
+            }
+
+            @Override
+            public boolean panStop(float x, float y, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean zoom(float initialDistance, float distance) {
+                return false;
+            }
+
+            @Override
+            public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
+                return false;
+            }
+
+            @Override
+            public void pinchStop() {
+
+            }
+        }));
+        inputMultiplexer.addProcessor(new InputProcessor() {
+            @Override
+            public boolean keyDown(int keycode) {
+                Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
+                if (keycode == Input.Keys.LEFT) {
+                    serverSnapshot.onServerInput(Constants.LEFT);
+                } else if (keycode == Input.Keys.UP) {
+                    serverSnapshot.onServerInput(Constants.UP);
+                } else if (keycode == Input.Keys.RIGHT) {
+                    serverSnapshot.onServerInput(Constants.RIGHT);
+                } else if (keycode == Input.Keys.DOWN) {
+                    serverSnapshot.onServerInput(Constants.DOWN);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean keyUp(int keycode) {
+                return false;
+            }
+
+            @Override
+            public boolean keyTyped(char character) {
+                return false;
+            }
+
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                return false;
+            }
+
+            @Override
+            public boolean touchDragged(int screenX, int screenY, int pointer) {
+                return false;
+            }
+
+            @Override
+            public boolean mouseMoved(int screenX, int screenY) {
+                return false;
+            }
+
+            @Override
+            public boolean scrolled(int amount) {
+                return false;
+            }
+        });
+        Gdx.input.setInputProcessor(inputMultiplexer);
+
         Gdx.graphics.setContinuousRendering(false);
 
         int[] tmpIds = new int[connectionIds.size()+1];
@@ -144,55 +260,5 @@ public class SVMainGameState extends GameState implements InputProcessor {
     @Override
     public void dispose() {
 
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
-        if (keycode == Input.Keys.LEFT) {
-            serverSnapshot.onServerInput(Constants.LEFT);
-        } else if (keycode == Input.Keys.UP) {
-            serverSnapshot.onServerInput(Constants.UP);
-        } else if (keycode == Input.Keys.RIGHT) {
-            serverSnapshot.onServerInput(Constants.RIGHT);
-        } else if (keycode == Input.Keys.DOWN) {
-            serverSnapshot.onServerInput(Constants.DOWN);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
     }
 }
