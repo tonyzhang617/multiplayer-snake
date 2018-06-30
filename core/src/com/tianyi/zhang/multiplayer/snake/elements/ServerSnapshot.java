@@ -65,7 +65,7 @@ public class ServerSnapshot extends Snapshot {
             long inputTime = Utils.getNanoTime() - startTimestamp;
             Input newInput = new Input(direction, nextInputId++, inputTime);
             SortedSet<Input> serverInputBuffer = inputBuffers.get(serverId);
-            Input lastInput = serverInputBuffer.isEmpty() ? snakes.get(serverId).LAST_INPUT : serverInputBuffer.last();
+            Input lastInput = serverInputBuffer.isEmpty() ? snakes.get(serverId).getLastInput() : serverInputBuffer.last();
             if (lastInput.isValidNewInput(newInput)) {
                 serverInputBuffer.add(newInput);
                 version += 1;
@@ -106,28 +106,27 @@ public class ServerSnapshot extends Snapshot {
         Snake[] resultSnakes;
 
         synchronized (lock) {
-            resultSnakes = new Snake[snakes.size()];
-            resultSnakes = snakes.toArray(resultSnakes);
             int stateStep = (int) (stateTime / SNAKE_MOVE_EVERY_NS);
             int stepDiff = updatedStateStep - stateStep;
             for (int i = 0; i <= stepDiff; ++i) {
-                for (int j = 0; j < resultSnakes.length; ++j) {
+                for (int j = 0; j < snakes.size(); ++j) {
                     // apply and remove inputs
                     Input tmpInput;
                     long upper = (i == stepDiff ? updatedStateTime : SNAKE_MOVE_EVERY_NS * (stateStep + i + 1));
                     while (!inputBuffers.get(j).isEmpty() && (tmpInput = inputBuffers.get(j).first()).timestamp < upper) {
-                        resultSnakes[j] = resultSnakes[j].changeDirection(tmpInput);
+                        snakes.get(j).handleInput(tmpInput);
                         inputBuffers.get(j).remove(tmpInput);
                     }
                     if (i != stepDiff) {
                         // move forward
-                        resultSnakes[j] = resultSnakes[j].next();
+                        snakes.get(j).forward();
                     }
                 }
             }
-            // Assign snakes
-            for (int j = 0; j < resultSnakes.length; ++j) {
-                snakes.set(j, resultSnakes[j]);
+
+            resultSnakes = new Snake[snakes.size()];
+            for (int i = 0; i < snakes.size(); ++i) {
+                resultSnakes[i] = new Snake(snakes.get(i));
             }
 
             stepDiff = currentStep - updatedStateStep;
@@ -140,11 +139,11 @@ public class ServerSnapshot extends Snapshot {
                     // only apply inputs
                     long upper = (i == stepDiff ? currentTime : SNAKE_MOVE_EVERY_NS * (updatedStateStep + i + 1));
                     while (!inputQueues[j].isEmpty() && inputQueues[j].peek().timestamp < upper) {
-                        resultSnakes[j] = resultSnakes[j].changeDirection(inputQueues[j].poll());
+                        resultSnakes[j].handleInput(inputQueues[j].poll());
                     }
                     if (i != stepDiff) {
                         // move forward
-                        resultSnakes[j] = resultSnakes[j].next();
+                        resultSnakes[j].forward();
                     }
                 }
             }
@@ -166,11 +165,11 @@ public class ServerSnapshot extends Snapshot {
                 Packet.Update.Builder builder = Packet.Update.newBuilder();
                 builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setVersion(version).setTimestamp(currentTime);
                 for (Snake snake : getSnakes()) {
-                    Input input = snake.LAST_INPUT;
+                    Input input = snake.getLastInput();
                     Packet.Update.PSnake.Builder pSnakeBuilder = Packet.Update.PSnake.newBuilder();
                     Packet.Update.PInput.Builder pInputBuilder = Packet.Update.PInput.newBuilder();
                     pInputBuilder.setId(input.id).setDirection(input.direction).setTimestamp(input.timestamp).setStep(input.step);
-                    pSnakeBuilder.setId(snake.ID).addAllCoords(snake.COORDS).setLastInput(pInputBuilder);
+                    pSnakeBuilder.setId(snake.id).addAllCoords(snake.getCoordinates()).setLastInput(pInputBuilder);
                     builder.addSnakes(pSnakeBuilder);
                 }
                 Gdx.app.debug(TAG, "New update sent to clients: " + builder.toString());

@@ -1,97 +1,115 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
-import java.util.ArrayList;
+import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.*;
-
-/**
- * Immutable class encapsulating coordinates and direction of a snake,
- * as well as the last user input.
- */
 public class Snake {
-    public final int ID;
-    public final List<Integer> COORDS;
-    public final Input LAST_INPUT;
-    public final boolean DEAD;
+    public final int id;
+    private final List<Integer> coords;
+    private Input lastInput;
+    private boolean isDead;
 
-    public Snake(int id, int[] coords, Input lastInput) {
-        ID = id;
-        List<Integer> tmpCoords = new ArrayList<Integer>(coords.length);
+    public Snake(int id, int[] coords, Input input) {
+        this.id = id;
+        this.coords = new LinkedList<Integer>();
         for (int i = 0; i < coords.length; ++i) {
-            tmpCoords.add(new Integer(coords[i]));
+            this.coords.add(new Integer(coords[i]));
         }
-        COORDS = Collections.unmodifiableList(tmpCoords);
-        LAST_INPUT = lastInput;
-        DEAD = false;
+        this.lastInput = input;
+        this.isDead = false;
     }
 
-    public Snake(int id, List<Integer> coords, Input lastInput) {
-        ID = id;
-        if (coords.getClass().getSimpleName().equals("UnmodifiableCollection")) {
-            COORDS = coords;
-        } else {
-            COORDS = Collections.unmodifiableList(coords);
-        }
-        LAST_INPUT = lastInput;
-        DEAD = false;
+    public Snake(int id, List<Integer> coords, Input input) {
+        this.id = id;
+        this.coords = new LinkedList<Integer>(coords);
+        this.lastInput = input;
+        this.isDead = false;
     }
 
-    public Snake(int id, List<Integer> coords, Input lastInput, boolean dead) {
-        ID = id;
-        if (coords.getClass().getSimpleName().equals("UnmodifiableCollection")) {
-            COORDS = coords;
-        } else {
-            COORDS = Collections.unmodifiableList(coords);
+    public Snake(int id, int headX, int headY, Input input, int length) {
+        this.id = id;
+        this.lastInput = input;
+
+        this.coords = new LinkedList<Integer>();
+        int x = headX, y = headY;
+        for (int i = 0; i < length; ++i) {
+            coords.add(Integer.valueOf(x));
+            coords.add(Integer.valueOf(y));
+            switch (input.direction) {
+                case Constants.LEFT:
+                    x += 1;
+                    break;
+                case Constants.UP:
+                    y -= 1;
+                    break;
+                case Constants.RIGHT:
+                    x -= 1;
+                    break;
+                case Constants.DOWN:
+                    y += 1;
+                    break;
+            }
         }
-        LAST_INPUT = lastInput;
-        DEAD = dead;
+        this.isDead = false;
     }
 
-    public Snake changeDirection(Input newInput) {
-        if (!DEAD && LAST_INPUT.isValidNewInput(newInput)) {
-            return new Snake(ID, COORDS, newInput);
-        } else {
-            return this;
+    public Snake(Snake snake) {
+        this.id = snake.id;
+        this.coords = new LinkedList<Integer>(snake.coords);
+        this.lastInput = snake.lastInput;
+        this.isDead = snake.isDead;
+    }
+
+    public void forward() {
+        if (!isDead) {
+            int size = coords.size();
+            coords.remove(size - 1);
+            coords.remove(size - 2);
+            int x0 = coords.get(0).intValue(), y0 = coords.get(1).intValue();
+            switch (lastInput.direction) {
+                case Constants.LEFT:
+                    --x0;
+                    break;
+                case Constants.UP:
+                    ++y0;
+                    break;
+                case Constants.RIGHT:
+                    ++x0;
+                    break;
+                case Constants.DOWN:
+                    --y0;
+                    break;
+            }
+            coords.add(0, y0);
+            coords.add(0, x0);
         }
     }
 
-    public Snake next() {
-        if (DEAD) return this;
-
-        int[] coords = new int[COORDS.size()];
-        for (int i = 0; i < COORDS.size()-2; ++i) {
-            coords[i+2] = COORDS.get(i).intValue();
-        }
-        int x0 = COORDS.get(0).intValue(), y0 = COORDS.get(1).intValue();
-        switch (LAST_INPUT.direction) {
-            case LEFT:
-                --x0;
-                break;
-            case UP:
-                ++y0;
-                break;
-            case RIGHT:
-                ++x0;
-                break;
-            case DOWN:
-                --y0;
-                break;
-        }
-        coords[0] = x0;
-        coords[1] = y0;
-        return new Snake(ID, coords, LAST_INPUT);
+    public List<Integer> getCoordinates() {
+        return Collections.unmodifiableList(coords);
     }
 
-    public Snake die() {
-        return new Snake(ID, COORDS, LAST_INPUT, true);
+    public void die() {
+        this.isDead = true;
+    }
+
+    public void handleInput(Input input) {
+        if (!isDead && lastInput.isValidNewInput(input)) {
+            this.lastInput = input;
+        }
+    }
+
+    public Input getLastInput() {
+        return lastInput;
     }
 
     @Override
     public String toString() {
         String str = String.format("%s snake %d, direction %d, last input ID %d, head coordinates (%d, %d).",
-                DEAD ? "Dead" : "Live", ID, LAST_INPUT.direction, LAST_INPUT.id, COORDS.get(0), COORDS.get(1));
+                isDead ? "Dead" : "Live", id, lastInput.direction, lastInput.id, coords.get(0), coords.get(1));
         return str;
     }
 }

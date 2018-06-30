@@ -14,8 +14,8 @@ import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
-import com.tianyi.zhang.multiplayer.snake.elements.ServerSnapshot;
 import com.tianyi.zhang.multiplayer.snake.elements.Snake;
+import com.tianyi.zhang.multiplayer.snake.elements.ServerSnapshot;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
@@ -224,7 +224,7 @@ public class SVMainGameState extends GameState {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (int s = 0; s < snakes.length; ++s) {
-            List<Integer> coords = snakes[s].COORDS;
+            List<Integer> coords = snakes[s].getCoordinates();
             for (int c = 0; c < coords.size() / 2; ++c) {
                 renderer.rect(coords.get(2*c)*Constants.UNIT_WIDTH, coords.get(2*c+1)*Constants.UNIT_HEIGHT, Constants.UNIT_WIDTH, Constants.UNIT_HEIGHT);
             }

@@ -218,7 +218,7 @@ public class MainGameState extends GameState {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (int s = 0; s < snakes.length; ++s) {
-            List<Integer> coords = snakes[s].COORDS;
+            List<Integer> coords = snakes[s].getCoordinates();
             for (int c = 0; c < coords.size() / 2; ++c) {
                 renderer.rect(coords.get(2 * c) * Constants.UNIT_WIDTH, coords.get(2 * c + 1) * Constants.UNIT_HEIGHT, Constants.UNIT_WIDTH, Constants.UNIT_HEIGHT);
             }

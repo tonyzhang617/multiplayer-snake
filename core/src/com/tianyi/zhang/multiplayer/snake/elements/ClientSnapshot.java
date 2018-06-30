@@ -87,7 +87,7 @@ public class ClientSnapshot extends Snapshot {
         synchronized (lock) {
             long tmpNs = Utils.getNanoTime() - startTimestamp;
             Input input = new Input(direction, nextInputId++, tmpNs);
-            Input lastInput = (unackInputs.isEmpty() ? snakes.get(clientId).LAST_INPUT : unackInputs.get(unackInputs.size()-1));
+            Input lastInput = (unackInputs.isEmpty() ? snakes.get(clientId).getLastInput() : unackInputs.get(unackInputs.size()-1));
             if (lastInput.isValidNewInput(input)) {
                 unackInputs.add(input);
             } else {
@@ -139,7 +139,7 @@ public class ClientSnapshot extends Snapshot {
                     if (stepDiff >= UPDATE_AFTER_INACTIVE_NS / SNAKE_MOVE_EVERY_NS) {
                         for (int i = 0; i < stepDiff; ++i) {
                             for (int j = 0; j < snakes.size(); ++j) {
-                                snakes.set(j, snakes.get(j).next());
+                                snakes.get(j).forward();
                             }
                         }
 
@@ -166,10 +166,11 @@ public class ClientSnapshot extends Snapshot {
 
             synchronized (lock) {
                 Snake[] resultSnakes = new Snake[snakes.size()];
-                resultSnakes = snakes.toArray(resultSnakes);
+                for (int i = 0; i < resultSnakes.length; ++i) {
+                    resultSnakes[i] = new Snake(snakes.get(i));
+                }
 
                 int stateStep = (int) (stateTime / SNAKE_MOVE_EVERY_NS);
-                Gdx.app.debug(TAG, "stateStep: " + stateStep);
                 int stepDiff = currentStep - stateStep;
 
                 int inputIndex = 0;
@@ -180,13 +181,13 @@ public class ClientSnapshot extends Snapshot {
                             // Apply inputs
                             Input tmpInput;
                             while (unackInputs.size() > inputIndex && (tmpInput = unackInputs.get(inputIndex)).timestamp < upper) {
-                                resultSnakes[j] = resultSnakes[j].changeDirection(tmpInput);
+                                resultSnakes[j].handleInput(tmpInput);
                                 inputIndex += 1;
                             }
                         }
                         if (i != stepDiff) {
                             // Move snakes forward
-                            resultSnakes[j] = resultSnakes[j].next();
+                            resultSnakes[j].forward();
                         }
                     }
                 }
