@@ -255,18 +255,4 @@ public class MainGameState extends GameState {
     public void dispose() {
 
     }
-
-    public boolean keyDown(int keycode) {
-        Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
-        if (keycode == Input.Keys.LEFT) {
-            clientSnapshot.onClientInput(Constants.LEFT);
-        } else if (keycode == Input.Keys.UP) {
-            clientSnapshot.onClientInput(Constants.UP);
-        } else if (keycode == Input.Keys.RIGHT) {
-            clientSnapshot.onClientInput(Constants.RIGHT);
-        } else if (keycode == Input.Keys.DOWN) {
-            clientSnapshot.onClientInput(Constants.DOWN);
-        }
-        return true;
-    }
 }
