@@ -25,19 +25,22 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainGameState extends GameState {
     private static final String TAG = MainGameState.class.getCanonicalName();
     private final ScheduledExecutorService executor;
     private final int clientId;
     private volatile int roundTripMs;
-    private final ClientSnapshot clientSnapshot;
+    private final AtomicBoolean gameInitialized;
+    private ClientSnapshot clientSnapshot;
     private final ShapeRenderer renderer;
 
     public MainGameState(App app, int id) {
         super(app);
-        clientSnapshot = new ClientSnapshot(id);
         clientId = id;
+        clientSnapshot = null;
+        gameInitialized = new AtomicBoolean(false);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(new GestureDetector(new GestureDetector.GestureListener() {
@@ -58,20 +61,24 @@ public class MainGameState extends GameState {
 
             @Override
             public boolean fling(float velocityX, float velocityY, int button) {
-                if (Math.abs(velocityX) > Math.abs(velocityY)) {
-                    if (velocityX > 0) {
-                        clientSnapshot.onClientInput(Constants.RIGHT);
+                if (gameInitialized.get()) {
+                    if (Math.abs(velocityX) > Math.abs(velocityY)) {
+                        if (velocityX > 0) {
+                            clientSnapshot.onClientInput(Constants.RIGHT);
+                        } else {
+                            clientSnapshot.onClientInput(Constants.LEFT);
+                        }
                     } else {
-                        clientSnapshot.onClientInput(Constants.LEFT);
+                        if (velocityY > 0) {
+                            clientSnapshot.onClientInput(Constants.DOWN);
+                        } else {
+                            clientSnapshot.onClientInput(Constants.UP);
+                        }
                     }
+                    return true;
                 } else {
-                    if (velocityY > 0) {
-                        clientSnapshot.onClientInput(Constants.DOWN);
-                    } else {
-                        clientSnapshot.onClientInput(Constants.UP);
-                    }
+                    return false;
                 }
-                return true;
             }
 
             @Override
@@ -102,17 +109,21 @@ public class MainGameState extends GameState {
         inputMultiplexer.addProcessor(new InputProcessor() {
             @Override
             public boolean keyDown(int keycode) {
-                Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
-                if (keycode == Input.Keys.LEFT) {
-                    clientSnapshot.onClientInput(Constants.LEFT);
-                } else if (keycode == Input.Keys.UP) {
-                    clientSnapshot.onClientInput(Constants.UP);
-                } else if (keycode == Input.Keys.RIGHT) {
-                    clientSnapshot.onClientInput(Constants.RIGHT);
-                } else if (keycode == Input.Keys.DOWN) {
-                    clientSnapshot.onClientInput(Constants.DOWN);
+                if (gameInitialized.get()) {
+                    Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
+                    if (keycode == Input.Keys.LEFT) {
+                        clientSnapshot.onClientInput(Constants.LEFT);
+                    } else if (keycode == Input.Keys.UP) {
+                        clientSnapshot.onClientInput(Constants.UP);
+                    } else if (keycode == Input.Keys.RIGHT) {
+                        clientSnapshot.onClientInput(Constants.RIGHT);
+                    } else if (keycode == Input.Keys.DOWN) {
+                        clientSnapshot.onClientInput(Constants.DOWN);
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
-                return true;
             }
 
             @Override
@@ -171,7 +182,8 @@ public class MainGameState extends GameState {
                         for (int i = 0; i < pSnakes.size(); ++i) {
                             snakeIds[i] = pSnakes.get(i).getId();
                         }
-                        clientSnapshot.init(startTimestamp, snakeIds);
+                        clientSnapshot = new ClientSnapshot(clientId, startTimestamp, snakeIds);
+                        gameInitialized.set(true);
                         executor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
@@ -194,7 +206,9 @@ public class MainGameState extends GameState {
                             }
                         }, 0, 30, TimeUnit.MILLISECONDS);
                     } else {
-                        clientSnapshot.onServerUpdate(update);
+                        if (gameInitialized.get()) {
+                            clientSnapshot.onServerUpdate(update);
+                        }
                     }
                 }
             }
@@ -208,22 +222,24 @@ public class MainGameState extends GameState {
         Gdx.gl.glClearColor(0, 0, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        Snake[] snakes = clientSnapshot.getSnakes();
+        if (gameInitialized.get()) {
+            Snake[] snakes = clientSnapshot.getSnakes();
 
-        for (Snake snake : snakes) {
-            Gdx.app.debug(TAG, snake.toString());
-        }
-
-        renderer.setColor(Color.WHITE);
-        renderer.begin(ShapeRenderer.ShapeType.Filled);
-
-        for (int s = 0; s < snakes.length; ++s) {
-            List<Integer> coords = snakes[s].getCoordinates();
-            for (int c = 0; c < coords.size() / 2; ++c) {
-                renderer.rect(coords.get(2 * c) * Constants.UNIT_WIDTH, coords.get(2 * c + 1) * Constants.UNIT_HEIGHT, Constants.UNIT_WIDTH, Constants.UNIT_HEIGHT);
+            for (Snake snake : snakes) {
+                Gdx.app.debug(TAG, snake.toString());
             }
+
+            renderer.setColor(Color.WHITE);
+            renderer.begin(ShapeRenderer.ShapeType.Filled);
+
+            for (int s = 0; s < snakes.length; ++s) {
+                List<Integer> coords = snakes[s].getCoordinates();
+                for (int c = 0; c < coords.size() / 2; ++c) {
+                    renderer.rect(coords.get(2 * c) * Constants.UNIT_WIDTH, coords.get(2 * c + 1) * Constants.UNIT_HEIGHT, Constants.UNIT_WIDTH, Constants.UNIT_HEIGHT);
+                }
+            }
+            renderer.end();
         }
-        renderer.end();
     }
 
     @Override

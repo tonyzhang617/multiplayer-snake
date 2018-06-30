@@ -8,7 +8,6 @@ import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -16,56 +15,43 @@ import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.RIGHT;
 
 public class ClientSnapshot extends Snapshot {
     private static final String TAG = ClientSnapshot.class.getCanonicalName();
-    /**
-     * Effectively immutable long storing the nano time of the start of game
-     */
-    private volatile long startTimestamp;
+
+    private final long startTimestamp;
     private final int clientId;
     private static final long SNAKE_MOVE_EVERY_NS = TimeUnit.MILLISECONDS.toNanos(Constants.MOVE_EVERY_MS);
     private static final long UPDATE_AFTER_INACTIVE_NS = TimeUnit.MILLISECONDS.toNanos(Constants.UPDATE_AFTER_INACTIVE_MS);
 
     private final AtomicInteger serverUpdateVersion;
 
-    private final Object lock;
     private final AtomicLong nextRenderTime;
-    private final AtomicBoolean gameInitialized;
+
+    private final Object lock;
     /**
      * Makes up the last game step, guarded by stateLock
      */
-    private List<Snake> snakes;
+    private final List<Snake> snakes;
     private long stateTime;
     private int nextInputId;
-    private List<Input> unackInputs;
+    private final List<Input> unackInputs;
 
-    public ClientSnapshot(int clientId) {
+    public ClientSnapshot(int clientId, long startTimestamp, int[] snakeIds) {
         this.clientId = clientId;
-        lock = new Object();
-        snakes = new LinkedList<Snake>();
-        nextInputId = 1;
-        unackInputs = new LinkedList<Input>();
-        gameInitialized = new AtomicBoolean(false);
-        stateTime = 0;
-        serverUpdateVersion = new AtomicInteger(Integer.MIN_VALUE);
-        nextRenderTime = new AtomicLong(0);
-    }
-
-    /**
-     * Initializes the snakes
-     * @param startTimestamp
-     * @param snakeIds
-     */
-    public void init(long startTimestamp, int[] snakeIds) {
-        // TODO: Take snakes as an argument and initialize the snakes
+        this.lock = new Object();
+        this.snakes = new LinkedList<Snake>();
+        this.nextInputId = 1;
+        this.unackInputs = new LinkedList<Input>();
+        this.stateTime = 0;
+        this.serverUpdateVersion = new AtomicInteger(Integer.MIN_VALUE);
+        this.nextRenderTime = new AtomicLong(0);
         this.startTimestamp = startTimestamp;
 
         int id = 0;
         for (int index = 0; index < snakeIds.length; ++index) {
             while (id <= snakeIds[index]) {
-                snakes.add(new Snake(id, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(RIGHT, 0, 0)));
+                this.snakes.add(new Snake(id, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(RIGHT, 0, 0)));
                 id += 1;
             }
         }
-        gameInitialized.set(true);
     }
 
     /**
@@ -98,7 +84,7 @@ public class ClientSnapshot extends Snapshot {
 
     @Override
     public void onServerUpdate(Packet.Update update) {
-        if (gameInitialized.get() && update.getState() == Packet.Update.PState.GAME_IN_PROGRESS) {
+        if (update.getState() == Packet.Update.PState.GAME_IN_PROGRESS) {
             if (update.getVersion() > serverUpdateVersion.get()) {
                 Gdx.app.debug(TAG, "Server update version " + update.getVersion() + " received.");
                 Gdx.app.debug(TAG, update.toString());
@@ -160,44 +146,40 @@ public class ClientSnapshot extends Snapshot {
 
     @Override
     public Snake[] getSnakes() {
-        if (gameInitialized.get()) {
-            long currentTime = Utils.getNanoTime() - startTimestamp;
-            int currentStep = (int) (currentTime / SNAKE_MOVE_EVERY_NS);
+        long currentTime = Utils.getNanoTime() - startTimestamp;
+        int currentStep = (int) (currentTime / SNAKE_MOVE_EVERY_NS);
 
-            synchronized (lock) {
-                Snake[] resultSnakes = new Snake[snakes.size()];
-                for (int i = 0; i < resultSnakes.length; ++i) {
-                    resultSnakes[i] = new Snake(snakes.get(i));
-                }
+        synchronized (lock) {
+            Snake[] resultSnakes = new Snake[snakes.size()];
+            for (int i = 0; i < resultSnakes.length; ++i) {
+                resultSnakes[i] = new Snake(snakes.get(i));
+            }
 
-                int stateStep = (int) (stateTime / SNAKE_MOVE_EVERY_NS);
-                int stepDiff = currentStep - stateStep;
+            int stateStep = (int) (stateTime / SNAKE_MOVE_EVERY_NS);
+            int stepDiff = currentStep - stateStep;
 
-                int inputIndex = 0;
-                for (int i = 0; i <= stepDiff; ++i) {
-                    long upper = (i == stepDiff ? currentTime : SNAKE_MOVE_EVERY_NS * (stateStep + i + 1));
-                    for (int j = 0; j < resultSnakes.length; ++j) {
-                        if (j == clientId) {
-                            // Apply inputs
-                            Input tmpInput;
-                            while (unackInputs.size() > inputIndex && (tmpInput = unackInputs.get(inputIndex)).timestamp < upper) {
-                                resultSnakes[j].handleInput(tmpInput);
-                                inputIndex += 1;
-                            }
-                        }
-                        if (i != stepDiff) {
-                            // Move snakes forward
-                            resultSnakes[j].forward();
+            int inputIndex = 0;
+            for (int i = 0; i <= stepDiff; ++i) {
+                long upper = (i == stepDiff ? currentTime : SNAKE_MOVE_EVERY_NS * (stateStep + i + 1));
+                for (int j = 0; j < resultSnakes.length; ++j) {
+                    if (j == clientId) {
+                        // Apply inputs
+                        Input tmpInput;
+                        while (unackInputs.size() > inputIndex && (tmpInput = unackInputs.get(inputIndex)).timestamp < upper) {
+                            resultSnakes[j].handleInput(tmpInput);
+                            inputIndex += 1;
                         }
                     }
+                    if (i != stepDiff) {
+                        // Move snakes forward
+                        resultSnakes[j].forward();
+                    }
                 }
-
-                nextRenderTime.set(SNAKE_MOVE_EVERY_NS * (currentStep + 1));
-
-                return resultSnakes;
             }
-        } else {
-            return new Snake[0];
+
+            nextRenderTime.set(SNAKE_MOVE_EVERY_NS * (currentStep + 1));
+
+            return resultSnakes;
         }
     }
 }
