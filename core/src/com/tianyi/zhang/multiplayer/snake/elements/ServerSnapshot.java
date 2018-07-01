@@ -33,16 +33,26 @@ public class ServerSnapshot extends Snapshot {
 
     public ServerSnapshot(long startTimestamp, int[] snakeIds) {
         this.startTimestamp = startTimestamp;
+        Gdx.app.debug(TAG, "startTimestamp: " + startTimestamp);
         serverId = 0;
         lock = new Object();
         stateTime = 0;
         nextInputId = 1;
         version = 0;
-        int tmpSize = snakeIds[snakeIds.length-1]+1;
-        snakes = new ArrayList<Snake>(tmpSize);
-        inputBuffers = new ArrayList<SortedSet<Input>>(tmpSize);
-        for (int i = 0; i < tmpSize; ++i) {
-            snakes.add(new Snake(i, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(Constants.RIGHT, 0, 0)));
+        int arraySize = snakeIds[snakeIds.length - 1] + 1;
+        snakes = new ArrayList<Snake>(arraySize);
+        inputBuffers = new ArrayList<SortedSet<Input>>(arraySize);
+
+        int interval = (Constants.HEIGHT - 2 * Constants.INITIAL_SNAKE_LENGTH) / (arraySize - 1);
+        int evenSnakeIdHeadX = Constants.INITIAL_SNAKE_LENGTH * 2 - 1;
+        int oddSnakeIdHeadX = Constants.WIDTH - 2 * Constants.INITIAL_SNAKE_LENGTH;
+
+        for (int i = 0; i < arraySize; ++i) {
+            if (i % 2 == 0) {
+                snakes.add(new Snake(i, evenSnakeIdHeadX, Constants.INITIAL_SNAKE_LENGTH + i * interval - 1, Constants.INITIAL_SNAKE_LENGTH, new Input(Constants.RIGHT, 0, 0)));
+            } else {
+                snakes.add(new Snake(i, oddSnakeIdHeadX, Constants.INITIAL_SNAKE_LENGTH + i * interval - 1, Constants.INITIAL_SNAKE_LENGTH, new Input(Constants.LEFT, 0, 0)));
+            }
             inputBuffers.add(new TreeSet<Input>(Input.comparator));
         }
         lastPacket = new AtomicReference<Packet.Update.Builder>(null);
@@ -155,15 +165,15 @@ public class ServerSnapshot extends Snapshot {
     }
 
     public Packet.Update buildPacket() {
-        long currentTime = Utils.getNanoTime() - startTimestamp;
         Packet.Update.Builder tmpPacket = lastPacket.get();
         synchronized (lock) {
             if (tmpPacket != null && tmpPacket.getVersion() == version) {
+                long currentTime = Utils.getNanoTime() - startTimestamp;
                 tmpPacket.setTimestamp(currentTime);
                 return tmpPacket.build();
             } else {
                 Packet.Update.Builder builder = Packet.Update.newBuilder();
-                builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setVersion(version).setTimestamp(currentTime);
+                builder.setType(Packet.Update.PType.GAME_UPDATE).setVersion(version);
                 for (Snake snake : getSnakes()) {
                     Input input = snake.getLastInput();
                     Packet.Update.PSnake.Builder pSnakeBuilder = Packet.Update.PSnake.newBuilder();
@@ -172,6 +182,8 @@ public class ServerSnapshot extends Snapshot {
                     pSnakeBuilder.setId(snake.id).addAllCoords(snake.getCoordinates()).setLastInput(pInputBuilder);
                     builder.addSnakes(pSnakeBuilder);
                 }
+                long currentTime = Utils.getNanoTime() - startTimestamp;
+                builder.setTimestamp(currentTime);
                 Gdx.app.debug(TAG, "New update sent to clients: " + builder.toString());
                 lastPacket.set(builder);
                 return builder.build();

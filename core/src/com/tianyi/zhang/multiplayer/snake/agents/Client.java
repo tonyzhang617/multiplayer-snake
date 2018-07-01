@@ -34,11 +34,6 @@ public class Client extends IAgent {
     }
 
     @Override
-    public int getRoundTripTime() {
-        return client.getReturnTripTime();
-    }
-
-    @Override
     public void lookForServer(Listener listener) {
         setListener(listener);
         new Thread(new Runnable() {
@@ -62,11 +57,6 @@ public class Client extends IAgent {
     @Override
     public void send(Packet.Update update) {
         client.sendUDP(update.toByteArray());
-    }
-
-    @Override
-    public void updateRoundTripTime() {
-        client.updateReturnTripTime();
     }
 
     @Override

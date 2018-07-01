@@ -19,13 +19,13 @@ public final class Packet {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required .messages.Update.PState state = 1;</code>
+     * <code>required .messages.Update.PType type = 1;</code>
      */
-    boolean hasState();
+    boolean hasType();
     /**
-     * <code>required .messages.Update.PState state = 1;</code>
+     * <code>required .messages.Update.PType type = 1;</code>
      */
-    com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState getState();
+    com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType getType();
 
     /**
      * <code>optional int32 snakeId = 2;</code>
@@ -115,7 +115,7 @@ public final class Packet {
       super(builder);
     }
     private Update() {
-      state_ = 0;
+      type_ = 0;
       snakeId_ = 0;
       inputs_ = java.util.Collections.emptyList();
       version_ = 0;
@@ -156,12 +156,12 @@ public final class Packet {
             }
             case 8: {
               int rawValue = input.readEnum();
-              com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState value = com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState.valueOf(rawValue);
+              com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType value = com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType.valueOf(rawValue);
               if (value == null) {
                 unknownFields.mergeVarintField(1, rawValue);
               } else {
                 bitField0_ |= 0x00000001;
-                state_ = rawValue;
+                type_ = rawValue;
               }
               break;
             }
@@ -229,28 +229,44 @@ public final class Packet {
     }
 
     /**
-     * Protobuf enum {@code messages.Update.PState}
+     * Protobuf enum {@code messages.Update.PType}
      */
-    public enum PState
+    public enum PType
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
-       * <code>READY = 0;</code>
+       * <code>PING = 0;</code>
        */
-      READY(0),
+      PING(0),
       /**
-       * <code>GAME_IN_PROGRESS = 1;</code>
+       * <code>PING_REPLY = 1;</code>
        */
-      GAME_IN_PROGRESS(1),
+      PING_REPLY(1),
+      /**
+       * <code>GAME_UPDATE = 2;</code>
+       */
+      GAME_UPDATE(2),
+      /**
+       * <code>INPUT_UPDATE = 3;</code>
+       */
+      INPUT_UPDATE(3),
       ;
 
       /**
-       * <code>READY = 0;</code>
+       * <code>PING = 0;</code>
        */
-      public static final int READY_VALUE = 0;
+      public static final int PING_VALUE = 0;
       /**
-       * <code>GAME_IN_PROGRESS = 1;</code>
+       * <code>PING_REPLY = 1;</code>
        */
-      public static final int GAME_IN_PROGRESS_VALUE = 1;
+      public static final int PING_REPLY_VALUE = 1;
+      /**
+       * <code>GAME_UPDATE = 2;</code>
+       */
+      public static final int GAME_UPDATE_VALUE = 2;
+      /**
+       * <code>INPUT_UPDATE = 3;</code>
+       */
+      public static final int INPUT_UPDATE_VALUE = 3;
 
 
       public final int getNumber() {
@@ -261,27 +277,29 @@ public final class Packet {
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
-      public static PState valueOf(int value) {
+      public static PType valueOf(int value) {
         return forNumber(value);
       }
 
-      public static PState forNumber(int value) {
+      public static PType forNumber(int value) {
         switch (value) {
-          case 0: return READY;
-          case 1: return GAME_IN_PROGRESS;
+          case 0: return PING;
+          case 1: return PING_REPLY;
+          case 2: return GAME_UPDATE;
+          case 3: return INPUT_UPDATE;
           default: return null;
         }
       }
 
-      public static com.google.protobuf.Internal.EnumLiteMap<PState>
+      public static com.google.protobuf.Internal.EnumLiteMap<PType>
           internalGetValueMap() {
         return internalValueMap;
       }
       private static final com.google.protobuf.Internal.EnumLiteMap<
-          PState> internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<PState>() {
-              public PState findValueByNumber(int number) {
-                return PState.forNumber(number);
+          PType> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<PType>() {
+              public PType findValueByNumber(int number) {
+                return PType.forNumber(number);
               }
             };
 
@@ -298,9 +316,9 @@ public final class Packet {
         return com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.getDescriptor().getEnumTypes().get(0);
       }
 
-      private static final PState[] VALUES = values();
+      private static final PType[] VALUES = values();
 
-      public static PState valueOf(
+      public static PType valueOf(
           com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
         if (desc.getType() != getDescriptor()) {
           throw new java.lang.IllegalArgumentException(
@@ -311,11 +329,11 @@ public final class Packet {
 
       private final int value;
 
-      private PState(int value) {
+      private PType(int value) {
         this.value = value;
       }
 
-      // @@protoc_insertion_point(enum_scope:messages.Update.PState)
+      // @@protoc_insertion_point(enum_scope:messages.Update.PType)
     }
 
     public interface PInputOrBuilder extends
@@ -1950,20 +1968,20 @@ public final class Packet {
     }
 
     private int bitField0_;
-    public static final int STATE_FIELD_NUMBER = 1;
-    private int state_;
+    public static final int TYPE_FIELD_NUMBER = 1;
+    private int type_;
     /**
-     * <code>required .messages.Update.PState state = 1;</code>
+     * <code>required .messages.Update.PType type = 1;</code>
      */
-    public boolean hasState() {
+    public boolean hasType() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .messages.Update.PState state = 1;</code>
+     * <code>required .messages.Update.PType type = 1;</code>
      */
-    public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState getState() {
-      com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState result = com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState.valueOf(state_);
-      return result == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState.READY : result;
+    public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType getType() {
+      com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType result = com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType.valueOf(type_);
+      return result == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType.PING : result;
     }
 
     public static final int SNAKEID_FIELD_NUMBER = 2;
@@ -2087,7 +2105,7 @@ public final class Packet {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasState()) {
+      if (!hasType()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -2110,7 +2128,7 @@ public final class Packet {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeEnum(1, state_);
+        output.writeEnum(1, type_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(2, snakeId_);
@@ -2137,7 +2155,7 @@ public final class Packet {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, state_);
+          .computeEnumSize(1, type_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -2175,9 +2193,9 @@ public final class Packet {
       com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update other = (com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update) obj;
 
       boolean result = true;
-      result = result && (hasState() == other.hasState());
-      if (hasState()) {
-        result = result && state_ == other.state_;
+      result = result && (hasType() == other.hasType());
+      if (hasType()) {
+        result = result && type_ == other.type_;
       }
       result = result && (hasSnakeId() == other.hasSnakeId());
       if (hasSnakeId()) {
@@ -2209,9 +2227,9 @@ public final class Packet {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasState()) {
-        hash = (37 * hash) + STATE_FIELD_NUMBER;
-        hash = (53 * hash) + state_;
+      if (hasType()) {
+        hash = (37 * hash) + TYPE_FIELD_NUMBER;
+        hash = (53 * hash) + type_;
       }
       if (hasSnakeId()) {
         hash = (37 * hash) + SNAKEID_FIELD_NUMBER;
@@ -2365,7 +2383,7 @@ public final class Packet {
       }
       public Builder clear() {
         super.clear();
-        state_ = 0;
+        type_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
         snakeId_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -2412,7 +2430,7 @@ public final class Packet {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.state_ = state_;
+        result.type_ = type_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
@@ -2485,8 +2503,8 @@ public final class Packet {
 
       public Builder mergeFrom(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update other) {
         if (other == com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.getDefaultInstance()) return this;
-        if (other.hasState()) {
-          setState(other.getState());
+        if (other.hasType()) {
+          setType(other.getType());
         }
         if (other.hasSnakeId()) {
           setSnakeId(other.getSnakeId());
@@ -2555,7 +2573,7 @@ public final class Packet {
       }
 
       public final boolean isInitialized() {
-        if (!hasState()) {
+        if (!hasType()) {
           return false;
         }
         for (int i = 0; i < getInputsCount(); i++) {
@@ -2590,38 +2608,38 @@ public final class Packet {
       }
       private int bitField0_;
 
-      private int state_ = 0;
+      private int type_ = 0;
       /**
-       * <code>required .messages.Update.PState state = 1;</code>
+       * <code>required .messages.Update.PType type = 1;</code>
        */
-      public boolean hasState() {
+      public boolean hasType() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .messages.Update.PState state = 1;</code>
+       * <code>required .messages.Update.PType type = 1;</code>
        */
-      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState getState() {
-        com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState result = com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState.valueOf(state_);
-        return result == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState.READY : result;
+      public com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType getType() {
+        com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType result = com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType.valueOf(type_);
+        return result == null ? com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType.PING : result;
       }
       /**
-       * <code>required .messages.Update.PState state = 1;</code>
+       * <code>required .messages.Update.PType type = 1;</code>
        */
-      public Builder setState(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PState value) {
+      public Builder setType(com.tianyi.zhang.multiplayer.snake.agents.messages.Packet.Update.PType value) {
         if (value == null) {
           throw new NullPointerException();
         }
         bitField0_ |= 0x00000001;
-        state_ = value.getNumber();
+        type_ = value.getNumber();
         onChanged();
         return this;
       }
       /**
-       * <code>required .messages.Update.PState state = 1;</code>
+       * <code>required .messages.Update.PType type = 1;</code>
        */
-      public Builder clearState() {
+      public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        state_ = 0;
+        type_ = 0;
         onChanged();
         return this;
       }
@@ -3274,18 +3292,19 @@ public final class Packet {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014packet.proto\022\010messages\"\376\002\n\006Update\022&\n\005s" +
-      "tate\030\001 \002(\0162\027.messages.Update.PState\022\017\n\007s" +
-      "nakeId\030\002 \001(\005\022\'\n\006inputs\030\003 \003(\0132\027.messages." +
-      "Update.PInput\022\017\n\007version\030\004 \001(\005\022\021\n\ttimest" +
-      "amp\030\005 \001(\003\022\'\n\006snakes\030\006 \003(\0132\027.messages.Upd" +
-      "ate.PSnake\032H\n\006PInput\022\n\n\002id\030\001 \002(\005\022\021\n\tdire" +
-      "ction\030\002 \002(\005\022\021\n\ttimestamp\030\003 \002(\003\022\014\n\004step\030\004" +
-      " \002(\005\032P\n\006PSnake\022\n\n\002id\030\001 \002(\005\022\016\n\006coords\030\002 \003" +
-      "(\005\022*\n\tlastInput\030\003 \002(\0132\027.messages.Update." +
-      "PInput\")\n\006PState\022\t\n\005READY\020\000\022\024\n\020GAME_IN_P" +
-      "ROGRESS\020\001B<\n2com.tianyi.zhang.multiplaye" +
-      "r.snake.agents.messagesB\006Packet"
+      "\n\014packet.proto\022\010messages\"\227\003\n\006Update\022$\n\004t" +
+      "ype\030\001 \002(\0162\026.messages.Update.PType\022\017\n\007sna" +
+      "keId\030\002 \001(\005\022\'\n\006inputs\030\003 \003(\0132\027.messages.Up" +
+      "date.PInput\022\017\n\007version\030\004 \001(\005\022\021\n\ttimestam" +
+      "p\030\005 \001(\003\022\'\n\006snakes\030\006 \003(\0132\027.messages.Updat" +
+      "e.PSnake\032H\n\006PInput\022\n\n\002id\030\001 \002(\005\022\021\n\tdirect" +
+      "ion\030\002 \002(\005\022\021\n\ttimestamp\030\003 \002(\003\022\014\n\004step\030\004 \002" +
+      "(\005\032P\n\006PSnake\022\n\n\002id\030\001 \002(\005\022\016\n\006coords\030\002 \003(\005" +
+      "\022*\n\tlastInput\030\003 \002(\0132\027.messages.Update.PI" +
+      "nput\"D\n\005PType\022\010\n\004PING\020\000\022\016\n\nPING_REPLY\020\001\022" +
+      "\017\n\013GAME_UPDATE\020\002\022\020\n\014INPUT_UPDATE\020\003B<\n2co" +
+      "m.tianyi.zhang.multiplayer.snake.agents." +
+      "messagesB\006Packet"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -3304,7 +3323,7 @@ public final class Packet {
     internal_static_messages_Update_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_messages_Update_descriptor,
-        new java.lang.String[] { "State", "SnakeId", "Inputs", "Version", "Timestamp", "Snakes", });
+        new java.lang.String[] { "Type", "SnakeId", "Inputs", "Version", "Timestamp", "Snakes", });
     internal_static_messages_Update_PInput_descriptor =
       internal_static_messages_Update_descriptor.getNestedTypes().get(0);
     internal_static_messages_Update_PInput_fieldAccessorTable = new

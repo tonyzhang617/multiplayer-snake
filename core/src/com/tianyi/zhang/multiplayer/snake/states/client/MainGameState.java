@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
@@ -21,6 +20,7 @@ import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,15 +31,16 @@ public class MainGameState extends GameState {
     private static final String TAG = MainGameState.class.getCanonicalName();
     private final ScheduledExecutorService executor;
     private final int clientId;
-    private volatile int roundTripMs;
+    private volatile long roundTripNs;
     private final AtomicBoolean gameInitialized;
-    private ClientSnapshot clientSnapshot;
+    private volatile ClientSnapshot clientSnapshot;
     private final ShapeRenderer renderer;
 
     public MainGameState(App app, int id) {
         super(app);
         clientId = id;
         clientSnapshot = null;
+        roundTripNs = 0;
         gameInitialized = new AtomicBoolean(false);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
@@ -166,53 +167,57 @@ public class MainGameState extends GameState {
         executor = Executors.newScheduledThreadPool(2);
 
         Gdx.graphics.setContinuousRendering(false);
-        _app.getAgent().updateRoundTripTime();
         _app.getAgent().setListener(new Listener() {
             @Override
             public void received(Connection connection, Object object) {
-                if (object instanceof FrameworkMessage.Ping) {
-                    roundTripMs = _app.getAgent().getRoundTripTime();
-                } else if (object instanceof byte[]) {
-                    long startTimestamp = Utils.getNanoTime() - TimeUnit.MILLISECONDS.toNanos(roundTripMs) / 2;
+                if (object instanceof byte[]) {
                     Packet.Update update = Client.parseReceived(object);
-                    if (update.getState() == Packet.Update.PState.READY) {
-                        List<Packet.Update.PSnake> pSnakes = update.getSnakesList();
-                        // TODO: Pass snakes as argument to constructor of ClientSnapshot
-                        final int[] snakeIds = new int[pSnakes.size()];
-                        for (int i = 0; i < pSnakes.size(); ++i) {
-                            snakeIds[i] = pSnakes.get(i).getId();
-                        }
-                        clientSnapshot = new ClientSnapshot(clientId, startTimestamp, snakeIds);
-                        gameInitialized.set(true);
-                        executor.scheduleAtFixedRate(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    if (clientSnapshot.update()) {
-                                        Gdx.graphics.requestRendering();
-                                    }
-                                    com.tianyi.zhang.multiplayer.snake.elements.Input[] inputs = clientSnapshot.getNewInputs();
-                                    if (inputs.length > 0) {
-                                        Packet.Update.Builder builder = Packet.Update.newBuilder();
-                                        builder.setState(Packet.Update.PState.GAME_IN_PROGRESS).setSnakeId(clientId);
-                                        for (com.tianyi.zhang.multiplayer.snake.elements.Input tmpInput : inputs) {
-                                            builder.addInputs(Packet.Update.PInput.newBuilder().setId(tmpInput.id).setDirection(tmpInput.direction).setTimestamp(tmpInput.timestamp).setStep(tmpInput.step));
-                                        }
-                                        _app.getAgent().send(builder.build());
-                                    }
-                                } catch (Exception e) {
-                                    Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
-                                }
+                    if (!gameInitialized.get()) {
+                        if (update.getType() == Packet.Update.PType.PING_REPLY) {
+                            roundTripNs = Utils.getNanoTime() - update.getTimestamp();
+                            Gdx.app.debug(TAG, "roundTripNs: " + roundTripNs);
+                        } else if (update.getType() == Packet.Update.PType.GAME_UPDATE) {
+                            long currentTime = Utils.getNanoTime();
+
+                            List<Packet.Update.PSnake> pSnakes = update.getSnakesList();
+                            List<Snake> snakes = new ArrayList<Snake>(pSnakes.size());
+                            for (Packet.Update.PSnake pSnake : pSnakes) {
+                                snakes.add(Snake.fromProtoSnake(pSnake));
                             }
-                        }, 0, 30, TimeUnit.MILLISECONDS);
-                    } else {
-                        if (gameInitialized.get()) {
-                            clientSnapshot.onServerUpdate(update);
+
+                            clientSnapshot = new ClientSnapshot(clientId, currentTime - update.getTimestamp() - roundTripNs / 2, snakes);
+
+                            executor.scheduleAtFixedRate(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        if (clientSnapshot.update()) {
+                                            Gdx.graphics.requestRendering();
+                                        }
+                                        com.tianyi.zhang.multiplayer.snake.elements.Input[] inputs = clientSnapshot.getNewInputs();
+                                        if (inputs.length > 0) {
+                                            Packet.Update.Builder builder = Packet.Update.newBuilder();
+                                            builder.setType(Packet.Update.PType.INPUT_UPDATE).setSnakeId(clientId);
+                                            for (com.tianyi.zhang.multiplayer.snake.elements.Input tmpInput : inputs) {
+                                                builder.addInputs(Packet.Update.PInput.newBuilder().setId(tmpInput.id).setDirection(tmpInput.direction).setTimestamp(tmpInput.timestamp).setStep(tmpInput.step));
+                                            }
+                                            _app.getAgent().send(builder.build());
+                                        }
+                                    } catch (Exception e) {
+                                        Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
+                                    }
+                                }
+                            }, 0, 30, TimeUnit.MILLISECONDS);
+
+                            gameInitialized.set(true);
                         }
+                    } else {
+                        clientSnapshot.onServerUpdate(update);
                     }
                 }
             }
         });
+        _app.getAgent().send(Packet.Update.newBuilder().setType(Packet.Update.PType.PING).setTimestamp(Utils.getNanoTime()).build());
         Gdx.app.debug(TAG, "Main game loaded");
         renderer = new ShapeRenderer();
     }

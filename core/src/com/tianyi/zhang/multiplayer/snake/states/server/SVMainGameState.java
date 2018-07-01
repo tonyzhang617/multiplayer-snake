@@ -163,18 +163,11 @@ public class SVMainGameState extends GameState {
             tmpIds[i+1] = connectionIds.get(i);
         }
 
-        _app.getAgent().send(buildFirstPacket(tmpIds));
+        executor = Executors.newSingleThreadScheduledExecutor();
+
         startTimestamp = Utils.getNanoTime();
         serverSnapshot = new ServerSnapshot(startTimestamp, tmpIds);
-        _app.getAgent().setListener(new Listener() {
-            @Override
-            public void received(Connection connection, Object object) {
-                if (object instanceof byte[]) {
-                    serverSnapshot.onClientUpdate(Server.parseReceived(object));
-                }
-            }
-        });
-        executor = Executors.newSingleThreadScheduledExecutor();
+
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -189,25 +182,20 @@ public class SVMainGameState extends GameState {
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
 
+        _app.getAgent().setListener(new Listener() {
+            @Override
+            public void received(Connection connection, Object object) {
+                if (object instanceof byte[]) {
+                    Packet.Update update = Server.parseReceived(object);
+                    if (update.getType() == Packet.Update.PType.INPUT_UPDATE) {
+                        serverSnapshot.onClientUpdate(Server.parseReceived(object));
+                    }
+                }
+            }
+        });
+
         Gdx.app.debug(TAG, "Server main game loaded");
         renderer = new ShapeRenderer();
-    }
-
-    private Packet.Update buildFirstPacket(int[] snakeIds) {
-        Packet.Update.Builder builder = Packet.Update.newBuilder();
-        int id = 0;
-        for (int index = 0; index < snakeIds.length; ++index) {
-            while (id <= snakeIds[index]) {
-                Packet.Update.PSnake.Builder snakeBuilder = Packet.Update.PSnake.newBuilder();
-                // TODO: add actual coordinates
-                snakeBuilder.setId(id).addAllCoords(new ArrayList());
-                snakeBuilder.setLastInput(Packet.Update.PInput.newBuilder().setId(0).setDirection(Constants.RIGHT).setTimestamp(0).setStep(0));
-                builder.addSnakes(snakeBuilder);
-                id += 1;
-            }
-        }
-        builder.setState(Packet.Update.PState.READY).setTimestamp(0).setVersion(0);
-        return builder.build();
     }
 
     @Override

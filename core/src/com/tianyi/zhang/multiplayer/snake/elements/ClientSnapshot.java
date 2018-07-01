@@ -5,13 +5,12 @@ import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.RIGHT;
 
 public class ClientSnapshot extends Snapshot {
     private static final String TAG = ClientSnapshot.class.getCanonicalName();
@@ -34,24 +33,18 @@ public class ClientSnapshot extends Snapshot {
     private int nextInputId;
     private final List<Input> unackInputs;
 
-    public ClientSnapshot(int clientId, long startTimestamp, int[] snakeIds) {
+    public ClientSnapshot(int clientId, long startTimestamp, List<Snake> snakes) {
         this.clientId = clientId;
         this.lock = new Object();
-        this.snakes = new LinkedList<Snake>();
         this.nextInputId = 1;
         this.unackInputs = new LinkedList<Input>();
         this.stateTime = 0;
-        this.serverUpdateVersion = new AtomicInteger(Integer.MIN_VALUE);
+        this.serverUpdateVersion = new AtomicInteger(0);
         this.nextRenderTime = new AtomicLong(0);
         this.startTimestamp = startTimestamp;
+        this.snakes = new ArrayList<Snake>(snakes);
 
-        int id = 0;
-        for (int index = 0; index < snakeIds.length; ++index) {
-            while (id <= snakeIds[index]) {
-                this.snakes.add(new Snake(id, new int[]{3, 3, 2, 3, 1, 3, 0, 3}, new Input(RIGHT, 0, 0)));
-                id += 1;
-            }
-        }
+        Gdx.app.debug(TAG, "startTimestamp: " + startTimestamp);
     }
 
     /**
@@ -84,7 +77,7 @@ public class ClientSnapshot extends Snapshot {
 
     @Override
     public void onServerUpdate(Packet.Update update) {
-        if (update.getState() == Packet.Update.PState.GAME_IN_PROGRESS) {
+        if (update.getType() == Packet.Update.PType.GAME_UPDATE) {
             if (update.getVersion() > serverUpdateVersion.get()) {
                 Gdx.app.debug(TAG, "Server update version " + update.getVersion() + " received.");
                 Gdx.app.debug(TAG, update.toString());
@@ -93,16 +86,13 @@ public class ClientSnapshot extends Snapshot {
                     List<Packet.Update.PSnake> pSnakes = update.getSnakesList();
                     for (int i = 0; i < pSnakes.size(); ++i) {
                         Packet.Update.PSnake pSnake = pSnakes.get(i);
-                        int tmpId = pSnake.getId();
-                        Packet.Update.PInput pInput = pSnake.getLastInput();
-                        Input newInput = new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp());
-                        Snake newSnake = new Snake(tmpId, pSnake.getCoordsList(), newInput);
-                        snakes.set(tmpId, newSnake);
+                        Snake newSnake = Snake.fromProtoSnake(pSnake);
+                        snakes.set(newSnake.id, newSnake);
 
                         stateTime = update.getTimestamp();
 
-                        if (tmpId == clientId) {
-                            int lastAckInputId = pInput.getId();
+                        if (newSnake.id == clientId) {
+                            int lastAckInputId = newSnake.getLastInput().id;
                             while (!unackInputs.isEmpty() && lastAckInputId <= unackInputs.get(0).id) {
                                 unackInputs.remove(0);
                             }

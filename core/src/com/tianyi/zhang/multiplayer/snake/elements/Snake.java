@@ -1,5 +1,6 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
+import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 
 import java.util.Collections;
@@ -29,7 +30,7 @@ public class Snake {
         this.isDead = false;
     }
 
-    public Snake(int id, int headX, int headY, Input input, int length) {
+    public Snake(int id, int headX, int headY, int length, Input input) {
         this.id = id;
         this.lastInput = input;
 
@@ -54,6 +55,11 @@ public class Snake {
             }
         }
         this.isDead = false;
+    }
+
+    public static Snake fromProtoSnake(Packet.Update.PSnake pSnake) {
+        Input input = Input.fromProtoInput(pSnake.getLastInput());
+        return new Snake(pSnake.getId(), pSnake.getCoordsList(), input);
     }
 
     public Snake(Snake snake) {

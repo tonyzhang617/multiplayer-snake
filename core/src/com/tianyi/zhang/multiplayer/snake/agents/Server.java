@@ -45,16 +45,6 @@ public class Server extends IAgent {
     }
 
     @Override
-    public void updateRoundTripTime() {
-
-    }
-
-    @Override
-    public int getRoundTripTime() {
-        return 0;
-    }
-
-    @Override
     public void destroy() {
         server.close();
     }

@@ -9,6 +9,8 @@ import com.esotericsoftware.kryonet.Listener;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.tianyi.zhang.multiplayer.snake.App;
+import com.tianyi.zhang.multiplayer.snake.agents.Server;
+import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.io.IOException;
@@ -69,6 +71,15 @@ public class BroadcastState extends GameState {
                 public void disconnected(Connection connection) {
                     synchronized (connectionIdsLock) {
                         connectionIds.remove(Integer.valueOf(connection.getID()));
+                    }
+                }
+
+
+                @Override
+                public void received(Connection connection, Object object) {
+                    Packet.Update update = Server.parseReceived(object);
+                    if (update.getType() == Packet.Update.PType.PING) {
+                        _app.getAgent().send(Packet.Update.newBuilder(update).setType(Packet.Update.PType.PING_REPLY).build());
                     }
                 }
             });

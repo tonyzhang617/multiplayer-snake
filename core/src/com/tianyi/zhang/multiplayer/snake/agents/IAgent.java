@@ -11,8 +11,6 @@ public abstract class IAgent {
     public abstract void broadcast(Listener listener) throws IOException;
     public abstract void lookForServer(Listener listener);
     public abstract void send(Packet.Update update);
-    public abstract void updateRoundTripTime();
-    public abstract int getRoundTripTime();
     public abstract void destroy();
 
     public static Packet.Update parseReceived(Object object) throws IllegalArgumentException {

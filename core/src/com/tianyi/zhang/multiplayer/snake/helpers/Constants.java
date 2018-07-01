@@ -20,6 +20,8 @@ public class Constants {
     public static final int CLIENT_SEND_EVERY_MS = 50;
     public static final int SERVER_SEND_EVERY_MS = 80;
 
+    public static final int INITIAL_SNAKE_LENGTH = 5;
+
     public static final int WINDOW_WIDTH = 640, WINDOW_HEIGHT = 640;
     public static final int WIDTH = 100, HEIGHT = 100;
     public static final int UNIT_WIDTH = WINDOW_WIDTH / WIDTH, UNIT_HEIGHT = WINDOW_HEIGHT / HEIGHT;

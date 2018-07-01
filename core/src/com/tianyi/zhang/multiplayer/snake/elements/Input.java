@@ -1,5 +1,6 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
+import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 
 import java.util.Comparator;
@@ -19,6 +20,10 @@ public class Input implements Comparable<Input> {
         this.id = id;
         this.timestamp = timestamp;
         this.step = (int) (timestamp / STEP_LENGTH);
+    }
+
+    public static Input fromProtoInput(Packet.Update.PInput pInput) {
+        return new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp());
     }
 
     public boolean isValidNewInput(Input newInput) {
