@@ -18,52 +18,52 @@ public class App extends Game {
 	protected IAgent agent;
 
 	// TODO: remove this variable
-    private boolean isServer = false;
+	private boolean isServer = false;
 
 	public IAgent getAgent() {
-	    return agent;
-    }
+		return agent;
+	}
 
 	@Override
 	public void create () {
-        Gdx.app.setLogLevel(Application.LOG_DEBUG);
-        VisUI.load();
+		Gdx.app.setLogLevel(Application.LOG_DEBUG);
+		VisUI.load();
 
-	    stateStack = new Stack<GameState>();
-	    if (isServer) {
-	        agent = new Server();
-	        pushState(new BroadcastState(this));
-        } else {
-	        agent = new Client();
-	        pushState(new LookForServerState(this));
-        }
+		stateStack = new Stack<GameState>();
+		if (isServer) {
+			agent = new Server();
+			pushState(new BroadcastState(this));
+		} else {
+			agent = new Client();
+			pushState(new LookForServerState(this));
+		}
 	}
 
 	@Override
 	public void render () {
-	    super.render();
+		super.render();
 	}
-	
+
 	@Override
 	public void dispose () {
-	    agent.destroy();
-	    while (!stateStack.empty()) {
-	        stateStack.pop().dispose();
-        }
-        VisUI.dispose();
+		agent.destroy();
+		while (!stateStack.empty()) {
+			stateStack.pop().dispose();
+		}
+		VisUI.dispose();
 	}
 
 	public void pushState(GameState gameState) {
-	    stateStack.push(gameState);
-	    setScreen(gameState);
-    }
+		stateStack.push(gameState);
+		setScreen(gameState);
+	}
 
-    public void popState() {
-	    stateStack.pop().dispose();
-    }
+	public void popState() {
+		stateStack.pop().dispose();
+	}
 
-    public void setState(GameState gameState) {
-	    stateStack.pop().dispose();
-	    pushState(gameState);
-    }
+	public void setState(GameState gameState) {
+		stateStack.pop().dispose();
+		pushState(gameState);
+	}
 }

@@ -77,9 +77,11 @@ public class BroadcastState extends GameState {
 
                 @Override
                 public void received(Connection connection, Object object) {
-                    Packet.Update update = Server.parseReceived(object);
-                    if (update.getType() == Packet.Update.PType.PING) {
-                        _app.getAgent().send(Packet.Update.newBuilder(update).setType(Packet.Update.PType.PING_REPLY).build());
+                    if (object instanceof byte[]) {
+                        Packet.Update update = Server.parseReceived(object);
+                        if (update.getType() == Packet.Update.PType.PING) {
+                            _app.getAgent().send(Packet.Update.newBuilder(update).setType(Packet.Update.PType.PING_REPLY).build());
+                        }
                     }
                 }
             });
