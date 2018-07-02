@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Connection;
@@ -15,13 +15,17 @@ import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.elements.ClientSnapshot;
+import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.elements.Snake;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+import com.tianyi.zhang.multiplayer.snake.helpers.RenderingUtils;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +38,11 @@ public class MainGameState extends GameState {
     private volatile long roundTripNs;
     private final AtomicBoolean gameInitialized;
     private volatile ClientSnapshot clientSnapshot;
-    private final ShapeRenderer renderer;
+
+    private final OrthographicCamera camera;
+    private final SpriteBatch batch;
+
+    private final Map<Grid.Block, Sprite> spriteMap;
 
     public MainGameState(App app, int id) {
         super(app);
@@ -219,31 +227,27 @@ public class MainGameState extends GameState {
         });
         _app.getAgent().send(Packet.Update.newBuilder().setType(Packet.Update.PType.PING).setTimestamp(Utils.getNanoTime()).build());
         Gdx.app.debug(TAG, "Main game loaded");
-        renderer = new ShapeRenderer();
+
+        float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
+        camera = new OrthographicCamera(Constants.HEIGHT * (w / h), Constants.HEIGHT);
+        camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
+        camera.update();
+
+        batch = new SpriteBatch();
+
+        Sprite playerSnakeBody = new Sprite(RenderingUtils.newTextureWithLinearFilter("player_snake_body.png"));
+        playerSnakeBody.setSize(Constants.BLOCK_LENGTH, Constants.BLOCK_LENGTH);
+        spriteMap = new HashMap<Grid.Block, Sprite>();
+        spriteMap.put(Grid.Block.PLAYER_SNAKE_BODY, playerSnakeBody);
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        RenderingUtils.clear();
 
         if (gameInitialized.get()) {
-            Snake[] snakes = clientSnapshot.getSnakes();
-
-            for (Snake snake : snakes) {
-                Gdx.app.debug(TAG, snake.toString());
-            }
-
-            renderer.setColor(Color.WHITE);
-            renderer.begin(ShapeRenderer.ShapeType.Filled);
-
-            for (int s = 0; s < snakes.length; ++s) {
-                List<Integer> coords = snakes[s].getCoordinates();
-                for (int c = 0; c < coords.size() / 2; ++c) {
-                    renderer.rect(coords.get(2 * c) * Constants.UNIT_WIDTH, coords.get(2 * c + 1) * Constants.UNIT_HEIGHT, Constants.UNIT_WIDTH, Constants.UNIT_HEIGHT);
-                }
-            }
-            renderer.end();
+            Grid grid = clientSnapshot.getGrid();
+            RenderingUtils.renderGrid(grid, camera, batch, spriteMap);
         }
     }
 
@@ -254,7 +258,9 @@ public class MainGameState extends GameState {
 
     @Override
     public void resize(int width, int height) {
-
+        camera.viewportWidth = Constants.HEIGHT * width/height;
+        camera.viewportHeight = Constants.HEIGHT;
+        camera.update();
     }
 
     @Override
@@ -274,6 +280,6 @@ public class MainGameState extends GameState {
 
     @Override
     public void dispose() {
-
+        batch.dispose();
     }
 }

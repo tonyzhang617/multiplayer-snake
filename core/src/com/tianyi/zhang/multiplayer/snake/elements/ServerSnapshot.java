@@ -164,6 +164,11 @@ public class ServerSnapshot extends Snapshot {
         return resultSnakes;
     }
 
+    @Override
+    public Grid getGrid() {
+        return new Grid(getSnakes(), serverId, new ArrayList<Integer>(), new ArrayList<Integer>());
+    }
+
     public Packet.Update buildPacket() {
         Packet.Update.Builder tmpPacket = lastPacket.get();
         synchronized (lock) {

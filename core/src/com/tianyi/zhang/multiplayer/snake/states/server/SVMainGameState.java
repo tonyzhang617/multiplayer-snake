@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Connection;
@@ -14,13 +14,16 @@ import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
-import com.tianyi.zhang.multiplayer.snake.elements.Snake;
+import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.elements.ServerSnapshot;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+import com.tianyi.zhang.multiplayer.snake.helpers.RenderingUtils;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,9 +32,11 @@ public class SVMainGameState extends GameState {
     private static final String TAG = SVMainGameState.class.getCanonicalName();
     private final ServerSnapshot serverSnapshot;
     private final ScheduledExecutorService executor;
-    private final long startTimestamp;
 
-    private final ShapeRenderer renderer;
+    private final OrthographicCamera camera;
+    private final SpriteBatch batch;
+
+    private final Map<Grid.Block, Sprite> spriteMap;
 
     /**
      *
@@ -164,8 +169,7 @@ public class SVMainGameState extends GameState {
 
         executor = Executors.newSingleThreadScheduledExecutor();
 
-        startTimestamp = Utils.getNanoTime();
-        serverSnapshot = new ServerSnapshot(startTimestamp, tmpIds);
+        serverSnapshot = new ServerSnapshot(Utils.getNanoTime(), tmpIds);
 
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -194,29 +198,26 @@ public class SVMainGameState extends GameState {
         });
 
         Gdx.app.debug(TAG, "Server main game loaded");
-        renderer = new ShapeRenderer();
+
+        float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
+        camera = new OrthographicCamera(Constants.HEIGHT * (w / h), Constants.HEIGHT);
+        camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
+        camera.update();
+
+        batch = new SpriteBatch();
+
+        Sprite playerSnakeBody = new Sprite(RenderingUtils.newTextureWithLinearFilter("player_snake_body.png"));
+        playerSnakeBody.setSize(Constants.BLOCK_LENGTH, Constants.BLOCK_LENGTH);
+        spriteMap = new HashMap<Grid.Block, Sprite>();
+        spriteMap.put(Grid.Block.PLAYER_SNAKE_BODY, playerSnakeBody);
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Grid grid = serverSnapshot.getGrid();
 
-        Snake[] snakes = serverSnapshot.getSnakes();
-        for (Snake snake : snakes) {
-            Gdx.app.debug(TAG, snake.toString());
-        }
-
-        renderer.setColor(Color.WHITE);
-        renderer.begin(ShapeRenderer.ShapeType.Filled);
-
-        for (int s = 0; s < snakes.length; ++s) {
-            List<Integer> coords = snakes[s].getCoordinates();
-            for (int c = 0; c < coords.size() / 2; ++c) {
-                renderer.rect(coords.get(2*c)*Constants.UNIT_WIDTH, coords.get(2*c+1)*Constants.UNIT_HEIGHT, Constants.UNIT_WIDTH, Constants.UNIT_HEIGHT);
-            }
-        }
-        renderer.end();
+        RenderingUtils.clear();
+        RenderingUtils.renderGrid(grid, camera, batch, spriteMap);
     }
 
     @Override
@@ -226,7 +227,9 @@ public class SVMainGameState extends GameState {
 
     @Override
     public void resize(int width, int height) {
-
+        camera.viewportWidth = Constants.HEIGHT * width/height;
+        camera.viewportHeight = Constants.HEIGHT;
+        camera.update();
     }
 
     @Override
@@ -246,6 +249,6 @@ public class SVMainGameState extends GameState {
 
     @Override
     public void dispose() {
-
+        batch.dispose();
     }
 }

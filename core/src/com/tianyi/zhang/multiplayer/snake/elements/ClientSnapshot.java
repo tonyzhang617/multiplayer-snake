@@ -172,4 +172,9 @@ public class ClientSnapshot extends Snapshot {
             return resultSnakes;
         }
     }
+
+    @Override
+    public Grid getGrid() {
+        return new Grid(getSnakes(), clientId, new ArrayList<Integer>(), new ArrayList<Integer>());
+    }
 }
