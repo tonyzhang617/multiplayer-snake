@@ -47,6 +47,28 @@ public class ClientSnapshot extends Snapshot {
         Gdx.app.debug(TAG, "startTimestamp: " + startTimestamp);
     }
 
+    public ClientSnapshot(int clientId, long packetDelay, Packet.Update initialUpdate) {
+        long currentNanoTime = Utils.getNanoTime();
+
+        this.clientId = clientId;
+        this.lock = new Object();
+        this.nextInputId = 1;
+        this.unackInputs = new LinkedList<Input>();
+        this.stateTime = 0;
+        this.serverUpdateVersion = new AtomicInteger(initialUpdate.getVersion());
+        this.nextRenderTime = new AtomicLong(0);
+        this.startTimestamp = currentNanoTime - packetDelay - initialUpdate.getTimestamp();
+
+        List<Packet.Update.PSnake> pSnakes = initialUpdate.getSnakesList();
+        List<Snake> snakes = new ArrayList<Snake>(pSnakes.size());
+        for (Packet.Update.PSnake pSnake : pSnakes) {
+            snakes.add(Snake.fromProtoSnake(pSnake));
+        }
+        this.snakes = new ArrayList<Snake>(snakes);
+
+        Gdx.app.debug(TAG, "startTimestamp: " + startTimestamp);
+    }
+
     /**
      *
      * @return true if a new frame should be rendered, false otherwise
@@ -130,6 +152,21 @@ public class ClientSnapshot extends Snapshot {
             inputs = unackInputs.toArray(inputs);
             return inputs;
         }
+    }
+
+    public Packet.Update buildPacket() {
+        Packet.Update.Builder builder = Packet.Update.newBuilder();
+        builder.setType(Packet.Update.PType.INPUT_UPDATE).setSnakeId(clientId);
+        synchronized (lock) {
+            if (unackInputs.size() == 0) {
+                return null;
+            }
+
+            for (com.tianyi.zhang.multiplayer.snake.elements.Input tmpInput : unackInputs) {
+                builder.addInputs(tmpInput.toProtoInput());
+            }
+        }
+        return builder.build();
     }
 
     @Override

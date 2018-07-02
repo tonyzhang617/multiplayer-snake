@@ -16,15 +16,12 @@ import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.elements.ClientSnapshot;
 import com.tianyi.zhang.multiplayer.snake.elements.Grid;
-import com.tianyi.zhang.multiplayer.snake.elements.Snake;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.RenderingUtils;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -185,15 +182,7 @@ public class MainGameState extends GameState {
                             roundTripNs = Utils.getNanoTime() - update.getTimestamp();
                             Gdx.app.debug(TAG, "roundTripNs: " + roundTripNs);
                         } else if (update.getType() == Packet.Update.PType.GAME_UPDATE) {
-                            long currentTime = Utils.getNanoTime();
-
-                            List<Packet.Update.PSnake> pSnakes = update.getSnakesList();
-                            List<Snake> snakes = new ArrayList<Snake>(pSnakes.size());
-                            for (Packet.Update.PSnake pSnake : pSnakes) {
-                                snakes.add(Snake.fromProtoSnake(pSnake));
-                            }
-
-                            clientSnapshot = new ClientSnapshot(clientId, currentTime - update.getTimestamp() - roundTripNs / 2, snakes);
+                            clientSnapshot = new ClientSnapshot(clientId, roundTripNs / 2, update);
 
                             executor.scheduleAtFixedRate(new Runnable() {
                                 @Override
@@ -202,14 +191,9 @@ public class MainGameState extends GameState {
                                         if (clientSnapshot.update()) {
                                             Gdx.graphics.requestRendering();
                                         }
-                                        com.tianyi.zhang.multiplayer.snake.elements.Input[] inputs = clientSnapshot.getNewInputs();
-                                        if (inputs.length > 0) {
-                                            Packet.Update.Builder builder = Packet.Update.newBuilder();
-                                            builder.setType(Packet.Update.PType.INPUT_UPDATE).setSnakeId(clientId);
-                                            for (com.tianyi.zhang.multiplayer.snake.elements.Input tmpInput : inputs) {
-                                                builder.addInputs(tmpInput.toProtoInput());
-                                            }
-                                            _app.getAgent().send(builder.build());
+                                        Packet.Update newUpdate = clientSnapshot.buildPacket();
+                                        if (newUpdate != null) {
+                                            _app.getAgent().send(newUpdate);
                                         }
                                     } catch (Exception e) {
                                         Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
