@@ -10,22 +10,25 @@ import java.util.List;
 public class Snake {
     public final int id;
     private final List<Integer> coords;
+    private int lastDirection;
     private Input lastInput;
     private boolean isDead;
 
-    public Snake(int id, int[] coords, Input input) {
+    public Snake(int id, int[] coords, int lastDirection, Input input) {
         this.id = id;
         this.coords = new LinkedList<Integer>();
         for (int i = 0; i < coords.length; ++i) {
             this.coords.add(new Integer(coords[i]));
         }
+        this.lastDirection = lastDirection;
         this.lastInput = input;
         this.isDead = false;
     }
 
-    public Snake(int id, List<Integer> coords, Input input) {
+    public Snake(int id, List<Integer> coords, int lastDirection, Input input) {
         this.id = id;
         this.coords = new LinkedList<Integer>(coords);
+        this.lastDirection = lastDirection;
         this.lastInput = input;
         this.isDead = false;
     }
@@ -54,23 +57,33 @@ public class Snake {
                     break;
             }
         }
+        this.lastDirection = input.direction;
         this.isDead = false;
     }
 
     public static Snake fromProtoSnake(Packet.Update.PSnake pSnake) {
         Input input = Input.fromProtoInput(pSnake.getLastInput());
-        return new Snake(pSnake.getId(), pSnake.getCoordsList(), input);
+        return new Snake(pSnake.getId(), pSnake.getCoordsList(), pSnake.getLastDirection(), input);
+    }
+
+    public Packet.Update.PSnake.Builder toProtoSnake() {
+        Packet.Update.PSnake.Builder snakeBuilder = Packet.Update.PSnake.newBuilder();
+        snakeBuilder.setId(id).setLastInput(lastInput.toProtoInput()).setLastDirection(lastDirection).addAllCoords(coords);
+        return snakeBuilder;
     }
 
     public Snake(Snake snake) {
         this.id = snake.id;
         this.coords = new LinkedList<Integer>(snake.coords);
         this.lastInput = snake.lastInput;
+        this.lastDirection = snake.lastDirection;
         this.isDead = snake.isDead;
     }
 
     public void forward() {
         if (!isDead) {
+            lastDirection = lastInput.direction;
+
             int size = coords.size();
             coords.remove(size - 1);
             coords.remove(size - 2);
@@ -103,7 +116,7 @@ public class Snake {
     }
 
     public void handleInput(Input input) {
-        if (!isDead && lastInput.isValidNewInput(input)) {
+        if (!isDead && lastInput.isValidNewInput(input) && lastDirection + input.direction != 5) {
             this.lastInput = input;
         }
     }

@@ -19,7 +19,6 @@ message Update {
         required int32 id = 1;
         required int32 direction = 2;
         required int64 timestamp = 3;
-        required int32 step = 4;
     }
 
     optional int32 snakeId = 2;
@@ -31,7 +30,8 @@ message Update {
     message PSnake {
         required int32 id = 1;
         repeated int32 coords = 2;
-        required PInput lastInput = 3;
+        required int32 lastDirection = 3;
+        required PInput lastInput = 4;
     }
 
     repeated PSnake snakes = 6;

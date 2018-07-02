@@ -69,8 +69,6 @@ public class ClientSnapshot extends Snapshot {
             Input lastInput = (unackInputs.isEmpty() ? snakes.get(clientId).getLastInput() : unackInputs.get(unackInputs.size()-1));
             if (lastInput.isValidNewInput(input)) {
                 unackInputs.add(input);
-            } else {
-                Gdx.app.debug(TAG, "Input " + input.id + " rejected");
             }
         }
     }

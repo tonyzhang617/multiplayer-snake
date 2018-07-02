@@ -207,7 +207,7 @@ public class MainGameState extends GameState {
                                             Packet.Update.Builder builder = Packet.Update.newBuilder();
                                             builder.setType(Packet.Update.PType.INPUT_UPDATE).setSnakeId(clientId);
                                             for (com.tianyi.zhang.multiplayer.snake.elements.Input tmpInput : inputs) {
-                                                builder.addInputs(Packet.Update.PInput.newBuilder().setId(tmpInput.id).setDirection(tmpInput.direction).setTimestamp(tmpInput.timestamp).setStep(tmpInput.step));
+                                                builder.addInputs(tmpInput.toProtoInput());
                                             }
                                             _app.getAgent().send(builder.build());
                                         }

@@ -180,12 +180,7 @@ public class ServerSnapshot extends Snapshot {
                 Packet.Update.Builder builder = Packet.Update.newBuilder();
                 builder.setType(Packet.Update.PType.GAME_UPDATE).setVersion(version);
                 for (Snake snake : getSnakes()) {
-                    Input input = snake.getLastInput();
-                    Packet.Update.PSnake.Builder pSnakeBuilder = Packet.Update.PSnake.newBuilder();
-                    Packet.Update.PInput.Builder pInputBuilder = Packet.Update.PInput.newBuilder();
-                    pInputBuilder.setId(input.id).setDirection(input.direction).setTimestamp(input.timestamp).setStep(input.step);
-                    pSnakeBuilder.setId(snake.id).addAllCoords(snake.getCoordinates()).setLastInput(pInputBuilder);
-                    builder.addSnakes(pSnakeBuilder);
+                    builder.addSnakes(snake.toProtoSnake());
                 }
                 long currentTime = Utils.getNanoTime() - startTimestamp;
                 builder.setTimestamp(currentTime);

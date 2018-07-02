@@ -26,13 +26,18 @@ public class Input implements Comparable<Input> {
         return new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp());
     }
 
+    public Packet.Update.PInput.Builder toProtoInput() {
+        Packet.Update.PInput.Builder inputBuilder = Packet.Update.PInput.newBuilder();
+        inputBuilder.setId(id).setDirection(direction).setTimestamp(timestamp);
+        return inputBuilder;
+    }
+
     public boolean isValidNewInput(Input newInput) {
         if (newInput == null) {
             return false;
         }
 
-        if (this.direction == newInput.direction || this.direction + newInput.direction == 5 || this.id >= newInput.id
-                || this.step > newInput.step || this.timestamp >= newInput.timestamp) {
+        if (this.direction == newInput.direction || this.id >= newInput.id || this.step > newInput.step || this.timestamp >= newInput.timestamp) {
             return false;
         }
 
