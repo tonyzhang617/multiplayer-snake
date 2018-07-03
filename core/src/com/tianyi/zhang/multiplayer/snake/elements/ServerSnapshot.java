@@ -33,7 +33,7 @@ public class ServerSnapshot extends Snapshot {
 
     public ServerSnapshot(long startTimestamp, int[] snakeIds) {
         this.startTimestamp = startTimestamp;
-        Gdx.app.debug(TAG, "startTimestamp: " + startTimestamp);
+        Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
         serverId = 0;
         lock = new Object();
         stateTime = 0;
@@ -110,7 +110,6 @@ public class ServerSnapshot extends Snapshot {
     public Snake[] getSnakes() {
         long currentTime = Utils.getNanoTime() - startTimestamp;
         int currentStep = (int) (currentTime / SNAKE_MOVE_EVERY_NS);
-        Gdx.app.debug(TAG, "Step " + currentStep);
         long updatedStateTime = (currentTime - LAG_TOLERANCE_NS) > stateTime ? currentTime - LAG_TOLERANCE_NS : stateTime;
         int updatedStateStep = (int) (updatedStateTime / SNAKE_MOVE_EVERY_NS);
         Snake[] resultSnakes;
@@ -172,8 +171,8 @@ public class ServerSnapshot extends Snapshot {
     public Packet.Update buildPacket() {
         Packet.Update.Builder tmpPacket = lastPacket.get();
         synchronized (lock) {
+            long currentTime = Utils.getNanoTime() - startTimestamp;
             if (tmpPacket != null && tmpPacket.getVersion() == version) {
-                long currentTime = Utils.getNanoTime() - startTimestamp;
                 tmpPacket.setTimestamp(currentTime);
                 return tmpPacket.build();
             } else {
@@ -182,9 +181,7 @@ public class ServerSnapshot extends Snapshot {
                 for (Snake snake : getSnakes()) {
                     builder.addSnakes(snake.toProtoSnake());
                 }
-                long currentTime = Utils.getNanoTime() - startTimestamp;
                 builder.setTimestamp(currentTime);
-                Gdx.app.debug(TAG, "New update sent to clients: " + builder.toString());
                 lastPacket.set(builder);
                 return builder.build();
             }

@@ -180,7 +180,6 @@ public class MainGameState extends GameState {
                     if (!gameInitialized.get()) {
                         if (update.getType() == Packet.Update.PType.PING_REPLY) {
                             roundTripNs = Utils.getNanoTime() - update.getTimestamp();
-                            Gdx.app.debug(TAG, "roundTripNs: " + roundTripNs);
                         } else if (update.getType() == Packet.Update.PType.GAME_UPDATE) {
                             clientSnapshot = new ClientSnapshot(clientId, roundTripNs / 2, update);
 

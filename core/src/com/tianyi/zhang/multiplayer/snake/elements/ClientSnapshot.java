@@ -44,7 +44,7 @@ public class ClientSnapshot extends Snapshot {
         this.startTimestamp = startTimestamp;
         this.snakes = new ArrayList<Snake>(snakes);
 
-        Gdx.app.debug(TAG, "startTimestamp: " + startTimestamp);
+        Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
     }
 
     public ClientSnapshot(int clientId, long packetDelay, Packet.Update initialUpdate) {
@@ -57,7 +57,10 @@ public class ClientSnapshot extends Snapshot {
         this.stateTime = 0;
         this.serverUpdateVersion = new AtomicInteger(initialUpdate.getVersion());
         this.nextRenderTime = new AtomicLong(0);
-        this.startTimestamp = currentNanoTime - packetDelay - initialUpdate.getTimestamp();
+        this.startTimestamp = currentNanoTime - initialUpdate.getTimestamp();
+
+        Gdx.app.debug(TAG, String.format("packetDelay: %,d", packetDelay));
+        Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
 
         List<Packet.Update.PSnake> pSnakes = initialUpdate.getSnakesList();
         List<Snake> snakes = new ArrayList<Snake>(pSnakes.size());
@@ -65,8 +68,6 @@ public class ClientSnapshot extends Snapshot {
             snakes.add(Snake.fromProtoSnake(pSnake));
         }
         this.snakes = new ArrayList<Snake>(snakes);
-
-        Gdx.app.debug(TAG, "startTimestamp: " + startTimestamp);
     }
 
     /**
