@@ -13,12 +13,12 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
-import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.elements.ClientSnapshot;
 import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.RenderingUtils;
-import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.util.HashMap;
@@ -174,8 +174,8 @@ public class MainGameState extends GameState {
             @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
-                    Packet.Update update = Client.parseReceived(object);
-                    if (!gameInitialized.get() && update.getType() == Packet.Update.PType.GAME_UPDATE) {
+                    ServerPacket.Update update = Client.parseServerUpdate(object);
+                    if (!gameInitialized.get()) {
                         clientSnapshot = new ClientSnapshot(clientId, update);
 
                         executor.scheduleAtFixedRate(new Runnable() {
@@ -185,9 +185,9 @@ public class MainGameState extends GameState {
                                     if (clientSnapshot.update()) {
                                         Gdx.graphics.requestRendering();
                                     }
-                                    Packet.Update newUpdate = clientSnapshot.buildPacket();
-                                    if (newUpdate != null) {
-                                        _app.getAgent().send(newUpdate);
+                                    ClientPacket.Message message = clientSnapshot.buildMessage();
+                                    if (message != null) {
+                                        _app.getAgent().send(message.toByteArray());
                                     }
                                 } catch (Exception e) {
                                     Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
@@ -196,7 +196,7 @@ public class MainGameState extends GameState {
                         }, 0, 30, TimeUnit.MILLISECONDS);
 
                         gameInitialized.set(true);
-                    } else if (gameInitialized.get() && update.getType() == Packet.Update.PType.GAME_UPDATE) {
+                    } else if (gameInitialized.get()) {
                         clientSnapshot.onServerUpdate(update);
                     }
                 }

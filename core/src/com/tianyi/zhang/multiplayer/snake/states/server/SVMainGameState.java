@@ -13,7 +13,6 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
-import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.elements.ServerSnapshot;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
@@ -178,7 +177,7 @@ public class SVMainGameState extends GameState {
                     if (serverSnapshot.update()) {
                         Gdx.graphics.requestRendering();
                     }
-                    _app.getAgent().send(serverSnapshot.buildPacket());
+                    _app.getAgent().send(serverSnapshot.buildPacket().toByteArray());
                 } catch (Exception e) {
                     Gdx.app.error(TAG, "Error encountered inside scheduled task: ", e);
                 }
@@ -189,10 +188,7 @@ public class SVMainGameState extends GameState {
             @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
-                    Packet.Update update = Server.parseReceived(object);
-                    if (update.getType() == Packet.Update.PType.INPUT_UPDATE) {
-                        serverSnapshot.onClientUpdate(Server.parseReceived(object));
-                    }
+                    serverSnapshot.onClientMessage(connection.getID(), Server.parseClientMessage(object));
                 }
             }
         });
