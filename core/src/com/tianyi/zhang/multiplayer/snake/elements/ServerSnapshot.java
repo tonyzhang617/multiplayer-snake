@@ -86,15 +86,18 @@ public class ServerSnapshot extends Snapshot {
     @Override
     public void onClientUpdate(Packet.Update update) {
         long currentTime = Utils.getNanoTime() - startTimestamp;
+        int id = update.getSnakeId();
 
         List<Packet.Update.PInput> newPInputs = update.getInputsList();
         List<Input> newInputs = new ArrayList<Input>(newPInputs.size());
         for (Packet.Update.PInput pInput : newPInputs) {
             if (currentTime - pInput.getTimestamp() <= LAG_TOLERANCE_NS) {
-                newInputs.add(new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp()));
+                newInputs.add(Input.fromProtoInput(pInput));
+            } else {
+                Gdx.app.debug(TAG, "Rejected input " + pInput.getId() + " from client " + id);
             }
         }
-        int id = update.getSnakeId();
+
         if (!newInputs.isEmpty()) {
             synchronized (lock) {
                 if (inputBuffers.get(id).addAll(newInputs)) {

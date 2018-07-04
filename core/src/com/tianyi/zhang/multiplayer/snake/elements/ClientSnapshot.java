@@ -47,7 +47,7 @@ public class ClientSnapshot extends Snapshot {
         Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
     }
 
-    public ClientSnapshot(int clientId, long packetDelay, Packet.Update initialUpdate) {
+    public ClientSnapshot(int clientId, Packet.Update initialUpdate) {
         long currentNanoTime = Utils.getNanoTime();
 
         this.clientId = clientId;
@@ -59,7 +59,6 @@ public class ClientSnapshot extends Snapshot {
         this.nextRenderTime = new AtomicLong(0);
         this.startTimestamp = currentNanoTime - initialUpdate.getTimestamp();
 
-        Gdx.app.debug(TAG, String.format("packetDelay: %,d", packetDelay));
         Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
 
         List<Packet.Update.PSnake> pSnakes = initialUpdate.getSnakesList();
