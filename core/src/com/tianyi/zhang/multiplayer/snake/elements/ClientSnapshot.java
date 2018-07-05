@@ -1,9 +1,10 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
 import com.badlogic.gdx.Gdx;
-import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,7 +19,7 @@ public class ClientSnapshot extends Snapshot {
     private final long startTimestamp;
     private final int clientId;
     private static final long SNAKE_MOVE_EVERY_NS = TimeUnit.MILLISECONDS.toNanos(Constants.MOVE_EVERY_MS);
-    private static final long UPDATE_AFTER_INACTIVE_NS = TimeUnit.MILLISECONDS.toNanos(Constants.UPDATE_AFTER_INACTIVE_MS);
+    private static final long LAG_TOLERANCE_NS = TimeUnit.MILLISECONDS.toNanos(Constants.LAG_TOLERANCE_MS);
 
     private final AtomicInteger serverUpdateVersion;
 
@@ -47,7 +48,7 @@ public class ClientSnapshot extends Snapshot {
         Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
     }
 
-    public ClientSnapshot(int clientId, Packet.Update initialUpdate) {
+    public ClientSnapshot(int clientId, ServerPacket.Update initialUpdate) {
         long currentNanoTime = Utils.getNanoTime();
 
         this.clientId = clientId;
@@ -61,9 +62,9 @@ public class ClientSnapshot extends Snapshot {
 
         Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
 
-        List<Packet.Update.PSnake> pSnakes = initialUpdate.getSnakesList();
+        List<ServerPacket.Update.PSnake> pSnakes = initialUpdate.getSnakesList();
         List<Snake> snakes = new ArrayList<Snake>(pSnakes.size());
-        for (Packet.Update.PSnake pSnake : pSnakes) {
+        for (ServerPacket.Update.PSnake pSnake : pSnakes) {
             snakes.add(Snake.fromProtoSnake(pSnake));
         }
         this.snakes = new ArrayList<Snake>(snakes);
@@ -96,50 +97,33 @@ public class ClientSnapshot extends Snapshot {
     }
 
     @Override
-    public void onServerUpdate(Packet.Update update) {
-        if (update.getType() == Packet.Update.PType.GAME_UPDATE) {
-            if (update.getVersion() > serverUpdateVersion.get()) {
-                Gdx.app.debug(TAG, "Server update version " + update.getVersion() + " received.");
-                Gdx.app.debug(TAG, update.toString());
-                serverUpdateVersion.set(update.getVersion());
-                synchronized (lock) {
-                    List<Packet.Update.PSnake> pSnakes = update.getSnakesList();
-                    for (int i = 0; i < pSnakes.size(); ++i) {
-                        Packet.Update.PSnake pSnake = pSnakes.get(i);
-                        Snake newSnake = Snake.fromProtoSnake(pSnake);
-                        snakes.set(newSnake.id, newSnake);
+    public void onServerUpdate(ServerPacket.Update update) {
+        if (update.getVersion() > serverUpdateVersion.get()) {
+            Gdx.app.debug(TAG, "Server update version " + update.getVersion() + " received.");
+            Gdx.app.debug(TAG, update.toString());
+            serverUpdateVersion.set(update.getVersion());
+            synchronized (lock) {
+                List<ServerPacket.Update.PSnake> pSnakes = update.getSnakesList();
+                for (int i = 0; i < pSnakes.size(); ++i) {
+                    ServerPacket.Update.PSnake pSnake = pSnakes.get(i);
+                    Snake newSnake = Snake.fromProtoSnake(pSnake);
+                    snakes.set(newSnake.id, newSnake);
 
-                        stateTime = update.getTimestamp();
+                    stateTime = update.getTimestamp();
 
-                        if (newSnake.id == clientId) {
-                            int lastAckInputId = newSnake.getLastInput().id;
-                            while (!unackInputs.isEmpty() && lastAckInputId <= unackInputs.get(0).id) {
-                                unackInputs.remove(0);
-                            }
+                    if (newSnake.id == clientId) {
+                        int lastAckInputId = newSnake.getLastInput().id;
+                        while (!unackInputs.isEmpty() && lastAckInputId <= unackInputs.get(0).id) {
+                            unackInputs.remove(0);
                         }
                     }
                 }
-            } else {
-                synchronized (lock) {
-                    long updatedStateTime;
-                    if (unackInputs.isEmpty()) {
-                        updatedStateTime = update.getTimestamp();
-                    } else {
-                        updatedStateTime = (unackInputs.get(0).timestamp < update.getTimestamp()) ? unackInputs.get(0).timestamp : update.getTimestamp();
-                    }
-                    int updatedStateStep = (int) (updatedStateTime / SNAKE_MOVE_EVERY_NS);
-
-                    int stateStep = (int) (stateTime / SNAKE_MOVE_EVERY_NS);
-                    int stepDiff = updatedStateStep - stateStep;
-
-                    if (stepDiff >= UPDATE_AFTER_INACTIVE_NS / SNAKE_MOVE_EVERY_NS) {
-                        for (int i = 0; i < stepDiff; ++i) {
-                            for (int j = 0; j < snakes.size(); ++j) {
-                                snakes.get(j).forward();
-                            }
-                        }
-
-                        stateTime = updatedStateTime;
+            }
+        } else {
+            synchronized (lock) {
+                if (!unackInputs.isEmpty()) {
+                    while (!unackInputs.isEmpty() && update.getTimestamp() - unackInputs.get(0).timestamp > LAG_TOLERANCE_NS * 2) {
+                        unackInputs.remove(0);
                     }
                 }
             }
@@ -154,9 +138,8 @@ public class ClientSnapshot extends Snapshot {
         }
     }
 
-    public Packet.Update buildPacket() {
-        Packet.Update.Builder builder = Packet.Update.newBuilder();
-        builder.setType(Packet.Update.PType.INPUT_UPDATE).setSnakeId(clientId);
+    public ClientPacket.Message buildMessage() {
+        ClientPacket.Message.Builder builder = ClientPacket.Message.newBuilder();
         synchronized (lock) {
             if (unackInputs.size() == 0) {
                 return null;

@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package messages;
+
+option java_package = "com.tianyi.zhang.multiplayer.snake.protobuf.generated";
+option java_outer_classname = "ClientPacket";
+
+message Message {
+    message PInput {
+        required int32 id = 1;
+        required int32 direction = 2;
+        required int64 timestamp = 3;
+    }
+
+    repeated PInput inputs = 3;
+}
