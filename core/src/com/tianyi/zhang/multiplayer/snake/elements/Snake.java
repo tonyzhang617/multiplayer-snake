@@ -1,7 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
-import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -61,14 +61,15 @@ public class Snake {
         this.isDead = false;
     }
 
-    public static Snake fromProtoSnake(Packet.Update.PSnake pSnake) {
-        Input input = Input.fromProtoInput(pSnake.getLastInput());
-        return new Snake(pSnake.getId(), pSnake.getCoordsList(), pSnake.getLastDirection(), input);
+    public static Snake fromProtoSnake(ServerPacket.Update.PSnake pSnake) {
+        Input input = new Input(pSnake.getInputDirection(), pSnake.getInputId(), pSnake.getInputTimestamp());
+        Snake snake = new Snake(pSnake.getId(), pSnake.getCoordsList(), pSnake.getLastDirection(), input);
+        return snake;
     }
 
-    public Packet.Update.PSnake.Builder toProtoSnake() {
-        Packet.Update.PSnake.Builder snakeBuilder = Packet.Update.PSnake.newBuilder();
-        snakeBuilder.setId(id).setLastInput(lastInput.toProtoInput()).setLastDirection(lastDirection).addAllCoords(coords);
+    public ServerPacket.Update.PSnake.Builder toProtoSnake() {
+        ServerPacket.Update.PSnake.Builder snakeBuilder = ServerPacket.Update.PSnake.newBuilder();
+        snakeBuilder.setId(id).setLastDirection(lastDirection).addAllCoords(coords).setInputId(lastInput.id).setInputDirection(lastInput.direction).setInputTimestamp(lastInput.timestamp);
         return snakeBuilder;
     }
 

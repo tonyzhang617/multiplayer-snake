@@ -13,12 +13,12 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
-import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.elements.ClientSnapshot;
 import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.RenderingUtils;
-import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.util.HashMap;
@@ -32,7 +32,6 @@ public class MainGameState extends GameState {
     private static final String TAG = MainGameState.class.getCanonicalName();
     private final ScheduledExecutorService executor;
     private final int clientId;
-    private volatile long roundTripNs;
     private final AtomicBoolean gameInitialized;
     private volatile ClientSnapshot clientSnapshot;
 
@@ -45,7 +44,6 @@ public class MainGameState extends GameState {
         super(app);
         clientId = id;
         clientSnapshot = null;
-        roundTripNs = 0;
         gameInitialized = new AtomicBoolean(false);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
@@ -176,40 +174,34 @@ public class MainGameState extends GameState {
             @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
-                    Packet.Update update = Client.parseReceived(object);
+                    ServerPacket.Update update = Client.parseServerUpdate(object);
                     if (!gameInitialized.get()) {
-                        if (update.getType() == Packet.Update.PType.PING_REPLY) {
-                            roundTripNs = Utils.getNanoTime() - update.getTimestamp();
-                            Gdx.app.debug(TAG, "roundTripNs: " + roundTripNs);
-                        } else if (update.getType() == Packet.Update.PType.GAME_UPDATE) {
-                            clientSnapshot = new ClientSnapshot(clientId, roundTripNs / 2, update);
+                        clientSnapshot = new ClientSnapshot(clientId, update);
 
-                            executor.scheduleAtFixedRate(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        if (clientSnapshot.update()) {
-                                            Gdx.graphics.requestRendering();
-                                        }
-                                        Packet.Update newUpdate = clientSnapshot.buildPacket();
-                                        if (newUpdate != null) {
-                                            _app.getAgent().send(newUpdate);
-                                        }
-                                    } catch (Exception e) {
-                                        Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
+                        executor.scheduleAtFixedRate(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    if (clientSnapshot.update()) {
+                                        Gdx.graphics.requestRendering();
                                     }
+                                    ClientPacket.Message message = clientSnapshot.buildMessage();
+                                    if (message != null) {
+                                        _app.getAgent().send(message.toByteArray());
+                                    }
+                                } catch (Exception e) {
+                                    Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
                                 }
-                            }, 0, 30, TimeUnit.MILLISECONDS);
+                            }
+                        }, 0, 30, TimeUnit.MILLISECONDS);
 
-                            gameInitialized.set(true);
-                        }
-                    } else {
+                        gameInitialized.set(true);
+                    } else if (gameInitialized.get()) {
                         clientSnapshot.onServerUpdate(update);
                     }
                 }
             }
         });
-        _app.getAgent().send(Packet.Update.newBuilder().setType(Packet.Update.PType.PING).setTimestamp(Utils.getNanoTime()).build());
         Gdx.app.debug(TAG, "Main game loaded");
 
         float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();

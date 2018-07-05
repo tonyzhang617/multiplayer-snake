@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+package messages;
+
+option java_package = "com.tianyi.zhang.multiplayer.snake.protobuf.generated";
+option java_outer_classname = "ServerPacket";
+
+message Update {
+    optional int32 version = 4;
+    optional int64 timestamp = 5;
+
+    message PSnake {
+        required int32 id = 1;
+        repeated int32 coords = 2;
+        required int32 lastDirection = 3;
+        required int32 inputId = 4;
+        required int32 inputDirection = 5;
+        required int64 inputTimestamp = 6;
+    }
+
+    repeated PSnake snakes = 6;
+}

@@ -2,7 +2,6 @@ package com.tianyi.zhang.multiplayer.snake.agents;
 
 import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
-import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 
 import java.io.IOException;
@@ -40,8 +39,8 @@ public class Server extends IAgent {
     }
 
     @Override
-    public void send(Packet.Update update) {
-        server.sendToAllUDP(update.toByteArray());
+    public void send(byte[] packet) {
+        server.sendToAllUDP(packet);
     }
 
     @Override

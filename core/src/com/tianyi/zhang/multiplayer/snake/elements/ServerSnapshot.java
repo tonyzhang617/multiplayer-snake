@@ -1,9 +1,10 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
 import com.badlogic.gdx.Gdx;
-import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +18,7 @@ public class ServerSnapshot extends Snapshot {
     private static final long SNAKE_MOVE_EVERY_NS = TimeUnit.MILLISECONDS.toNanos(Constants.MOVE_EVERY_MS);
     private static final long LAG_TOLERANCE_NS = TimeUnit.MILLISECONDS.toNanos(Constants.LAG_TOLERANCE_MS);
 
-    private final AtomicReference<Packet.Update.Builder> lastPacket;
+    private final AtomicReference<ServerPacket.Update.Builder> lastPacket;
 
     private final AtomicLong nextRenderTime;
 
@@ -33,7 +34,7 @@ public class ServerSnapshot extends Snapshot {
 
     public ServerSnapshot(long startTimestamp, int[] snakeIds) {
         this.startTimestamp = startTimestamp;
-        Gdx.app.debug(TAG, "startTimestamp: " + startTimestamp);
+        Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
         serverId = 0;
         lock = new Object();
         stateTime = 0;
@@ -55,7 +56,7 @@ public class ServerSnapshot extends Snapshot {
             }
             inputBuffers.add(new TreeSet<Input>(Input.comparator));
         }
-        lastPacket = new AtomicReference<Packet.Update.Builder>(null);
+        lastPacket = new AtomicReference<ServerPacket.Update.Builder>(null);
         nextRenderTime = new AtomicLong(0);
     }
 
@@ -84,22 +85,24 @@ public class ServerSnapshot extends Snapshot {
     }
 
     @Override
-    public void onClientUpdate(Packet.Update update) {
+    public void onClientMessage(int clientId, ClientPacket.Message message) {
         long currentTime = Utils.getNanoTime() - startTimestamp;
 
-        List<Packet.Update.PInput> newPInputs = update.getInputsList();
+        List<ClientPacket.Message.PInput> newPInputs = message.getInputsList();
         List<Input> newInputs = new ArrayList<Input>(newPInputs.size());
-        for (Packet.Update.PInput pInput : newPInputs) {
-            if (currentTime - pInput.getTimestamp() <= LAG_TOLERANCE_NS) {
-                newInputs.add(new Input(pInput.getDirection(), pInput.getId(), pInput.getTimestamp()));
+        for (ClientPacket.Message.PInput pInput : newPInputs) {
+            if (currentTime > pInput.getTimestamp() && currentTime - pInput.getTimestamp() <= LAG_TOLERANCE_NS) {
+                newInputs.add(Input.fromProtoInput(pInput));
+            } else {
+                Gdx.app.debug(TAG, "Rejected input " + pInput.getId() + " from client " + clientId);
             }
         }
-        int id = update.getSnakeId();
+
         if (!newInputs.isEmpty()) {
             synchronized (lock) {
-                if (inputBuffers.get(id).addAll(newInputs)) {
-                    Gdx.app.debug(TAG, "New update received from client " + id);
-                    Gdx.app.debug(TAG, update.toString());
+                if (inputBuffers.get(clientId).addAll(newInputs)) {
+                    Gdx.app.debug(TAG, "New update received from client " + clientId);
+                    Gdx.app.debug(TAG, message.toString());
                     version += 1;
                 }
             }
@@ -110,7 +113,6 @@ public class ServerSnapshot extends Snapshot {
     public Snake[] getSnakes() {
         long currentTime = Utils.getNanoTime() - startTimestamp;
         int currentStep = (int) (currentTime / SNAKE_MOVE_EVERY_NS);
-        Gdx.app.debug(TAG, "Step " + currentStep);
         long updatedStateTime = (currentTime - LAG_TOLERANCE_NS) > stateTime ? currentTime - LAG_TOLERANCE_NS : stateTime;
         int updatedStateStep = (int) (updatedStateTime / SNAKE_MOVE_EVERY_NS);
         Snake[] resultSnakes;
@@ -169,22 +171,19 @@ public class ServerSnapshot extends Snapshot {
         return new Grid(getSnakes(), serverId, new ArrayList<Integer>(), new ArrayList<Integer>());
     }
 
-    public Packet.Update buildPacket() {
-        Packet.Update.Builder tmpPacket = lastPacket.get();
+    public ServerPacket.Update buildPacket() {
+        ServerPacket.Update.Builder tmpPacket = lastPacket.get();
         synchronized (lock) {
+            long currentTime = Utils.getNanoTime() - startTimestamp;
             if (tmpPacket != null && tmpPacket.getVersion() == version) {
-                long currentTime = Utils.getNanoTime() - startTimestamp;
                 tmpPacket.setTimestamp(currentTime);
                 return tmpPacket.build();
             } else {
-                Packet.Update.Builder builder = Packet.Update.newBuilder();
-                builder.setType(Packet.Update.PType.GAME_UPDATE).setVersion(version);
+                ServerPacket.Update.Builder builder = ServerPacket.Update.newBuilder();
+                builder.setVersion(version).setTimestamp(currentTime);
                 for (Snake snake : getSnakes()) {
                     builder.addSnakes(snake.toProtoSnake());
                 }
-                long currentTime = Utils.getNanoTime() - startTimestamp;
-                builder.setTimestamp(currentTime);
-                Gdx.app.debug(TAG, "New update sent to clients: " + builder.toString());
                 lastPacket.set(builder);
                 return builder.build();
             }

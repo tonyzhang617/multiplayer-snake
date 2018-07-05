@@ -1,6 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
-import com.tianyi.zhang.multiplayer.snake.agents.messages.Packet;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 
 public abstract class Snapshot {
     public abstract boolean update();
@@ -13,11 +14,11 @@ public abstract class Snapshot {
 
     }
 
-    public void onClientUpdate(Packet.Update update) {
+    public void onClientMessage(int clientId, ClientPacket.Message message) {
 
     }
 
-    public void onServerUpdate(Packet.Update update) {
+    public void onServerUpdate(ServerPacket.Update update) {
 
     }
 
