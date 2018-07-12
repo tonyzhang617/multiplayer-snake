@@ -5,27 +5,26 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
+import com.tianyi.zhang.multiplayer.snake.elements.GameRenderer;
 import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.elements.ServerSnapshot;
+import com.tianyi.zhang.multiplayer.snake.elements.Snake;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
-import com.tianyi.zhang.multiplayer.snake.helpers.RenderingUtils;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
+import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SVMainGameState extends GameState {
     private static final String TAG = SVMainGameState.class.getCanonicalName();
@@ -33,9 +32,8 @@ public class SVMainGameState extends GameState {
     private final ScheduledExecutorService executor;
 
     private final OrthographicCamera camera;
-    private final SpriteBatch batch;
 
-    private final Map<Grid.Block, Sprite> spriteMap;
+    private final AtomicReference<Grid> cachedGrid;
 
     /**
      *
@@ -169,20 +167,28 @@ public class SVMainGameState extends GameState {
         executor = Executors.newSingleThreadScheduledExecutor();
 
         serverSnapshot = new ServerSnapshot(Utils.getNanoTime(), tmpIds);
+        cachedGrid = new AtomicReference<Grid>(serverSnapshot.getGrid());
 
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
-                    if (serverSnapshot.update()) {
-                        Gdx.graphics.requestRendering();
+                    Grid grid = serverSnapshot.getGrid();
+                    cachedGrid.set(grid);
+                    ServerPacket.Update.Builder builder = ServerPacket.Update.newBuilder();
+                    builder.setVersion(serverSnapshot.getVersion()).setTimestamp(grid.timestamp);
+                    for (Snake snake : grid.snakes) {
+                        builder.addSnakes(snake.toProtoSnake());
                     }
-                    _app.getAgent().send(serverSnapshot.buildPacket().toByteArray());
+                    builder.addAllFoodLocations(grid.foods.getLocations());
+                    _app.getAgent().send(builder.build().toByteArray());
+
+                    Gdx.graphics.requestRendering();
                 } catch (Exception e) {
                     Gdx.app.error(TAG, "Error encountered inside scheduled task: ", e);
                 }
             }
-        }, 0, 100, TimeUnit.MILLISECONDS);
+        }, 0, Constants.MOVE_EVERY_MS / 2, TimeUnit.MILLISECONDS);
 
         _app.getAgent().setListener(new Listener() {
             @Override
@@ -199,21 +205,12 @@ public class SVMainGameState extends GameState {
         camera = new OrthographicCamera(Constants.HEIGHT * (w / h), Constants.HEIGHT);
         camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
         camera.update();
-
-        batch = new SpriteBatch();
-
-        Sprite playerSnakeBody = new Sprite(RenderingUtils.newTextureWithLinearFilter("player_snake_body.png"));
-        playerSnakeBody.setSize(Constants.BLOCK_LENGTH, Constants.BLOCK_LENGTH);
-        spriteMap = new HashMap<Grid.Block, Sprite>();
-        spriteMap.put(Grid.Block.PLAYER_SNAKE_BODY, playerSnakeBody);
     }
 
     @Override
     public void render(float delta) {
-        Grid grid = serverSnapshot.getGrid();
-
-        RenderingUtils.clear();
-        RenderingUtils.renderGrid(grid, camera, batch, spriteMap);
+        GameRenderer.INSTANCE.clear();
+        GameRenderer.INSTANCE.render(cachedGrid.get(), camera);
     }
 
     @Override
@@ -245,6 +242,6 @@ public class SVMainGameState extends GameState {
 
     @Override
     public void dispose() {
-        batch.dispose();
+        executor.shutdown();
     }
 }

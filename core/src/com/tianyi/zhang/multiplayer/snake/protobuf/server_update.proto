@@ -6,8 +6,8 @@ option java_package = "com.tianyi.zhang.multiplayer.snake.protobuf.generated";
 option java_outer_classname = "ServerPacket";
 
 message Update {
-    optional int32 version = 4;
-    optional int64 timestamp = 5;
+    optional int32 version = 1;
+    optional int64 timestamp = 2;
 
     message PSnake {
         required int32 id = 1;
@@ -18,5 +18,7 @@ message Update {
         required int64 inputTimestamp = 6;
     }
 
-    repeated PSnake snakes = 6;
+    repeated PSnake snakes = 3;
+
+    repeated int32 foodLocations = 4;
 }

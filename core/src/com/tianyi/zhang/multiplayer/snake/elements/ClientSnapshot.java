@@ -30,23 +30,10 @@ public class ClientSnapshot extends Snapshot {
      * Makes up the last game step, guarded by stateLock
      */
     private final List<Snake> snakes;
+    private final Foods foods;
     private long stateTime;
     private int nextInputId;
     private final List<Input> unackInputs;
-
-    public ClientSnapshot(int clientId, long startTimestamp, List<Snake> snakes) {
-        this.clientId = clientId;
-        this.lock = new Object();
-        this.nextInputId = 1;
-        this.unackInputs = new LinkedList<Input>();
-        this.stateTime = 0;
-        this.serverUpdateVersion = new AtomicInteger(0);
-        this.nextRenderTime = new AtomicLong(0);
-        this.startTimestamp = startTimestamp;
-        this.snakes = new ArrayList<Snake>(snakes);
-
-        Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
-    }
 
     public ClientSnapshot(int clientId, ServerPacket.Update initialUpdate) {
         long currentNanoTime = Utils.getNanoTime();
@@ -68,6 +55,8 @@ public class ClientSnapshot extends Snapshot {
             snakes.add(Snake.fromProtoSnake(pSnake));
         }
         this.snakes = new ArrayList<Snake>(snakes);
+        this.foods = new Foods();
+        this.foods.setLocations(initialUpdate.getFoodLocationsList());
     }
 
     /**
@@ -118,6 +107,9 @@ public class ClientSnapshot extends Snapshot {
                         }
                     }
                 }
+
+                List<Integer> foodLocations = update.getFoodLocationsList();
+                foods.setLocations(foodLocations);
             }
         } else {
             synchronized (lock) {
@@ -127,14 +119,6 @@ public class ClientSnapshot extends Snapshot {
                     }
                 }
             }
-        }
-    }
-
-    public Input[] getNewInputs() {
-        synchronized (lock) {
-            Input[] inputs = new Input[unackInputs.size()];
-            inputs = unackInputs.toArray(inputs);
-            return inputs;
         }
     }
 
@@ -153,15 +137,18 @@ public class ClientSnapshot extends Snapshot {
     }
 
     @Override
-    public Snake[] getSnakes() {
+    public Grid getGrid() {
         long currentTime = Utils.getNanoTime() - startTimestamp;
         int currentStep = (int) (currentTime / SNAKE_MOVE_EVERY_NS);
 
+        List<Snake> resultSnakes;
+        Foods resultFoods;
         synchronized (lock) {
-            Snake[] resultSnakes = new Snake[snakes.size()];
-            for (int i = 0; i < resultSnakes.length; ++i) {
-                resultSnakes[i] = new Snake(snakes.get(i));
+            resultSnakes = new ArrayList<Snake>(snakes.size());
+            for (int i = 0; i < snakes.size(); ++i) {
+                resultSnakes.add(new Snake(snakes.get(i)));
             }
+            resultFoods = new Foods(foods);
 
             int stateStep = (int) (stateTime / SNAKE_MOVE_EVERY_NS);
             int stepDiff = currentStep - stateStep;
@@ -169,30 +156,24 @@ public class ClientSnapshot extends Snapshot {
             int inputIndex = 0;
             for (int i = 0; i <= stepDiff; ++i) {
                 long upper = (i == stepDiff ? currentTime : SNAKE_MOVE_EVERY_NS * (stateStep + i + 1));
-                for (int j = 0; j < resultSnakes.length; ++j) {
+                for (int j = 0; j < resultSnakes.size(); ++j) {
+                    Snake currSnake = resultSnakes.get(j);
                     if (j == clientId) {
-                        // Apply inputs
                         Input tmpInput;
                         while (unackInputs.size() > inputIndex && (tmpInput = unackInputs.get(inputIndex)).timestamp < upper) {
-                            resultSnakes[j].handleInput(tmpInput);
+                            currSnake.handleInput(tmpInput);
                             inputIndex += 1;
                         }
                     }
                     if (i != stepDiff) {
-                        // Move snakes forward
-                        resultSnakes[j].forward();
+                        currSnake.forward();
+                        resultFoods.consumedBy(currSnake);
                     }
                 }
             }
 
             nextRenderTime.set(SNAKE_MOVE_EVERY_NS * (currentStep + 1));
-
-            return resultSnakes;
         }
-    }
-
-    @Override
-    public Grid getGrid() {
-        return new Grid(getSnakes(), clientId, new ArrayList<Integer>(), new ArrayList<Integer>());
+        return new Grid(Utils.getNanoTime(), resultSnakes, clientId, resultFoods);
     }
 }
