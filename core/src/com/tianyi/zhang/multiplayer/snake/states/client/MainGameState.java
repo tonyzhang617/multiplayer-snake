@@ -5,8 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.kryonet.Connection;
@@ -14,15 +12,13 @@ import com.esotericsoftware.kryonet.Listener;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.elements.ClientSnapshot;
+import com.tianyi.zhang.multiplayer.snake.elements.GameRenderer;
 import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
-import com.tianyi.zhang.multiplayer.snake.helpers.RenderingUtils;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -36,9 +32,6 @@ public class MainGameState extends GameState {
     private volatile ClientSnapshot clientSnapshot;
 
     private final OrthographicCamera camera;
-    private final SpriteBatch batch;
-
-    private final Map<Grid.Block, Sprite> spriteMap;
 
     public MainGameState(App app, int id) {
         super(app);
@@ -167,7 +160,7 @@ public class MainGameState extends GameState {
         });
         Gdx.input.setInputProcessor(inputMultiplexer);
 
-        executor = Executors.newScheduledThreadPool(2);
+        executor = Executors.newSingleThreadScheduledExecutor();
 
         Gdx.graphics.setContinuousRendering(false);
         _app.getAgent().setListener(new Listener() {
@@ -208,22 +201,15 @@ public class MainGameState extends GameState {
         camera = new OrthographicCamera(Constants.HEIGHT * (w / h), Constants.HEIGHT);
         camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
         camera.update();
-
-        batch = new SpriteBatch();
-
-        Sprite playerSnakeBody = new Sprite(RenderingUtils.newTextureWithLinearFilter("player_snake_body.png"));
-        playerSnakeBody.setSize(Constants.BLOCK_LENGTH, Constants.BLOCK_LENGTH);
-        spriteMap = new HashMap<Grid.Block, Sprite>();
-        spriteMap.put(Grid.Block.PLAYER_SNAKE_BODY, playerSnakeBody);
     }
 
     @Override
     public void render(float delta) {
-        RenderingUtils.clear();
+        GameRenderer.INSTANCE.clear();
 
         if (gameInitialized.get()) {
             Grid grid = clientSnapshot.getGrid();
-            RenderingUtils.renderGrid(grid, camera, batch, spriteMap);
+            GameRenderer.INSTANCE.render(grid, camera);
         }
     }
 
@@ -256,6 +242,6 @@ public class MainGameState extends GameState {
 
     @Override
     public void dispose() {
-        batch.dispose();
+        executor.shutdown();
     }
 }

@@ -8,7 +8,6 @@ import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ServerSnapshot extends Snapshot {
@@ -20,13 +19,12 @@ public class ServerSnapshot extends Snapshot {
 
     private final AtomicReference<ServerPacket.Update.Builder> lastPacket;
 
-    private final AtomicLong nextRenderTime;
-
     private final Object lock;
     /**
      * Makes up the last game step, guarded by lock
      */
     private final List<Snake> snakes;
+    private final Foods foods;
     private final List<SortedSet<Input>> inputBuffers;
     private long stateTime;
     private int nextInputId;
@@ -42,6 +40,7 @@ public class ServerSnapshot extends Snapshot {
         version = 0;
         int arraySize = snakeIds[snakeIds.length - 1] + 1;
         snakes = new ArrayList<Snake>(arraySize);
+        foods = new Foods();
         inputBuffers = new ArrayList<SortedSet<Input>>(arraySize);
 
         int interval = (Constants.HEIGHT - 2 * Constants.INITIAL_SNAKE_LENGTH) / (arraySize - 1);
@@ -56,18 +55,13 @@ public class ServerSnapshot extends Snapshot {
             }
             inputBuffers.add(new TreeSet<Input>(Input.comparator));
         }
+        foods.generate(snakes);
         lastPacket = new AtomicReference<ServerPacket.Update.Builder>(null);
-        nextRenderTime = new AtomicLong(0);
     }
 
     @Override
     public boolean update() {
-        long currentTime = Utils.getNanoTime() - startTimestamp;
-        if (currentTime >= nextRenderTime.get()) {
-            return true;
-        } else {
-            return false;
-        }
+        return true;
     }
 
     @Override
@@ -109,84 +103,75 @@ public class ServerSnapshot extends Snapshot {
         }
     }
 
+    public int getVersion() {
+        synchronized (lock) {
+            return version;
+        }
+    }
+
     @Override
-    public Snake[] getSnakes() {
+    public Grid getGrid() {
         long currentTime = Utils.getNanoTime() - startTimestamp;
         int currentStep = (int) (currentTime / SNAKE_MOVE_EVERY_NS);
         long updatedStateTime = (currentTime - LAG_TOLERANCE_NS) > stateTime ? currentTime - LAG_TOLERANCE_NS : stateTime;
         int updatedStateStep = (int) (updatedStateTime / SNAKE_MOVE_EVERY_NS);
-        Snake[] resultSnakes;
+        List<Snake> resultSnakes;
+        Foods resultFoods;
 
         synchronized (lock) {
             int stateStep = (int) (stateTime / SNAKE_MOVE_EVERY_NS);
             int stepDiff = updatedStateStep - stateStep;
+            // Update the game state
             for (int i = 0; i <= stepDiff; ++i) {
                 for (int j = 0; j < snakes.size(); ++j) {
-                    // apply and remove inputs
+                    Snake currSnake = snakes.get(j);
                     Input tmpInput;
                     long upper = (i == stepDiff ? updatedStateTime : SNAKE_MOVE_EVERY_NS * (stateStep + i + 1));
                     while (!inputBuffers.get(j).isEmpty() && (tmpInput = inputBuffers.get(j).first()).timestamp < upper) {
-                        snakes.get(j).handleInput(tmpInput);
+                        currSnake.handleInput(tmpInput);
                         inputBuffers.get(j).remove(tmpInput);
                     }
                     if (i != stepDiff) {
-                        // move forward
-                        snakes.get(j).forward();
+                        currSnake.forward();
+                        foods.consumedBy(currSnake);
                     }
                 }
             }
 
-            resultSnakes = new Snake[snakes.size()];
-            for (int i = 0; i < snakes.size(); ++i) {
-                resultSnakes[i] = new Snake(snakes.get(i));
+            if (foods.shouldGenerate()) {
+                foods.generate(snakes);
+                version += 1;
             }
+
+            // Make a copy of the game state
+            resultSnakes = new ArrayList<Snake>(snakes.size());
+            for (int i = 0; i < snakes.size(); ++i) {
+                resultSnakes.add(new Snake(snakes.get(i)));
+            }
+            resultFoods = new Foods(foods);
 
             stepDiff = currentStep - updatedStateStep;
             Queue<Input>[] inputQueues = new Queue[inputBuffers.size()];
             for (int i = 0; i < inputQueues.length; ++i) {
                 inputQueues[i] = new ArrayDeque<Input>(inputBuffers.get(i));
             }
+            // Update the copied game state
             for (int i = 0; i <= stepDiff; ++i) {
-                for (int j = 0; j < resultSnakes.length; ++j) {
-                    // only apply inputs
+                for (int j = 0; j < resultSnakes.size(); ++j) {
+                    Snake currSnake = resultSnakes.get(j);
                     long upper = (i == stepDiff ? currentTime : SNAKE_MOVE_EVERY_NS * (updatedStateStep + i + 1));
                     while (!inputQueues[j].isEmpty() && inputQueues[j].peek().timestamp < upper) {
-                        resultSnakes[j].handleInput(inputQueues[j].poll());
+                        currSnake.handleInput(inputQueues[j].poll());
                     }
                     if (i != stepDiff) {
-                        // move forward
-                        resultSnakes[j].forward();
+                        currSnake.forward();
+                        resultFoods.consumedBy(currSnake);
                     }
                 }
             }
             stateTime = updatedStateTime;
         }
 
-        nextRenderTime.set((currentStep + 1) * SNAKE_MOVE_EVERY_NS);
-        return resultSnakes;
-    }
-
-    @Override
-    public Grid getGrid() {
-        return new Grid(getSnakes(), serverId, new ArrayList<Integer>(), new ArrayList<Integer>());
-    }
-
-    public ServerPacket.Update buildPacket() {
-        ServerPacket.Update.Builder tmpPacket = lastPacket.get();
-        synchronized (lock) {
-            long currentTime = Utils.getNanoTime() - startTimestamp;
-            if (tmpPacket != null && tmpPacket.getVersion() == version) {
-                tmpPacket.setTimestamp(currentTime);
-                return tmpPacket.build();
-            } else {
-                ServerPacket.Update.Builder builder = ServerPacket.Update.newBuilder();
-                builder.setVersion(version).setTimestamp(currentTime);
-                for (Snake snake : getSnakes()) {
-                    builder.addSnakes(snake.toProtoSnake());
-                }
-                lastPacket.set(builder);
-                return builder.build();
-            }
-        }
+        return new Grid(currentTime, resultSnakes, serverId, resultFoods);
     }
 }

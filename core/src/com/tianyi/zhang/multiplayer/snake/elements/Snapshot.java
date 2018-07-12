@@ -22,7 +22,5 @@ public abstract class Snapshot {
 
     }
 
-    public abstract Snake[] getSnakes();
-
     public abstract Grid getGrid();
 }

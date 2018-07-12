@@ -108,6 +108,22 @@ public class Snake {
         }
     }
 
+    public void grow() {
+        if (!isDead) {
+            int size = coords.size();
+            coords.add(coords.get(size - 2));
+            coords.add(coords.get(size - 1));
+        }
+    }
+
+    public int getHeadX() {
+        return coords.get(0);
+    }
+
+    public int getHeadY() {
+        return coords.get(1);
+    }
+
     public List<Integer> getCoordinates() {
         return Collections.unmodifiableList(coords);
     }
