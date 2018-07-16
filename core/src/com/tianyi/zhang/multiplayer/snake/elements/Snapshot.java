@@ -1,5 +1,6 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
+import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
@@ -49,7 +50,14 @@ public abstract class Snapshot {
         }
         for (int i = 0; i < snakes.size(); ++i) {
             if (!snakes.get(i).isDead()) {
-                Integer headPosition = Utils.positionFromXy(snakes.get(i).getHeadX(), snakes.get(i).getHeadY());
+                int headX = snakes.get(i).getHeadX(), headY = snakes.get(i).getHeadY();
+                if (headX <= 0 || headX >= Constants.WIDTH || headY <= 0 || headY >= Constants.HEIGHT) {
+                    snakes.get(i).die();
+                    result = true;
+                    continue;
+                }
+
+                Integer headPosition = Utils.positionFromXy(headX, headY);
                 Integer count = positions.get(headPosition);
                 if (count > 1) {
                     snakes.get(i).die();

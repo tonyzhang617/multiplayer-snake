@@ -5,10 +5,10 @@ import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 
 import java.util.*;
 
-public class Foods {
-    public static final int WIDTH = Constants.WIDTH;
-    public static final int HEIGHT = Constants.HEIGHT;
+import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.WIDTH;
+import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.HEIGHT;
 
+public class Foods {
     private final SortedSet<Integer> locations;
     private final Random random;
 
@@ -44,6 +44,14 @@ public class Foods {
 
     public void generate(List<Snake> snakes) {
         List<Integer> exclude = new LinkedList<Integer>();
+        for (int i = 0; i < Constants.WIDTH; ++i) {
+            exclude.add(Utils.positionFromXy(i, 0));
+            exclude.add(Utils.positionFromXy(i, Constants.HEIGHT - 1));
+        }
+        for (int i = 1; i < Constants.HEIGHT - 1; ++i) {
+            exclude.add(Utils.positionFromXy(0, i));
+            exclude.add(Utils.positionFromXy(Constants.WIDTH - 1, i));
+        }
         for (Snake s : snakes) {
             List<Integer> coords = s.getCoordinates();
             for (int i = 0; i < coords.size(); i += 2) {

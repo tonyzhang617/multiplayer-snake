@@ -1,14 +1,12 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
-import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class Grid {
-    public static final int WIDTH = Constants.WIDTH;
-    public static final int HEIGHT = Constants.HEIGHT;
+import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.WIDTH;
+import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.HEIGHT;
 
+public class Grid {
     public final long timestamp;
     public final List<Snake> snakes;
     public final Foods foods;
@@ -27,8 +25,18 @@ public class Grid {
         blocks = new ArrayList<List<Block>>(HEIGHT);
         for (int i = 0; i < HEIGHT; ++i) {
             blocks.add(new ArrayList<Block>(WIDTH));
-            for (int j = 0; j < WIDTH; ++j) {
-                blocks.get(i).add(Block.GROUND);
+            if (i == 0 || i == HEIGHT - 1) {
+                for (int j = 0; j < WIDTH; ++j) {
+                    blocks.get(i).add(Block.CRATE);
+                }
+            } else {
+                for (int j = 0; j < WIDTH; ++j) {
+                    if (j == 0 || j == WIDTH - 1) {
+                        blocks.get(i).add(Block.CRATE);
+                    } else {
+                        blocks.get(i).add(Block.GROUND);
+                    }
+                }
             }
         }
 

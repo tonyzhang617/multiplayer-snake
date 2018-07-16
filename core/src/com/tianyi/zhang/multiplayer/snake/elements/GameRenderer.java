@@ -26,12 +26,14 @@ public enum GameRenderer {
         Sprite snakeBody = new Sprite(newTextureWithLinearFilter("snake_body.png"));
         Sprite food = new Sprite(newTextureWithLinearFilter("cake.png"));
         Sprite ground = new Sprite(newTextureWithLinearFilter("ground.png"));
+        Sprite crate = new Sprite(newTextureWithLinearFilter("wooden_crate.png"));
 
         spriteMap = new HashMap<Grid.Block, Sprite>();
         spriteMap.put(PLAYER_SNAKE_BODY, playerSnakeBody);
         spriteMap.put(SNAKE_BODY, snakeBody);
         spriteMap.put(FOOD, food);
         spriteMap.put(GROUND, ground);
+        spriteMap.put(CRATE, crate);
 
         batch = new SpriteBatch();
     }
@@ -53,8 +55,8 @@ public enum GameRenderer {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        for (int y = Grid.HEIGHT - 1; y >= 0; --y) {
-            for (int x = 0; x < Grid.WIDTH; ++x) {
+        for (int y = Constants.HEIGHT - 1; y >= 0; --y) {
+            for (int x = 0; x < Constants.WIDTH; ++x) {
                 switch (grid.getBlockByCoordinate(x, y)) {
                     case PLAYER_SNAKE_BODY:
                         batch.draw(spriteMap.get(PLAYER_SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
@@ -68,6 +70,9 @@ public enum GameRenderer {
                         break;
                     case GROUND:
                         batch.draw(spriteMap.get(GROUND), x, y, BLOCK_LENGTH, BLOCK_LENGTH);
+                        break;
+                    case CRATE:
+                        batch.draw(spriteMap.get(CRATE), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
                         break;
                 }
             }
