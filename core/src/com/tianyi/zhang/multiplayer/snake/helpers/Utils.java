@@ -1,5 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.helpers;
 
+import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.WIDTH;
+
 public class Utils {
     private static final Object timeLock = new Object();
 
@@ -11,5 +13,17 @@ public class Utils {
         synchronized (timeLock) {
             return System.nanoTime();
         }
+    }
+
+    public static Integer positionFromXy(Integer x, Integer y) {
+        return y*WIDTH + x;
+    }
+
+    public static Integer xFromPosition(Integer position) {
+        return position - yFromPosition(position) * WIDTH;
+    }
+
+    public static Integer yFromPosition(Integer position) {
+        return position / WIDTH;
     }
 }

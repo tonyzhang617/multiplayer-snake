@@ -134,6 +134,9 @@ public class ServerSnapshot extends Snapshot {
                     if (i != stepDiff) {
                         currSnake.forward();
                         foods.consumedBy(currSnake);
+                        if (collisionDetection(snakes)) {
+                            version += 1;
+                        }
                     }
                 }
             }

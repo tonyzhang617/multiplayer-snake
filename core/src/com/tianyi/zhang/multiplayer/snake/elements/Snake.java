@@ -25,12 +25,12 @@ public class Snake {
         this.isDead = false;
     }
 
-    public Snake(int id, List<Integer> coords, int lastDirection, Input input) {
+    public Snake(int id, List<Integer> coords, int lastDirection, Input input, boolean isDead) {
         this.id = id;
         this.coords = new LinkedList<Integer>(coords);
         this.lastDirection = lastDirection;
         this.lastInput = input;
-        this.isDead = false;
+        this.isDead = isDead;
     }
 
     public Snake(int id, int headX, int headY, int length, Input input) {
@@ -63,13 +63,13 @@ public class Snake {
 
     public static Snake fromProtoSnake(ServerPacket.Update.PSnake pSnake) {
         Input input = new Input(pSnake.getInputDirection(), pSnake.getInputId(), pSnake.getInputTimestamp());
-        Snake snake = new Snake(pSnake.getId(), pSnake.getCoordsList(), pSnake.getLastDirection(), input);
+        Snake snake = new Snake(pSnake.getId(), pSnake.getCoordsList(), pSnake.getLastDirection(), input, pSnake.getIsDead());
         return snake;
     }
 
     public ServerPacket.Update.PSnake.Builder toProtoSnake() {
         ServerPacket.Update.PSnake.Builder snakeBuilder = ServerPacket.Update.PSnake.newBuilder();
-        snakeBuilder.setId(id).setLastDirection(lastDirection).addAllCoords(coords).setInputId(lastInput.id).setInputDirection(lastInput.direction).setInputTimestamp(lastInput.timestamp);
+        snakeBuilder.setId(id).setLastDirection(lastDirection).setIsDead(isDead).addAllCoords(coords).setInputId(lastInput.id).setInputDirection(lastInput.direction).setInputTimestamp(lastInput.timestamp);
         return snakeBuilder;
     }
 
@@ -130,6 +130,10 @@ public class Snake {
 
     public void die() {
         this.isDead = true;
+    }
+
+    public boolean isDead() {
+        return this.isDead;
     }
 
     public void handleInput(Input input) {

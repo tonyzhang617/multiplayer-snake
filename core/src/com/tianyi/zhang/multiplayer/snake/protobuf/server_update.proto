@@ -13,9 +13,10 @@ message Update {
         required int32 id = 1;
         repeated int32 coords = 2;
         required int32 lastDirection = 3;
-        required int32 inputId = 4;
-        required int32 inputDirection = 5;
-        required int64 inputTimestamp = 6;
+        required bool isDead = 4;
+        required int32 inputId = 5;
+        required int32 inputDirection = 6;
+        required int64 inputTimestamp = 7;
     }
 
     repeated PSnake snakes = 3;

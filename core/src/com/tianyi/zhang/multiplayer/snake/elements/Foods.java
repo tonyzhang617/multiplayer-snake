@@ -1,6 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 
 import java.util.*;
 
@@ -46,7 +47,7 @@ public class Foods {
         for (Snake s : snakes) {
             List<Integer> coords = s.getCoordinates();
             for (int i = 0; i < coords.size(); i += 2) {
-                exclude.add(indexFromXy(coords.get(i), coords.get(i+1)));
+                exclude.add(Utils.positionFromXy(coords.get(i), coords.get(i+1)));
             }
         }
         exclude.addAll(locations);
@@ -67,7 +68,7 @@ public class Foods {
     }
 
     public void consumedBy(Snake snake) {
-        Integer headIndex = indexFromXy(snake.getHeadX(), snake.getHeadY());
+        Integer headIndex = Utils.positionFromXy(snake.getHeadX(), snake.getHeadY());
         if (locations.contains(headIndex)) {
             locations.remove(headIndex);
             snake.grow();
@@ -78,25 +79,13 @@ public class Foods {
         return getQuantity() <= Constants.MIN_FOOD_QUANTITY;
     }
 
-    public Integer indexFromXy(Integer x, Integer y) {
-        return Integer.valueOf(y*WIDTH + x);
-    }
-
-    public Integer xFromIndex(int index) {
-        return index - index / WIDTH * WIDTH;
-    }
-
-    public int yFromIndex(int index) {
-        return index / WIDTH;
-    }
-
     public List<Integer> getLocations() {
         List<Integer> result = new ArrayList<Integer>(locations.size() * 2);
         Iterator<Integer> iterator = locations.iterator();
         while (iterator.hasNext()) {
-            Integer index = iterator.next();
-            result.add(Integer.valueOf(xFromIndex(index)));
-            result.add(Integer.valueOf(yFromIndex(index)));
+            Integer position = iterator.next();
+            result.add(Utils.xFromPosition(position));
+            result.add(Utils.yFromPosition(position));
         }
         return Collections.unmodifiableList(result);
     }
@@ -104,7 +93,7 @@ public class Foods {
     public void setLocations(List<Integer> xyLocations) {
         this.locations.clear();
         for (int i = 0; i < xyLocations.size(); i += 2) {
-            this.locations.add(indexFromXy(xyLocations.get(i), xyLocations.get(i+1)));
+            this.locations.add(Utils.positionFromXy(xyLocations.get(i), xyLocations.get(i+1)));
         }
     }
 }

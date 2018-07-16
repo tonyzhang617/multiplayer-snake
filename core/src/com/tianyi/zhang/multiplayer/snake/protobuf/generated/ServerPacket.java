@@ -229,29 +229,38 @@ public final class ServerPacket {
       int getLastDirection();
 
       /**
-       * <code>required int32 inputId = 4;</code>
+       * <code>required bool isDead = 4;</code>
+       */
+      boolean hasIsDead();
+      /**
+       * <code>required bool isDead = 4;</code>
+       */
+      boolean getIsDead();
+
+      /**
+       * <code>required int32 inputId = 5;</code>
        */
       boolean hasInputId();
       /**
-       * <code>required int32 inputId = 4;</code>
+       * <code>required int32 inputId = 5;</code>
        */
       int getInputId();
 
       /**
-       * <code>required int32 inputDirection = 5;</code>
+       * <code>required int32 inputDirection = 6;</code>
        */
       boolean hasInputDirection();
       /**
-       * <code>required int32 inputDirection = 5;</code>
+       * <code>required int32 inputDirection = 6;</code>
        */
       int getInputDirection();
 
       /**
-       * <code>required int64 inputTimestamp = 6;</code>
+       * <code>required int64 inputTimestamp = 7;</code>
        */
       boolean hasInputTimestamp();
       /**
-       * <code>required int64 inputTimestamp = 6;</code>
+       * <code>required int64 inputTimestamp = 7;</code>
        */
       long getInputTimestamp();
     }
@@ -271,6 +280,7 @@ public final class ServerPacket {
         id_ = 0;
         coords_ = java.util.Collections.emptyList();
         lastDirection_ = 0;
+        isDead_ = false;
         inputId_ = 0;
         inputDirection_ = 0;
         inputTimestamp_ = 0L;
@@ -340,16 +350,21 @@ public final class ServerPacket {
               }
               case 32: {
                 bitField0_ |= 0x00000004;
-                inputId_ = input.readInt32();
+                isDead_ = input.readBool();
                 break;
               }
               case 40: {
                 bitField0_ |= 0x00000008;
-                inputDirection_ = input.readInt32();
+                inputId_ = input.readInt32();
                 break;
               }
               case 48: {
                 bitField0_ |= 0x00000010;
+                inputDirection_ = input.readInt32();
+                break;
+              }
+              case 56: {
+                bitField0_ |= 0x00000020;
                 inputTimestamp_ = input.readInt64();
                 break;
               }
@@ -433,46 +448,61 @@ public final class ServerPacket {
         return lastDirection_;
       }
 
-      public static final int INPUTID_FIELD_NUMBER = 4;
-      private int inputId_;
+      public static final int ISDEAD_FIELD_NUMBER = 4;
+      private boolean isDead_;
       /**
-       * <code>required int32 inputId = 4;</code>
+       * <code>required bool isDead = 4;</code>
        */
-      public boolean hasInputId() {
+      public boolean hasIsDead() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>required int32 inputId = 4;</code>
+       * <code>required bool isDead = 4;</code>
+       */
+      public boolean getIsDead() {
+        return isDead_;
+      }
+
+      public static final int INPUTID_FIELD_NUMBER = 5;
+      private int inputId_;
+      /**
+       * <code>required int32 inputId = 5;</code>
+       */
+      public boolean hasInputId() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 inputId = 5;</code>
        */
       public int getInputId() {
         return inputId_;
       }
 
-      public static final int INPUTDIRECTION_FIELD_NUMBER = 5;
+      public static final int INPUTDIRECTION_FIELD_NUMBER = 6;
       private int inputDirection_;
       /**
-       * <code>required int32 inputDirection = 5;</code>
+       * <code>required int32 inputDirection = 6;</code>
        */
       public boolean hasInputDirection() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>required int32 inputDirection = 5;</code>
+       * <code>required int32 inputDirection = 6;</code>
        */
       public int getInputDirection() {
         return inputDirection_;
       }
 
-      public static final int INPUTTIMESTAMP_FIELD_NUMBER = 6;
+      public static final int INPUTTIMESTAMP_FIELD_NUMBER = 7;
       private long inputTimestamp_;
       /**
-       * <code>required int64 inputTimestamp = 6;</code>
+       * <code>required int64 inputTimestamp = 7;</code>
        */
       public boolean hasInputTimestamp() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
-       * <code>required int64 inputTimestamp = 6;</code>
+       * <code>required int64 inputTimestamp = 7;</code>
        */
       public long getInputTimestamp() {
         return inputTimestamp_;
@@ -489,6 +519,10 @@ public final class ServerPacket {
           return false;
         }
         if (!hasLastDirection()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasIsDead()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -520,13 +554,16 @@ public final class ServerPacket {
           output.writeInt32(3, lastDirection_);
         }
         if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          output.writeInt32(4, inputId_);
+          output.writeBool(4, isDead_);
         }
         if (((bitField0_ & 0x00000008) == 0x00000008)) {
-          output.writeInt32(5, inputDirection_);
+          output.writeInt32(5, inputId_);
         }
         if (((bitField0_ & 0x00000010) == 0x00000010)) {
-          output.writeInt64(6, inputTimestamp_);
+          output.writeInt32(6, inputDirection_);
+        }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          output.writeInt64(7, inputTimestamp_);
         }
         unknownFields.writeTo(output);
       }
@@ -555,15 +592,19 @@ public final class ServerPacket {
         }
         if (((bitField0_ & 0x00000004) == 0x00000004)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(4, inputId_);
+            .computeBoolSize(4, isDead_);
         }
         if (((bitField0_ & 0x00000008) == 0x00000008)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(5, inputDirection_);
+            .computeInt32Size(5, inputId_);
         }
         if (((bitField0_ & 0x00000010) == 0x00000010)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt64Size(6, inputTimestamp_);
+            .computeInt32Size(6, inputDirection_);
+        }
+        if (((bitField0_ & 0x00000020) == 0x00000020)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(7, inputTimestamp_);
         }
         size += unknownFields.getSerializedSize();
         memoizedSize = size;
@@ -592,6 +633,11 @@ public final class ServerPacket {
         if (hasLastDirection()) {
           result = result && (getLastDirection()
               == other.getLastDirection());
+        }
+        result = result && (hasIsDead() == other.hasIsDead());
+        if (hasIsDead()) {
+          result = result && (getIsDead()
+              == other.getIsDead());
         }
         result = result && (hasInputId() == other.hasInputId());
         if (hasInputId()) {
@@ -630,6 +676,11 @@ public final class ServerPacket {
         if (hasLastDirection()) {
           hash = (37 * hash) + LASTDIRECTION_FIELD_NUMBER;
           hash = (53 * hash) + getLastDirection();
+        }
+        if (hasIsDead()) {
+          hash = (37 * hash) + ISDEAD_FIELD_NUMBER;
+          hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+              getIsDead());
         }
         if (hasInputId()) {
           hash = (37 * hash) + INPUTID_FIELD_NUMBER;
@@ -779,12 +830,14 @@ public final class ServerPacket {
           bitField0_ = (bitField0_ & ~0x00000002);
           lastDirection_ = 0;
           bitField0_ = (bitField0_ & ~0x00000004);
-          inputId_ = 0;
+          isDead_ = false;
           bitField0_ = (bitField0_ & ~0x00000008);
-          inputDirection_ = 0;
+          inputId_ = 0;
           bitField0_ = (bitField0_ & ~0x00000010);
-          inputTimestamp_ = 0L;
+          inputDirection_ = 0;
           bitField0_ = (bitField0_ & ~0x00000020);
+          inputTimestamp_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000040);
           return this;
         }
 
@@ -825,13 +878,17 @@ public final class ServerPacket {
           if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
             to_bitField0_ |= 0x00000004;
           }
-          result.inputId_ = inputId_;
+          result.isDead_ = isDead_;
           if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
             to_bitField0_ |= 0x00000008;
           }
-          result.inputDirection_ = inputDirection_;
+          result.inputId_ = inputId_;
           if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
             to_bitField0_ |= 0x00000010;
+          }
+          result.inputDirection_ = inputDirection_;
+          if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+            to_bitField0_ |= 0x00000020;
           }
           result.inputTimestamp_ = inputTimestamp_;
           result.bitField0_ = to_bitField0_;
@@ -892,6 +949,9 @@ public final class ServerPacket {
           if (other.hasLastDirection()) {
             setLastDirection(other.getLastDirection());
           }
+          if (other.hasIsDead()) {
+            setIsDead(other.getIsDead());
+          }
           if (other.hasInputId()) {
             setInputId(other.getInputId());
           }
@@ -911,6 +971,9 @@ public final class ServerPacket {
             return false;
           }
           if (!hasLastDirection()) {
+            return false;
+          }
+          if (!hasIsDead()) {
             return false;
           }
           if (!hasInputId()) {
@@ -1074,33 +1137,65 @@ public final class ServerPacket {
           return this;
         }
 
-        private int inputId_ ;
+        private boolean isDead_ ;
         /**
-         * <code>required int32 inputId = 4;</code>
+         * <code>required bool isDead = 4;</code>
          */
-        public boolean hasInputId() {
+        public boolean hasIsDead() {
           return ((bitField0_ & 0x00000008) == 0x00000008);
         }
         /**
-         * <code>required int32 inputId = 4;</code>
+         * <code>required bool isDead = 4;</code>
+         */
+        public boolean getIsDead() {
+          return isDead_;
+        }
+        /**
+         * <code>required bool isDead = 4;</code>
+         */
+        public Builder setIsDead(boolean value) {
+          bitField0_ |= 0x00000008;
+          isDead_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required bool isDead = 4;</code>
+         */
+        public Builder clearIsDead() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          isDead_ = false;
+          onChanged();
+          return this;
+        }
+
+        private int inputId_ ;
+        /**
+         * <code>required int32 inputId = 5;</code>
+         */
+        public boolean hasInputId() {
+          return ((bitField0_ & 0x00000010) == 0x00000010);
+        }
+        /**
+         * <code>required int32 inputId = 5;</code>
          */
         public int getInputId() {
           return inputId_;
         }
         /**
-         * <code>required int32 inputId = 4;</code>
+         * <code>required int32 inputId = 5;</code>
          */
         public Builder setInputId(int value) {
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000010;
           inputId_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>required int32 inputId = 4;</code>
+         * <code>required int32 inputId = 5;</code>
          */
         public Builder clearInputId() {
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
           inputId_ = 0;
           onChanged();
           return this;
@@ -1108,31 +1203,31 @@ public final class ServerPacket {
 
         private int inputDirection_ ;
         /**
-         * <code>required int32 inputDirection = 5;</code>
+         * <code>required int32 inputDirection = 6;</code>
          */
         public boolean hasInputDirection() {
-          return ((bitField0_ & 0x00000010) == 0x00000010);
+          return ((bitField0_ & 0x00000020) == 0x00000020);
         }
         /**
-         * <code>required int32 inputDirection = 5;</code>
+         * <code>required int32 inputDirection = 6;</code>
          */
         public int getInputDirection() {
           return inputDirection_;
         }
         /**
-         * <code>required int32 inputDirection = 5;</code>
+         * <code>required int32 inputDirection = 6;</code>
          */
         public Builder setInputDirection(int value) {
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000020;
           inputDirection_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>required int32 inputDirection = 5;</code>
+         * <code>required int32 inputDirection = 6;</code>
          */
         public Builder clearInputDirection() {
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000020);
           inputDirection_ = 0;
           onChanged();
           return this;
@@ -1140,31 +1235,31 @@ public final class ServerPacket {
 
         private long inputTimestamp_ ;
         /**
-         * <code>required int64 inputTimestamp = 6;</code>
+         * <code>required int64 inputTimestamp = 7;</code>
          */
         public boolean hasInputTimestamp() {
-          return ((bitField0_ & 0x00000020) == 0x00000020);
+          return ((bitField0_ & 0x00000040) == 0x00000040);
         }
         /**
-         * <code>required int64 inputTimestamp = 6;</code>
+         * <code>required int64 inputTimestamp = 7;</code>
          */
         public long getInputTimestamp() {
           return inputTimestamp_;
         }
         /**
-         * <code>required int64 inputTimestamp = 6;</code>
+         * <code>required int64 inputTimestamp = 7;</code>
          */
         public Builder setInputTimestamp(long value) {
-          bitField0_ |= 0x00000020;
+          bitField0_ |= 0x00000040;
           inputTimestamp_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>required int64 inputTimestamp = 6;</code>
+         * <code>required int64 inputTimestamp = 7;</code>
          */
         public Builder clearInputTimestamp() {
-          bitField0_ = (bitField0_ & ~0x00000020);
+          bitField0_ = (bitField0_ & ~0x00000040);
           inputTimestamp_ = 0L;
           onChanged();
           return this;
@@ -2165,15 +2260,15 @@ public final class ServerPacket {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\023server_update.proto\022\010messages\"\352\001\n\006Upda" +
+      "\n\023server_update.proto\022\010messages\"\373\001\n\006Upda" +
       "te\022\017\n\007version\030\001 \001(\005\022\021\n\ttimestamp\030\002 \001(\003\022\'" +
       "\n\006snakes\030\003 \003(\0132\027.messages.Update.PSnake\022" +
-      "\025\n\rfoodLocations\030\004 \003(\005\032|\n\006PSnake\022\n\n\002id\030\001" +
-      " \002(\005\022\016\n\006coords\030\002 \003(\005\022\025\n\rlastDirection\030\003 " +
-      "\002(\005\022\017\n\007inputId\030\004 \002(\005\022\026\n\016inputDirection\030\005" +
-      " \002(\005\022\026\n\016inputTimestamp\030\006 \002(\003BE\n5com.tian" +
-      "yi.zhang.multiplayer.snake.protobuf.gene" +
-      "ratedB\014ServerPacket"
+      "\025\n\rfoodLocations\030\004 \003(\005\032\214\001\n\006PSnake\022\n\n\002id\030" +
+      "\001 \002(\005\022\016\n\006coords\030\002 \003(\005\022\025\n\rlastDirection\030\003" +
+      " \002(\005\022\016\n\006isDead\030\004 \002(\010\022\017\n\007inputId\030\005 \002(\005\022\026\n" +
+      "\016inputDirection\030\006 \002(\005\022\026\n\016inputTimestamp\030" +
+      "\007 \002(\003BE\n5com.tianyi.zhang.multiplayer.sn" +
+      "ake.protobuf.generatedB\014ServerPacket"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2198,7 +2293,7 @@ public final class ServerPacket {
     internal_static_messages_Update_PSnake_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_messages_Update_PSnake_descriptor,
-        new java.lang.String[] { "Id", "Coords", "LastDirection", "InputId", "InputDirection", "InputTimestamp", });
+        new java.lang.String[] { "Id", "Coords", "LastDirection", "IsDead", "InputId", "InputDirection", "InputTimestamp", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
