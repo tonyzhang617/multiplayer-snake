@@ -11,9 +11,7 @@ import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.tianyi.zhang.multiplayer.snake.elements.Grid.Block.FOOD;
-import static com.tianyi.zhang.multiplayer.snake.elements.Grid.Block.GROUND;
-import static com.tianyi.zhang.multiplayer.snake.elements.Grid.Block.PLAYER_SNAKE_BODY;
+import static com.tianyi.zhang.multiplayer.snake.elements.Grid.Block.*;
 import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.BLOCK_LENGTH;
 import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.BLOCK_OFFSET;
 
@@ -25,11 +23,13 @@ public enum GameRenderer {
 
     private GameRenderer() {
         Sprite playerSnakeBody = new Sprite(newTextureWithLinearFilter("player_snake_body.png"));
+        Sprite snakeBody = new Sprite(newTextureWithLinearFilter("snake_body.png"));
         Sprite food = new Sprite(newTextureWithLinearFilter("cake.png"));
         Sprite ground = new Sprite(newTextureWithLinearFilter("ground.png"));
 
         spriteMap = new HashMap<Grid.Block, Sprite>();
         spriteMap.put(PLAYER_SNAKE_BODY, playerSnakeBody);
+        spriteMap.put(SNAKE_BODY, snakeBody);
         spriteMap.put(FOOD, food);
         spriteMap.put(GROUND, ground);
 
@@ -57,8 +57,10 @@ public enum GameRenderer {
             for (int x = 0; x < Grid.WIDTH; ++x) {
                 switch (grid.getBlockByCoordinate(x, y)) {
                     case PLAYER_SNAKE_BODY:
-                    case SNAKE_BODY:
                         batch.draw(spriteMap.get(PLAYER_SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
+                        break;
+                    case SNAKE_BODY:
+                        batch.draw(spriteMap.get(SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
                         break;
                     case FOOD:
                         batch.draw(spriteMap.get(GROUND), x, y, BLOCK_LENGTH, BLOCK_LENGTH);
