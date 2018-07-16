@@ -33,16 +33,15 @@ public class Grid {
         }
 
         List<Integer> coords;
+        coords = foods.getLocations();
+        for (int i = 0; i < coords.size(); i += 2) {
+            int x = coords.get(i), y = coords.get(i+1);
+            blocks.get(y).set(x, Block.FOOD);
+        }
+
         for (int i = 0; i < snakes.size(); ++i) {
             coords = snakes.get(i).getCoordinates();
-            if (i == playerIndex) {
-                for (int j = 0; j < coords.size(); j += 2) {
-                    int x = coords.get(j), y = coords.get(j+1);
-                    if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
-                        blocks.get(y).set(x, Block.PLAYER_SNAKE_BODY);
-                    }
-                }
-            } else {
+            if (i != playerIndex) {
                 for (int j = 0; j < coords.size(); j += 2) {
                     int x = coords.get(j), y = coords.get(j+1);
                     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
@@ -52,10 +51,12 @@ public class Grid {
             }
         }
 
-        coords = foods.getLocations();
-        for (int i = 0; i < coords.size(); i += 2) {
-            int x = coords.get(i), y = coords.get(i+1);
-            blocks.get(y).set(x, Block.FOOD);
+        coords = snakes.get(playerIndex).getCoordinates();
+        for (int j = 0; j < coords.size(); j += 2) {
+            int x = coords.get(j), y = coords.get(j+1);
+            if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
+                blocks.get(y).set(x, Block.PLAYER_SNAKE_BODY);
+            }
         }
     }
 
