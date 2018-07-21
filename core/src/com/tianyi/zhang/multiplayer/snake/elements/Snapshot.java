@@ -51,7 +51,7 @@ public abstract class Snapshot {
         for (int i = 0; i < snakes.size(); ++i) {
             if (!snakes.get(i).isDead()) {
                 int headX = snakes.get(i).getHeadX(), headY = snakes.get(i).getHeadY();
-                if (headX <= 0 || headX >= Constants.WIDTH || headY <= 0 || headY >= Constants.HEIGHT) {
+                if (headX <= 0 || headX >= Constants.WIDTH - 1 || headY <= 0 || headY >= Constants.HEIGHT - 1) {
                     snakes.get(i).die();
                     result = true;
                     continue;
