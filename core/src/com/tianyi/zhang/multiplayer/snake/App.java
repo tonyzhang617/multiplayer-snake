@@ -28,7 +28,7 @@ public class App extends Game {
 	@Override
 	public void create () {
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
-		VisUI.load();
+		VisUI.load(VisUI.SkinScale.X2);
 
 		stateStack = new Stack<GameState>();
 		if (isServer) {

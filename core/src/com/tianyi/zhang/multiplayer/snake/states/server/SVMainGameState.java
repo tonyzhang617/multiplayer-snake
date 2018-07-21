@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class SVMainGameState extends GameState {
     private static final String TAG = SVMainGameState.class.getCanonicalName();
+    private static final float GRID_RATIO = (float) Constants.WIDTH / Constants.HEIGHT;
+
     private final ServerSnapshot serverSnapshot;
     private final ScheduledExecutorService executor;
 
@@ -201,9 +203,18 @@ public class SVMainGameState extends GameState {
 
         Gdx.app.debug(TAG, "Server main game loaded");
 
-        float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
-        camera = new OrthographicCamera(Constants.HEIGHT * (w / h), Constants.HEIGHT);
-        camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
+        float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight(), ratio = w / h;
+        camera = new OrthographicCamera();
+        if (ratio >= GRID_RATIO) {
+            // Black bars on both sides
+            camera.viewportWidth = Constants.HEIGHT * ratio;
+            camera.viewportHeight = Constants.HEIGHT;
+        } else {
+            // Black bars on top and bottom
+            camera.viewportWidth = Constants.WIDTH;
+            camera.viewportHeight = Constants.WIDTH / ratio;
+        }
+        camera.position.set(Constants.WIDTH / 2f, Constants.HEIGHT / 2f, 0);
         camera.update();
     }
 
@@ -220,8 +231,17 @@ public class SVMainGameState extends GameState {
 
     @Override
     public void resize(int width, int height) {
-        camera.viewportWidth = Constants.HEIGHT * width/height;
-        camera.viewportHeight = Constants.HEIGHT;
+        float ratio = (float) width / height;
+        if (ratio >= GRID_RATIO) {
+            // Black bars on both sides
+            camera.viewportWidth = Constants.HEIGHT * ratio;
+            camera.viewportHeight = Constants.HEIGHT;
+        } else {
+            // Black bars on top and bottom
+            camera.viewportWidth = Constants.WIDTH;
+            camera.viewportHeight = Constants.WIDTH / ratio;
+        }
+        camera.position.set(Constants.WIDTH / 2f, Constants.HEIGHT / 2f, 0);
         camera.update();
     }
 

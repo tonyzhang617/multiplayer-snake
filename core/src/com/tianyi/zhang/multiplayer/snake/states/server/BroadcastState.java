@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.tianyi.zhang.multiplayer.snake.App;
@@ -24,6 +26,10 @@ public class BroadcastState extends GameState {
     private Stage stage;
     private VisTable table;
     private VisTextButton btnStart;
+    private VisLabel lblPlayerCount;
+
+    private static final String WAITING_FOR_PLAYERS = "Waiting for other snakes to join the game...";
+    private static final String PLAYERS_CONNECTED_FORMAT = "%d other snakes have joined the game";
 
     public BroadcastState(App app) {
         super(app);
@@ -32,7 +38,9 @@ public class BroadcastState extends GameState {
         connectionIds = new ArrayList<Integer>();
 
         // Set up UI element layout
+        float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
         stage = new Stage();
+        stage.setViewport(new ExtendViewport(w, h));
 
         table = new VisTable(true);
         table.setFillParent(true);
@@ -51,8 +59,13 @@ public class BroadcastState extends GameState {
                 }
             }
         });
+        btnStart.setDisabled(true);
         table.row();
         table.add(btnStart);
+        lblPlayerCount = new VisLabel(WAITING_FOR_PLAYERS);
+        lblPlayerCount.setScale(0.5f);
+        table.row();
+        table.add(lblPlayerCount);
         Gdx.input.setInputProcessor(stage);
 
         // Start broadcasting
@@ -62,6 +75,13 @@ public class BroadcastState extends GameState {
                 public void connected(Connection connection) {
                     synchronized (connectionIdsLock) {
                         connectionIds.add(Integer.valueOf(connection.getID()));
+                        if (connectionIds.size() == 0) {
+                            btnStart.setDisabled(true);
+                            lblPlayerCount.setText(WAITING_FOR_PLAYERS);
+                        } else {
+                            btnStart.setDisabled(false);
+                            lblPlayerCount.setText(String.format(PLAYERS_CONNECTED_FORMAT, connectionIds.size()));
+                        }
                     }
                 }
 
@@ -69,6 +89,13 @@ public class BroadcastState extends GameState {
                 public void disconnected(Connection connection) {
                     synchronized (connectionIdsLock) {
                         connectionIds.remove(Integer.valueOf(connection.getID()));
+                        if (connectionIds.size() == 0) {
+                            btnStart.setDisabled(true);
+                            lblPlayerCount.setText(WAITING_FOR_PLAYERS);
+                        } else {
+                            btnStart.setDisabled(false);
+                            lblPlayerCount.setText(String.format(PLAYERS_CONNECTED_FORMAT, connectionIds.size()));
+                        }
                     }
                 }
             });
@@ -92,7 +119,7 @@ public class BroadcastState extends GameState {
 
     @Override
     public void resize(int width, int height) {
-
+        stage.getViewport().update(width, height, true);
     }
 
     @Override

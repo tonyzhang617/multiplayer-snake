@@ -27,7 +27,7 @@ public class Constants {
     public static final int MIN_FOOD_QUANTITY = 3;
 
     public static final int WINDOW_WIDTH = 640, WINDOW_HEIGHT = 640;
-    public static final int WIDTH = 50, HEIGHT = 50;
+    public static final int WIDTH = 48, HEIGHT = 27;
     public static final int UNIT_WIDTH = WINDOW_WIDTH / WIDTH, UNIT_HEIGHT = WINDOW_HEIGHT / HEIGHT;
 
     public static final float BLOCK_LENGTH = 1f;
