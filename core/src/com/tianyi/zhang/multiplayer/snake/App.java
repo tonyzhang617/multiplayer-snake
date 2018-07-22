@@ -3,6 +3,7 @@ package com.tianyi.zhang.multiplayer.snake;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Align;
 import com.kotcrab.vis.ui.VisUI;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.agents.IAgent;
@@ -29,6 +30,7 @@ public class App extends Game {
 	public void create () {
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 		VisUI.load(VisUI.SkinScale.X2);
+		VisUI.setDefaultTitleAlign(Align.center);
 
 		stateStack = new Stack<GameState>();
 		if (isServer) {

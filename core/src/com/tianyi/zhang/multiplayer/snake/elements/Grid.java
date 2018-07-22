@@ -11,6 +11,8 @@ public class Grid {
     public final List<Snake> snakes;
     public final Foods foods;
 
+    private final int aliveCount;
+
     public enum Block {
         PLAYER_SNAKE_BODY, SNAKE_BODY, CRATE, FOOD, GROUND
     }
@@ -47,9 +49,13 @@ public class Grid {
             blocks.get(y).set(x, Block.FOOD);
         }
 
+        int count = 0;
         for (int i = 0; i < snakes.size(); ++i) {
-            coords = snakes.get(i).getCoordinates();
+            if (!snakes.get(i).isDead()) {
+                count += 1;
+            }
             if (i != playerIndex) {
+                coords = snakes.get(i).getCoordinates();
                 for (int j = 0; j < coords.size(); j += 2) {
                     int x = coords.get(j), y = coords.get(j+1);
                     if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
@@ -58,6 +64,7 @@ public class Grid {
                 }
             }
         }
+        aliveCount = count;
 
         coords = snakes.get(playerIndex).getCoordinates();
         for (int j = 0; j < coords.size(); j += 2) {
@@ -70,5 +77,13 @@ public class Grid {
 
     public Block getBlockByCoordinate(int x, int y) {
         return blocks.get(y).get(x);
+    }
+
+    public boolean isSnakeDead(int index) {
+        return snakes.get(index).isDead();
+    }
+
+    public int getAliveCount() {
+        return aliveCount;
     }
 }

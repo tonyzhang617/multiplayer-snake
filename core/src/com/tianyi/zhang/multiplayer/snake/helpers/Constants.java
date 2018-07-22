@@ -32,4 +32,11 @@ public class Constants {
 
     public static final float BLOCK_LENGTH = 1f;
     public static final float BLOCK_OFFSET = 8f / 24f;
+
+    public enum GameResult {
+        WON, LOST
+    }
+
+    public static final String GAME_OVER = "Game over. You\'ll get better next time!";
+    public static final String CONGRATS = "Congratulations! You won the game!";
 }

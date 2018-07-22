@@ -7,8 +7,15 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.kotcrab.vis.ui.widget.VisLabel;
+import com.kotcrab.vis.ui.widget.VisTable;
+import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.kotcrab.vis.ui.widget.VisWindow;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.elements.ClientSnapshot;
@@ -23,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MainGameState extends GameState {
     private static final String TAG = MainGameState.class.getCanonicalName();
@@ -34,6 +42,13 @@ public class MainGameState extends GameState {
     private volatile ClientSnapshot clientSnapshot;
 
     private final OrthographicCamera camera;
+    private final Stage stage;
+    private final VisWindow window;
+    private final Table table;
+    private final VisTextButton btnToTitleScreen;
+    private final VisLabel lblResult;
+
+    private final AtomicReference<Constants.GameResult> gameResult;
 
     public MainGameState(App app, int id) {
         super(app);
@@ -197,7 +212,6 @@ public class MainGameState extends GameState {
                 }
             }
         });
-        Gdx.app.debug(TAG, "Main game loaded");
 
         float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight(), ratio = w / h;
         camera = new OrthographicCamera();
@@ -212,6 +226,24 @@ public class MainGameState extends GameState {
         }
         camera.position.set(Constants.WIDTH / 2f, Constants.HEIGHT / 2f, 0);
         camera.update();
+
+        stage = new Stage();
+        stage.setViewport(new ScreenViewport(stage.getCamera()));
+        window = new VisWindow("GG", false);
+        window.setColor(0, 1f, 0, 0.64f);
+        window.setSize(w * 0.9f, h * 0.3f);
+        window.setPosition((w - window.getWidth()) / 2f, (h - window.getHeight()) / 2f);
+        table = new VisTable(true);
+        btnToTitleScreen = new VisTextButton("Return to main screen");
+        lblResult = new VisLabel();
+        table.add(lblResult).row();
+        table.add(btnToTitleScreen).row();
+        window.add(table).row();
+        stage.addActor(window);
+
+        gameResult = new AtomicReference<Constants.GameResult>(null);
+
+        Gdx.app.debug(TAG, "Main game loaded");
     }
 
     @Override
@@ -221,6 +253,25 @@ public class MainGameState extends GameState {
         if (gameInitialized.get()) {
             Grid grid = clientSnapshot.getGrid();
             GameRenderer.INSTANCE.render(grid, camera);
+
+            if (gameResult.get() == null) {
+                if (grid.isSnakeDead(clientId)) {
+                    // Game over... GG
+                    gameResult.set(Constants.GameResult.LOST);
+                    lblResult.setText(Constants.GAME_OVER);
+                    Gdx.input.setInputProcessor(stage);
+                } else if (grid.getAliveCount() == 1) {
+                    // You are the last snake alive
+                    gameResult.set(Constants.GameResult.WON);
+                    lblResult.setText(Constants.CONGRATS);
+                    Gdx.input.setInputProcessor(stage);
+                }
+            }
+
+            if (gameResult.get() != null) {
+                stage.act();
+                stage.draw();
+            }
         }
     }
 
@@ -243,6 +294,10 @@ public class MainGameState extends GameState {
         }
         camera.position.set(Constants.WIDTH / 2f, Constants.HEIGHT / 2f, 0);
         camera.update();
+
+        stage.getViewport().update(width, height, true);
+        window.setSize(width * 0.9f, height * 0.3f);
+        window.setPosition((width - window.getWidth()) / 2f, (height - window.getHeight()) / 2f);
     }
 
     @Override

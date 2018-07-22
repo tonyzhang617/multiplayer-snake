@@ -60,12 +60,10 @@ public class BroadcastState extends GameState {
             }
         });
         btnStart.setDisabled(true);
-        table.row();
-        table.add(btnStart);
+        table.add(btnStart).row();
         lblPlayerCount = new VisLabel(WAITING_FOR_PLAYERS);
         lblPlayerCount.setScale(0.5f);
-        table.row();
-        table.add(lblPlayerCount);
+        table.add(lblPlayerCount).row();
         Gdx.input.setInputProcessor(stage);
 
         // Start broadcasting
