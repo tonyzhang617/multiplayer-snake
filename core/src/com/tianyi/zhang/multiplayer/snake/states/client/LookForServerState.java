@@ -21,7 +21,7 @@ public class LookForServerState extends GameState {
                 Gdx.app.postRunnable(new Runnable() {
                     @Override
                     public void run() {
-                        _app.pushState(new MainGameState(_app, tmpId));
+                        _app.setState(new MainGameState(_app, tmpId));
                     }
                 });
             }

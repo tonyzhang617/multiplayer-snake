@@ -7,8 +7,10 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -237,6 +239,13 @@ public class SVMainGameState extends GameState {
         window.setPosition((w - window.getWidth()) / 2f, (h - window.getHeight()) / 2f);
         table = new VisTable(true);
         btnToTitleScreen = new VisTextButton("Return to main screen");
+        btnToTitleScreen.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                _app.popState();
+                _app.destroyAgent();
+            }
+        });
         btnToTitleScreen.setDisabled(true);
         lblResult = new VisLabel();
         lblHosting = new VisLabel("Still hosting the game. Please do not exit.");
@@ -327,5 +336,7 @@ public class SVMainGameState extends GameState {
     @Override
     public void dispose() {
         executor.shutdown();
+        stage.dispose();
+        Gdx.graphics.setContinuousRendering(true);
     }
 }

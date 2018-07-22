@@ -10,17 +10,13 @@ import com.tianyi.zhang.multiplayer.snake.agents.IAgent;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
 import com.tianyi.zhang.multiplayer.snake.elements.GameRenderer;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
-import com.tianyi.zhang.multiplayer.snake.states.client.LookForServerState;
-import com.tianyi.zhang.multiplayer.snake.states.server.BroadcastState;
+import com.tianyi.zhang.multiplayer.snake.states.TitleScreenState;
 
 import java.util.Stack;
 
 public class App extends Game {
 	protected Stack<GameState> stateStack;
 	protected IAgent agent;
-
-	// TODO: remove this variable
-	private boolean isServer = false;
 
 	public IAgent getAgent() {
 		return agent;
@@ -33,13 +29,7 @@ public class App extends Game {
 		VisUI.setDefaultTitleAlign(Align.center);
 
 		stateStack = new Stack<GameState>();
-		if (isServer) {
-			agent = new Server();
-			pushState(new BroadcastState(this));
-		} else {
-			agent = new Client();
-			pushState(new LookForServerState(this));
-		}
+		pushState(new TitleScreenState(this));
 	}
 
 	@Override
@@ -49,7 +39,9 @@ public class App extends Game {
 
 	@Override
 	public void dispose () {
-		agent.destroy();
+	    if (agent != null) {
+            agent.destroy();
+        }
 		while (!stateStack.empty()) {
 			stateStack.pop().dispose();
 		}
@@ -58,16 +50,33 @@ public class App extends Game {
 	}
 
 	public void pushState(GameState gameState) {
+	    if (!stateStack.isEmpty()) {
+	        stateStack.peek().pause();
+        }
 		stateStack.push(gameState);
 		setScreen(gameState);
 	}
 
 	public void popState() {
 		stateStack.pop().dispose();
+		setScreen(stateStack.peek());
+		stateStack.peek().resume();
 	}
 
 	public void setState(GameState gameState) {
 		stateStack.pop().dispose();
 		pushState(gameState);
 	}
+
+	public void initAgent(boolean isServer) {
+	    if (isServer) {
+	        agent = new Server();
+        } else {
+	        agent = new Client();
+        }
+    }
+
+    public void destroyAgent() {
+	    agent.destroy();
+    }
 }

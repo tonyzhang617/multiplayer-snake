@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.kotcrab.vis.ui.widget.VisLabel;
@@ -23,10 +23,10 @@ public class BroadcastState extends GameState {
     private static final String TAG = BroadcastState.class.getCanonicalName();
 
     // UI elements
-    private Stage stage;
-    private VisTable table;
-    private VisTextButton btnStart;
-    private VisLabel lblPlayerCount;
+    private final Stage stage;
+    private final VisTable table;
+    private final VisTextButton btnStart;
+    private final VisLabel lblPlayerCount;
 
     private static final String WAITING_FOR_PLAYERS = "Waiting for other snakes to join the game...";
     private static final String PLAYERS_CONNECTED_FORMAT = "%d other snakes have joined the game";
@@ -40,7 +40,7 @@ public class BroadcastState extends GameState {
         // Set up UI element layout
         float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
         stage = new Stage();
-        stage.setViewport(new ExtendViewport(w, h));
+        stage.setViewport(new ScreenViewport(stage.getCamera()));
 
         table = new VisTable(true);
         table.setFillParent(true);
@@ -54,7 +54,7 @@ public class BroadcastState extends GameState {
                 Gdx.app.debug(TAG, "START GAME button clicked");
                 synchronized (connectionIdsLock) {
                     if (connectionIds.size() > 0) {
-                        _app.pushState(new SVMainGameState(_app, connectionIds));
+                        _app.setState(new SVMainGameState(_app, connectionIds));
                     }
                 }
             }
