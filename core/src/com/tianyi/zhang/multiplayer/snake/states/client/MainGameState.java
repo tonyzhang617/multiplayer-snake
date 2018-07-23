@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -21,9 +22,9 @@ import com.kotcrab.vis.ui.widget.VisWindow;
 import com.tianyi.zhang.multiplayer.snake.App;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.elements.ClientSnapshot;
-import com.tianyi.zhang.multiplayer.snake.elements.GameRenderer;
 import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
@@ -51,6 +52,7 @@ public class MainGameState extends GameState {
     private final VisLabel lblResult;
 
     private final AtomicReference<Constants.GameResult> gameResult;
+    private final SpriteBatch spriteBatch;
 
     public MainGameState(App app, int id) {
         super(app);
@@ -228,6 +230,7 @@ public class MainGameState extends GameState {
         }
         camera.position.set(Constants.WIDTH / 2f, Constants.HEIGHT / 2f, 0);
         camera.update();
+        spriteBatch = new SpriteBatch();
 
         stage = new Stage();
         stage.setViewport(new ScreenViewport(stage.getCamera()));
@@ -257,11 +260,11 @@ public class MainGameState extends GameState {
 
     @Override
     public void render(float delta) {
-        GameRenderer.INSTANCE.clear();
+        Utils.clear();
 
         if (gameInitialized.get()) {
             Grid grid = clientSnapshot.getGrid();
-            GameRenderer.INSTANCE.render(grid, camera);
+            Utils.renderGrid(grid, camera, spriteBatch);
 
             if (gameResult.get() == null) {
                 if (grid.isSnakeDead(clientId)) {
@@ -326,6 +329,7 @@ public class MainGameState extends GameState {
 
     @Override
     public void dispose() {
+        spriteBatch.dispose();
         executor.shutdown();
         stage.dispose();
         Gdx.graphics.setContinuousRendering(true);

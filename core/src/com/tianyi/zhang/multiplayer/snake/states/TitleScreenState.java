@@ -5,9 +5,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.widget.VisImage;
 import com.kotcrab.vis.ui.widget.VisTable;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.tianyi.zhang.multiplayer.snake.App;
+import com.tianyi.zhang.multiplayer.snake.helpers.AssetManager;
 import com.tianyi.zhang.multiplayer.snake.states.client.LookForServerState;
 import com.tianyi.zhang.multiplayer.snake.states.server.BroadcastState;
 
@@ -16,6 +18,7 @@ public class TitleScreenState extends GameState {
 
     private final Stage stage;
     private final VisTable table;
+    private final VisImage imgTitle;
     private final VisTextButton btnHost;
     private final VisTextButton btnJoin;
     private final VisTextButton btnAcknowledgements;
@@ -27,6 +30,8 @@ public class TitleScreenState extends GameState {
         table = new VisTable(true);
         table.setFillParent(true);
         stage.addActor(table);
+        imgTitle = new VisImage(AssetManager.INSTANCE.getTitleTexture());
+        table.add(imgTitle).row();
         btnHost = new VisTextButton("Host a Game");
         btnHost.addListener(new ClickListener() {
             @Override
