@@ -158,6 +158,7 @@ public class ClientSnapshot extends Snapshot {
                 long upper = (i == stepDiff ? currentTime : SNAKE_MOVE_EVERY_NS * (stateStep + i + 1));
                 for (int j = 0; j < resultSnakes.size(); ++j) {
                     Snake currSnake = resultSnakes.get(j);
+                    if (currSnake.isDead()) continue;
                     if (j == clientId) {
                         Input tmpInput;
                         while (unackInputs.size() > inputIndex && (tmpInput = unackInputs.get(inputIndex)).timestamp < upper) {

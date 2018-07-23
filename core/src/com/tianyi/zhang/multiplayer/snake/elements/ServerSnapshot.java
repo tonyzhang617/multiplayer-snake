@@ -43,15 +43,21 @@ public class ServerSnapshot extends Snapshot {
         foods = new Foods();
         inputBuffers = new ArrayList<SortedSet<Input>>(arraySize);
 
-        int interval = (Constants.HEIGHT - 2 * Constants.INITIAL_SNAKE_LENGTH) / (arraySize - 1);
+        int interval = (Constants.HEIGHT - 2 * Constants.INITIAL_SNAKE_LENGTH) / (snakeIds.length - 1);
         int evenSnakeIdHeadX = Constants.INITIAL_SNAKE_LENGTH * 2 - 1;
         int oddSnakeIdHeadX = Constants.WIDTH - 2 * Constants.INITIAL_SNAKE_LENGTH;
 
+        int index = 0;
         for (int i = 0; i < arraySize; ++i) {
-            if (i % 2 == 0) {
-                snakes.add(new Snake(i, evenSnakeIdHeadX, Constants.INITIAL_SNAKE_LENGTH + i * interval - 1, Constants.INITIAL_SNAKE_LENGTH, new Input(Constants.RIGHT, 0, 0)));
+            if (snakeIds[index] == i) {
+                if (index % 2 == 0) {
+                    snakes.add(new Snake(i, evenSnakeIdHeadX, Constants.INITIAL_SNAKE_LENGTH + index * interval - 1, Constants.INITIAL_SNAKE_LENGTH, new Input(Constants.RIGHT, 0, 0)));
+                } else {
+                    snakes.add(new Snake(i, oddSnakeIdHeadX, Constants.INITIAL_SNAKE_LENGTH + index * interval - 1, Constants.INITIAL_SNAKE_LENGTH, new Input(Constants.LEFT, 0, 0)));
+                }
+                index += 1;
             } else {
-                snakes.add(new Snake(i, oddSnakeIdHeadX, Constants.INITIAL_SNAKE_LENGTH + i * interval - 1, Constants.INITIAL_SNAKE_LENGTH, new Input(Constants.LEFT, 0, 0)));
+                snakes.add(Snake.ghostSnake(i));
             }
             inputBuffers.add(new TreeSet<Input>(Input.comparator));
         }
@@ -125,6 +131,7 @@ public class ServerSnapshot extends Snapshot {
             for (int i = 0; i <= stepDiff; ++i) {
                 for (int j = 0; j < snakes.size(); ++j) {
                     Snake currSnake = snakes.get(j);
+                    if (currSnake.isDead()) continue;
                     Input tmpInput;
                     long upper = (i == stepDiff ? updatedStateTime : SNAKE_MOVE_EVERY_NS * (stateStep + i + 1));
                     while (!inputBuffers.get(j).isEmpty() && (tmpInput = inputBuffers.get(j).first()).timestamp < upper) {
@@ -162,6 +169,7 @@ public class ServerSnapshot extends Snapshot {
             for (int i = 0; i <= stepDiff; ++i) {
                 for (int j = 0; j < resultSnakes.size(); ++j) {
                     Snake currSnake = resultSnakes.get(j);
+                    if (currSnake.isDead()) continue;
                     long upper = (i == stepDiff ? currentTime : SNAKE_MOVE_EVERY_NS * (updatedStateStep + i + 1));
                     while (!inputQueues[j].isEmpty() && inputQueues[j].peek().timestamp < upper) {
                         currSnake.handleInput(inputQueues[j].poll());

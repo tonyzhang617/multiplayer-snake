@@ -3,6 +3,7 @@ package com.tianyi.zhang.multiplayer.snake.elements;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,6 +60,10 @@ public class Snake {
         }
         this.lastDirection = input.direction;
         this.isDead = false;
+    }
+
+    public static Snake ghostSnake(int id) {
+        return new Snake(id, new ArrayList<Integer>(0), Constants.RIGHT, new Input(Constants.RIGHT, 0, 0), true);
     }
 
     public static Snake fromProtoSnake(ServerPacket.Update.PSnake pSnake) {
