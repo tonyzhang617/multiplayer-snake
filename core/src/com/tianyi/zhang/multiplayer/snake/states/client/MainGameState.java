@@ -26,13 +26,11 @@ import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ClientPacket;
-import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MainGameState extends GameState {
@@ -41,8 +39,7 @@ public class MainGameState extends GameState {
 
     private final ScheduledExecutorService executor;
     private final int clientId;
-    private final AtomicBoolean gameInitialized;
-    private volatile ClientSnapshot clientSnapshot;
+    private final ClientSnapshot clientSnapshot;
 
     private final OrthographicCamera camera;
     private final Stage stage;
@@ -54,11 +51,10 @@ public class MainGameState extends GameState {
     private final AtomicReference<Constants.GameResult> gameResult;
     private final SpriteBatch spriteBatch;
 
-    public MainGameState(App app, int id) {
+    public MainGameState(App app, int id, long initialUpdateNanoTime, byte[] initialPacket) {
         super(app);
         clientId = id;
-        clientSnapshot = null;
-        gameInitialized = new AtomicBoolean(false);
+        clientSnapshot = new ClientSnapshot(id, initialUpdateNanoTime, Client.parseServerUpdate(initialPacket));
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(new GestureDetector(new GestureDetector.GestureListener() {
@@ -79,24 +75,20 @@ public class MainGameState extends GameState {
 
             @Override
             public boolean fling(float velocityX, float velocityY, int button) {
-                if (gameInitialized.get()) {
-                    if (Math.abs(velocityX) > Math.abs(velocityY)) {
-                        if (velocityX > 0) {
-                            clientSnapshot.onClientInput(Constants.RIGHT);
-                        } else {
-                            clientSnapshot.onClientInput(Constants.LEFT);
-                        }
+                if (Math.abs(velocityX) > Math.abs(velocityY)) {
+                    if (velocityX > 0) {
+                        clientSnapshot.onClientInput(Constants.RIGHT);
                     } else {
-                        if (velocityY > 0) {
-                            clientSnapshot.onClientInput(Constants.DOWN);
-                        } else {
-                            clientSnapshot.onClientInput(Constants.UP);
-                        }
+                        clientSnapshot.onClientInput(Constants.LEFT);
                     }
-                    return true;
                 } else {
-                    return false;
+                    if (velocityY > 0) {
+                        clientSnapshot.onClientInput(Constants.DOWN);
+                    } else {
+                        clientSnapshot.onClientInput(Constants.UP);
+                    }
                 }
+                return true;
             }
 
             @Override
@@ -127,21 +119,16 @@ public class MainGameState extends GameState {
         inputMultiplexer.addProcessor(new InputProcessor() {
             @Override
             public boolean keyDown(int keycode) {
-                if (gameInitialized.get()) {
-                    Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
-                    if (keycode == Input.Keys.LEFT) {
-                        clientSnapshot.onClientInput(Constants.LEFT);
-                    } else if (keycode == Input.Keys.UP) {
-                        clientSnapshot.onClientInput(Constants.UP);
-                    } else if (keycode == Input.Keys.RIGHT) {
-                        clientSnapshot.onClientInput(Constants.RIGHT);
-                    } else if (keycode == Input.Keys.DOWN) {
-                        clientSnapshot.onClientInput(Constants.DOWN);
-                    }
-                    return true;
-                } else {
-                    return false;
+                if (keycode == Input.Keys.LEFT) {
+                    clientSnapshot.onClientInput(Constants.LEFT);
+                } else if (keycode == Input.Keys.UP) {
+                    clientSnapshot.onClientInput(Constants.UP);
+                } else if (keycode == Input.Keys.RIGHT) {
+                    clientSnapshot.onClientInput(Constants.RIGHT);
+                } else if (keycode == Input.Keys.DOWN) {
+                    clientSnapshot.onClientInput(Constants.DOWN);
                 }
+                return true;
             }
 
             @Override
@@ -188,31 +175,7 @@ public class MainGameState extends GameState {
             @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
-                    ServerPacket.Update update = Client.parseServerUpdate(object);
-                    if (!gameInitialized.get()) {
-                        clientSnapshot = new ClientSnapshot(clientId, update);
-
-                        executor.scheduleAtFixedRate(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    if (clientSnapshot.update()) {
-                                        Gdx.graphics.requestRendering();
-                                    }
-                                    ClientPacket.Message message = clientSnapshot.buildMessage();
-                                    if (message != null) {
-                                        _app.getAgent().send(message.toByteArray());
-                                    }
-                                } catch (Exception e) {
-                                    Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
-                                }
-                            }
-                        }, 0, 30, TimeUnit.MILLISECONDS);
-
-                        gameInitialized.set(true);
-                    } else if (gameInitialized.get()) {
-                        clientSnapshot.onServerUpdate(update);
-                    }
+                    clientSnapshot.onServerUpdate(Client.parseServerUpdate(object));
                 }
             }
         });
@@ -243,8 +206,7 @@ public class MainGameState extends GameState {
         btnToTitleScreen.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                _app.popState();
-                _app.destroyAgent();
+                _app.gotoTitleScreen();
             }
         });
         lblResult = new VisLabel();
@@ -255,6 +217,24 @@ public class MainGameState extends GameState {
 
         gameResult = new AtomicReference<Constants.GameResult>(null);
 
+        executor.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (clientSnapshot.update()) {
+                        Gdx.graphics.requestRendering();
+                    }
+                    ClientPacket.Message message = clientSnapshot.buildMessage();
+                    if (message != null) {
+                        _app.getAgent().send(message.toByteArray());
+                    }
+                } catch (Exception e) {
+                    // TODO: Go to error screen
+                    Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
+                }
+            }
+        }, 0, Constants.MOVE_EVERY_MS / 3, TimeUnit.MILLISECONDS);
+
         Gdx.app.debug(TAG, "Main game loaded");
     }
 
@@ -262,28 +242,27 @@ public class MainGameState extends GameState {
     public void render(float delta) {
         Utils.clear();
 
-        if (gameInitialized.get()) {
-            Grid grid = clientSnapshot.getGrid();
-            Utils.renderGrid(grid, camera, spriteBatch);
+        Grid grid = clientSnapshot.getGrid();
+        Utils.renderGrid(grid, camera, spriteBatch);
 
-            if (gameResult.get() == null) {
-                if (grid.isSnakeDead(clientId)) {
-                    // Game over... GG
-                    gameResult.set(Constants.GameResult.LOST);
-                    lblResult.setText(Constants.GAME_OVER);
-                    Gdx.input.setInputProcessor(stage);
-                } else if (grid.getAliveCount() == 1) {
-                    // You are the last snake alive
-                    gameResult.set(Constants.GameResult.WON);
-                    lblResult.setText(Constants.CONGRATS);
-                    Gdx.input.setInputProcessor(stage);
-                }
+        // TODO: Store game result in grid
+        if (gameResult.get() == null) {
+            if (grid.isSnakeDead(clientId)) {
+                // Game over... GG
+                gameResult.set(Constants.GameResult.LOST);
+                lblResult.setText(Constants.GAME_OVER);
+                Gdx.input.setInputProcessor(stage);
+            } else if (grid.getAliveCount() == 1) {
+                // You are the last snake alive
+                gameResult.set(Constants.GameResult.WON);
+                lblResult.setText(Constants.CONGRATS);
+                Gdx.input.setInputProcessor(stage);
             }
+        }
 
-            if (gameResult.get() != null) {
-                stage.act();
-                stage.draw();
-            }
+        if (gameResult.get() != null) {
+            stage.act();
+            stage.draw();
         }
     }
 

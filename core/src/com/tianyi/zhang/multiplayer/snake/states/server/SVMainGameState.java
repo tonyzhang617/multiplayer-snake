@@ -204,6 +204,7 @@ public class SVMainGameState extends GameState {
 
                     Gdx.graphics.requestRendering();
                 } catch (Exception e) {
+                    // TODO: Go to error screen
                     Gdx.app.error(TAG, "Error encountered inside scheduled task: ", e);
                 }
             }
@@ -244,8 +245,7 @@ public class SVMainGameState extends GameState {
         btnToTitleScreen.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                _app.popState();
-                _app.destroyAgent();
+                _app.gotoTitleScreen();
             }
         });
         btnToTitleScreen.setDisabled(true);

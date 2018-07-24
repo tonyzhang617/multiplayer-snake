@@ -14,67 +14,74 @@ import com.tianyi.zhang.multiplayer.snake.states.TitleScreenState;
 import java.util.Stack;
 
 public class App extends Game {
-	protected Stack<GameState> stateStack;
-	protected IAgent agent;
+    protected Stack<GameState> stateStack;
+    protected IAgent agent;
 
-	public IAgent getAgent() {
-		return agent;
-	}
+    public IAgent getAgent() {
+        return agent;
+    }
 
-	@Override
-	public void create () {
-		Gdx.app.setLogLevel(Application.LOG_DEBUG);
-		VisUI.load(VisUI.SkinScale.X2);
-		VisUI.setDefaultTitleAlign(Align.center);
+    @Override
+    public void create() {
+        Gdx.app.setLogLevel(Application.LOG_DEBUG);
+        VisUI.load(VisUI.SkinScale.X2);
+        VisUI.setDefaultTitleAlign(Align.center);
 
-		stateStack = new Stack<GameState>();
-		pushState(new TitleScreenState(this));
-	}
+        stateStack = new Stack<GameState>();
+        pushState(new TitleScreenState(this));
+    }
 
-	@Override
-	public void render () {
-		super.render();
-	}
+    @Override
+    public void render() {
+        super.render();
+    }
 
-	@Override
-	public void dispose () {
-	    if (agent != null) {
+    @Override
+    public void dispose() {
+        if (agent != null) {
             agent.destroy();
         }
-		while (!stateStack.empty()) {
-			stateStack.pop().dispose();
-		}
-		VisUI.dispose();
-	}
-
-	public void pushState(GameState gameState) {
-	    if (!stateStack.isEmpty()) {
-	        stateStack.peek().pause();
+        while (!stateStack.empty()) {
+            stateStack.pop().dispose();
         }
-		stateStack.push(gameState);
-		setScreen(gameState);
-	}
+        VisUI.dispose();
+    }
 
-	public void popState() {
-		stateStack.pop().dispose();
-		setScreen(stateStack.peek());
-		stateStack.peek().resume();
-	}
+    public void pushState(GameState gameState) {
+        if (!stateStack.isEmpty()) {
+            stateStack.peek().pause();
+        }
+        stateStack.push(gameState);
+        setScreen(gameState);
+    }
 
-	public void setState(GameState gameState) {
-		stateStack.pop().dispose();
-		pushState(gameState);
-	}
+    public void popState() {
+        stateStack.pop().dispose();
+        setScreen(stateStack.peek());
+        stateStack.peek().resume();
+    }
 
-	public void initAgent(boolean isServer) {
-	    if (isServer) {
-	        agent = new Server();
+    public void setState(GameState gameState) {
+        stateStack.pop().dispose();
+        pushState(gameState);
+    }
+
+    public void gotoTitleScreen() {
+        while (stateStack.size() > 1) {
+            popState();
+        }
+        destroyAgent();
+    }
+
+    public void initAgent(boolean isServer) {
+        if (isServer) {
+            agent = new Server();
         } else {
-	        agent = new Client();
+            agent = new Client();
         }
     }
 
     public void destroyAgent() {
-	    agent.destroy();
+        agent.destroy();
     }
 }

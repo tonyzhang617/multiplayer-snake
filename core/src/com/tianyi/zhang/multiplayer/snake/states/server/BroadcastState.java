@@ -103,7 +103,7 @@ public class BroadcastState extends GameState {
                 }
             });
         } catch (IOException e) {
-            // TODO: Display error message
+            // TODO: Go to error screen
             Gdx.app.error(TAG, e.getMessage());
         }
     }

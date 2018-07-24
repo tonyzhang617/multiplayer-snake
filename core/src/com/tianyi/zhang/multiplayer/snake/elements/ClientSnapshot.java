@@ -35,9 +35,7 @@ public class ClientSnapshot extends Snapshot {
     private int nextInputId;
     private final List<Input> unackInputs;
 
-    public ClientSnapshot(int clientId, ServerPacket.Update initialUpdate) {
-        long currentNanoTime = Utils.getNanoTime();
-
+    public ClientSnapshot(int clientId, long initialUpdateNanoTime, ServerPacket.Update initialUpdate) {
         this.clientId = clientId;
         this.lock = new Object();
         this.nextInputId = 1;
@@ -45,7 +43,7 @@ public class ClientSnapshot extends Snapshot {
         this.stateTime = 0;
         this.serverUpdateVersion = new AtomicInteger(initialUpdate.getVersion());
         this.nextRenderTime = new AtomicLong(0);
-        this.startTimestamp = currentNanoTime - initialUpdate.getTimestamp();
+        this.startTimestamp = initialUpdateNanoTime - initialUpdate.getTimestamp();
 
         Gdx.app.debug(TAG, String.format("startTimestamp: %,d", startTimestamp));
 
