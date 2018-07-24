@@ -35,7 +35,7 @@ public enum AssetManager {
 
         title = Utils.newTextureWithLinearFilter("game_title.png");
 
-        backgroundColor = new Color(0xc08048ff);
+        backgroundColor = new Color(0x124E10ff);
     }
 
     public Sprite getSpriteByType(Grid.Block type) {
