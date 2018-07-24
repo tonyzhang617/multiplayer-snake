@@ -125,7 +125,6 @@ public class SVMainGameState extends GameState {
         inputMultiplexer.addProcessor(new InputProcessor() {
             @Override
             public boolean keyDown(int keycode) {
-                Gdx.app.debug(TAG, "Keycode " + keycode + " pressed");
                 if (keycode == Input.Keys.LEFT) {
                     serverSnapshot.onServerInput(Constants.LEFT);
                 } else if (keycode == Input.Keys.UP) {
@@ -204,8 +203,13 @@ public class SVMainGameState extends GameState {
 
                     Gdx.graphics.requestRendering();
                 } catch (Exception e) {
-                    // TODO: Go to error screen
                     Gdx.app.error(TAG, "Error encountered inside scheduled task: ", e);
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            _app.gotoErrorScreen("Oops, something went wrong...\nPlease try starting a new game");
+                        }
+                    });
                 }
             }
         }, 0, Constants.MOVE_EVERY_MS / 2, TimeUnit.MILLISECONDS);

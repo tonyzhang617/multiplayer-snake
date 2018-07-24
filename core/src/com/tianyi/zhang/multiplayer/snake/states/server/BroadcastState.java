@@ -18,6 +18,7 @@ import com.tianyi.zhang.multiplayer.snake.states.GameState;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BroadcastState extends GameState {
     private final Object connectionIdsLock;
@@ -30,6 +31,8 @@ public class BroadcastState extends GameState {
     private final VisImage imgTitle;
     private final VisTextButton btnStart;
     private final VisLabel lblPlayerCount;
+
+    private final AtomicBoolean success;
 
     private static final String WAITING_FOR_PLAYERS = "Waiting for other snakes to join the game...";
     private static final String PLAYERS_CONNECTED_FORMAT = "%d other snakes have joined the game";
@@ -71,6 +74,8 @@ public class BroadcastState extends GameState {
         table.add(lblPlayerCount).row();
         Gdx.input.setInputProcessor(stage);
 
+        success = new AtomicBoolean();
+
         // Start broadcasting
         try {
             _app.getAgent().broadcast(new Listener() {
@@ -102,9 +107,11 @@ public class BroadcastState extends GameState {
                     }
                 }
             });
+
+            success.set(true);
         } catch (IOException e) {
-            // TODO: Go to error screen
             Gdx.app.error(TAG, e.getMessage());
+            success.set(false);
         }
     }
 
@@ -113,6 +120,10 @@ public class BroadcastState extends GameState {
         super.render(delta);
         stage.act();
         stage.draw();
+
+        if (!success.get()) {
+            _app.gotoErrorScreen("Cannot host game\nIs there someone already hosting a game?");
+        }
     }
 
     @Override

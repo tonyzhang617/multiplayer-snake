@@ -8,6 +8,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.tianyi.zhang.multiplayer.snake.agents.Client;
 import com.tianyi.zhang.multiplayer.snake.agents.IAgent;
 import com.tianyi.zhang.multiplayer.snake.agents.Server;
+import com.tianyi.zhang.multiplayer.snake.states.ErrorState;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 import com.tianyi.zhang.multiplayer.snake.states.TitleScreenState;
 
@@ -71,6 +72,14 @@ public class App extends Game {
             popState();
         }
         destroyAgent();
+    }
+
+    public void gotoErrorScreen(String errorMessage) {
+        while (stateStack.size() > 1) {
+            popState();
+        }
+        destroyAgent();
+        pushState(new ErrorState(this, errorMessage));
     }
 
     public void initAgent(boolean isServer) {

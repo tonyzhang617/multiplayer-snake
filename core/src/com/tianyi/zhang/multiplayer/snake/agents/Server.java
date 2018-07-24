@@ -34,7 +34,7 @@ public class Server extends IAgent {
     }
 
     @Override
-    public void lookForServer(Listener listener) {
+    public void lookForServer(Listener listener, Runnable errorCallback) {
 
     }
 

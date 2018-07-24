@@ -173,6 +173,18 @@ public class MainGameState extends GameState {
         Gdx.graphics.setContinuousRendering(false);
         _app.getAgent().setListener(new Listener() {
             @Override
+            public void disconnected(Connection connection) {
+                if (gameResult.get() == null) {
+                    Gdx.app.postRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            _app.gotoErrorScreen("NOOO! We lost contact with the host!");
+                        }
+                    });
+                }
+            }
+
+            @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
                     clientSnapshot.onServerUpdate(Client.parseServerUpdate(object));
@@ -229,7 +241,6 @@ public class MainGameState extends GameState {
                         _app.getAgent().send(message.toByteArray());
                     }
                 } catch (Exception e) {
-                    // TODO: Go to error screen
                     Gdx.app.error(TAG, "Error encountered while running scheduled rendering task: ", e);
                 }
             }

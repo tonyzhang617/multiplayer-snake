@@ -57,13 +57,18 @@ public class LookForServerState extends GameState {
         _app.getAgent().lookForServer(new Listener() {
             @Override
             public void connected(Connection connection) {
-                lblInfo.setText("Joined game successfully\nWaiting for host to start the game...");
+                lblInfo.setText("Joined successfully\nWaiting for host to start the game...");
                 table.removeActor(btnToTitleScreen);
             }
 
             @Override
             public void disconnected(Connection connection) {
-                // TODO: Go to error screen
+                Gdx.app.postRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        _app.gotoErrorScreen("NOOO! We lost contact with the host!");
+                    }
+                });
             }
 
             @Override
@@ -81,6 +86,11 @@ public class LookForServerState extends GameState {
                         }
                     });
                 }
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+                _app.gotoErrorScreen("Having trouble finding a host\nIs there someone hosting?\nPlease ensure you are playing on home Wi-fi");
             }
         });
     }

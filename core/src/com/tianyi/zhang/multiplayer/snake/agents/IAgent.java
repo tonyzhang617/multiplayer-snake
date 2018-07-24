@@ -10,7 +10,7 @@ import java.io.IOException;
 public abstract class IAgent {
     public abstract void setListener(Listener listener);
     public abstract void broadcast(Listener listener) throws IOException;
-    public abstract void lookForServer(Listener listener);
+    public abstract void lookForServer(Listener listener, Runnable errorCallback);
     public abstract void send(byte[] packet);
     public abstract void destroy();
 

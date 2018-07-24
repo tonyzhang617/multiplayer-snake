@@ -16,6 +16,7 @@ public class Constants {
     public static final int LAG_TOLERANCE_MS = 500;
 
     public static final int MOVE_EVERY_MS = 333;
+    public static final int SEARCH_TIMEOUT_MS = 10000;
     public static final int UPDATE_AFTER_INACTIVE_MS = MOVE_EVERY_MS * 3;
     public static final int CLIENT_SEND_EVERY_MS = 50;
     public static final int SERVER_SEND_EVERY_MS = 80;

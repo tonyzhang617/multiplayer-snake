@@ -33,21 +33,23 @@ public class Client extends IAgent {
     }
 
     @Override
-    public void lookForServer(Listener listener) {
+    public void lookForServer(Listener listener, final Runnable errorCallback) {
         setListener(listener);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                InetAddress serverAddress = client.discoverHost(Constants.UDP_PORT, 5000);
+                InetAddress serverAddress = client.discoverHost(Constants.UDP_PORT, Constants.SEARCH_TIMEOUT_MS);
                 if (serverAddress != null) {
                     Gdx.app.debug(TAG, "Server discovered at " + serverAddress.getHostAddress());
                     try {
-                        client.connect(5000, serverAddress, Constants.TCP_PORT, Constants.UDP_PORT);
+                        client.connect(Constants.SEARCH_TIMEOUT_MS, serverAddress, Constants.TCP_PORT, Constants.UDP_PORT);
                     } catch (IOException e) {
                         Gdx.app.error(TAG, e.getMessage());
+                        errorCallback.run();
                     }
                 } else {
                     Gdx.app.debug(TAG, "No server found");
+                    Gdx.app.postRunnable(errorCallback);
                 }
             }
         }).start();
