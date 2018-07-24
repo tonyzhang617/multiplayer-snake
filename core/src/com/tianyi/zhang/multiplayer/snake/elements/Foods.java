@@ -19,7 +19,6 @@ public class Foods {
 
     public Foods(Foods other) {
         locations = new TreeSet<Integer>(other.locations);
-        // TODO: randomize food generation
         random = new Random(Constants.SEED);
     }
 

@@ -4,7 +4,6 @@ public class Constants {
     public static final int TCP_PORT = 21345;
     public static final int UDP_PORT = 21346;
 
-    public static final byte NO_INPUT = 0;
     public static final byte LEFT = 1;
     public static final byte RIGHT = 4;
     public static final byte UP = 2;
@@ -17,19 +16,15 @@ public class Constants {
 
     public static final int MOVE_EVERY_MS = 333;
     public static final int SEARCH_TIMEOUT_MS = 10000;
-    public static final int UPDATE_AFTER_INACTIVE_MS = MOVE_EVERY_MS * 3;
-    public static final int CLIENT_SEND_EVERY_MS = 50;
-    public static final int SERVER_SEND_EVERY_MS = 80;
 
-    public static final long SEED = 88888888;
+    public static final long SEED = Utils.getNanoTime();
 
     public static final int INITIAL_SNAKE_LENGTH = 3;
     public static final int MAX_FOOD_QUANTITY = 10;
     public static final int MIN_FOOD_QUANTITY = 3;
 
-    public static final int WINDOW_WIDTH = 640, WINDOW_HEIGHT = 640;
-    public static final int WIDTH = 48, HEIGHT = 27;
-    public static final int UNIT_WIDTH = WINDOW_WIDTH / WIDTH, UNIT_HEIGHT = WINDOW_HEIGHT / HEIGHT;
+    public static final int WINDOW_WIDTH = 800, WINDOW_HEIGHT = 600;
+    public static final int WIDTH = 40, HEIGHT = 30;
 
     public static final float BLOCK_LENGTH = 1f;
     public static final float BLOCK_OFFSET = 8f / 24f;
