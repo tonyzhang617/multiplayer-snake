@@ -45,7 +45,7 @@ public class Client extends IAgent {
                         client.connect(Constants.SEARCH_TIMEOUT_MS, serverAddress, Constants.TCP_PORT, Constants.UDP_PORT);
                     } catch (IOException e) {
                         Gdx.app.error(TAG, e.getMessage());
-                        errorCallback.run();
+                        Gdx.app.postRunnable(errorCallback);
                     }
                 } else {
                     Gdx.app.debug(TAG, "No server found");

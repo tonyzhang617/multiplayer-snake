@@ -91,6 +91,8 @@ public class App extends Game {
     }
 
     public void destroyAgent() {
-        agent.destroy();
+        if (agent != null) {
+            agent.destroy();
+        }
     }
 }

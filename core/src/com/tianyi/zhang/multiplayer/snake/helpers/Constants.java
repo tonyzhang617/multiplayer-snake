@@ -40,4 +40,6 @@ public class Constants {
 
     public static final String GAME_OVER = "Game over. You\'ll get better next time!";
     public static final String CONGRATS = "Congratulations! You won the game!";
+
+    public static final String VERSION = "v0.9.0";
 }

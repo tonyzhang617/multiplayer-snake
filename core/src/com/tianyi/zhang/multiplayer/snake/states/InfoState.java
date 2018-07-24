@@ -6,20 +6,22 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTable;
-import com.kotcrab.vis.ui.widget.VisTextButton;
+import com.kotcrab.vis.ui.widget.*;
 import com.tianyi.zhang.multiplayer.snake.App;
+import com.tianyi.zhang.multiplayer.snake.helpers.AssetManager;
+import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
 
-public class ErrorState extends GameState {
-    private static final String TAG = ErrorState.class.getCanonicalName();
+public class InfoState extends GameState {
+    private static final String TAG = InfoState.class.getCanonicalName();
 
     private final Stage stage;
     private final VisTable table;
-    private final VisLabel lblError;
+    private final VisImage imgTitle;
+    private final VisLabel lblGameInfo, lblAcknowledgements;
+    private final LinkLabel lkGnu, lkLibGdx, lkKryonet, lkProtoBuf;
     private final VisTextButton btnToTitleScreen;
 
-    public ErrorState(App app, String errorMessage) {
+    public InfoState(App app) {
         super(app);
 
         stage = new Stage();
@@ -27,9 +29,22 @@ public class ErrorState extends GameState {
         table = new VisTable(true);
         table.setFillParent(true);
         stage.addActor(table);
-        lblError = new VisLabel(errorMessage);
-        lblError.setAlignment(Align.center);
-        table.add(lblError).row();
+
+        imgTitle = new VisImage(AssetManager.INSTANCE.getTitleTexture());
+        table.add(imgTitle).row();
+        lblGameInfo = new VisLabel(Constants.VERSION + "\nA game by Tony Zhang, licensed under");
+        lblGameInfo.setAlignment(Align.center);
+        table.add(lblGameInfo).row();
+        lkGnu = new LinkLabel("GNU GPLv3", "https://www.gnu.org/licenses/gpl-3.0.txt");
+        table.add(lkGnu).row();
+        lblAcknowledgements = new VisLabel("Acknowledgements: ");
+        table.add(lblAcknowledgements).row();
+        lkLibGdx = new LinkLabel("libGDX (license)", "http://www.apache.org/licenses/LICENSE-2.0.html");
+        table.add(lkLibGdx).row();
+        lkKryonet = new LinkLabel("Kryonet (license)", "https://github.com/EsotericSoftware/kryonet/blob/master/license.txt");
+        table.add(lkKryonet).row();
+        lkProtoBuf = new LinkLabel("Protocol Buffers (license)", "https://github.com/google/protobuf/blob/master/LICENSE");
+        table.add(lkProtoBuf).row();
         btnToTitleScreen = new VisTextButton("Return to main screen");
         btnToTitleScreen.addListener(new ClickListener() {
             @Override
