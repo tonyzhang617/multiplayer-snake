@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.tianyi.zhang.multiplayer.snake" >
+    package="com.tianyi.zhang.multiplayer.snake"
+    android:versionCode="90"
+    android:versionName="Beta" >
 
     <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="27" />
 
