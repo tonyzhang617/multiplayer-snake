@@ -178,7 +178,7 @@ public class MainGameState extends GameState {
                     Gdx.app.postRunnable(new Runnable() {
                         @Override
                         public void run() {
-                            _app.gotoErrorScreen("NOOO! We lost contact with the host!");
+                            _app.gotoErrorScreen("No! We lost contact with the host!");
                         }
                     });
                 }
