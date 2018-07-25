@@ -18,7 +18,7 @@ public class InfoState extends GameState {
     private final VisTable table;
     private final VisImage imgTitle;
     private final VisLabel lblGameInfo, lblAcknowledgements;
-    private final LinkLabel lkGnu, lkLibGdx, lkKryonet, lkProtoBuf;
+    private final LinkLabel lkGitHub, lkLibGdx, lkKryonet, lkProtoBuf;
     private final VisTextButton btnToTitleScreen;
 
     public InfoState(App app) {
@@ -32,18 +32,18 @@ public class InfoState extends GameState {
 
         imgTitle = new VisImage(AssetManager.INSTANCE.getTitleTexture());
         table.add(imgTitle).row();
-        lblGameInfo = new VisLabel(Constants.VERSION + "\nA game by Tony Zhang, licensed under");
+        lblGameInfo = new VisLabel(Constants.VERSION + "\nA game by Tianyi Zhang\nThe sources to this game can be retrieved at");
         lblGameInfo.setAlignment(Align.center);
         table.add(lblGameInfo).row();
-        lkGnu = new LinkLabel("GNU GPLv3", "https://www.gnu.org/licenses/gpl-3.0.txt");
-        table.add(lkGnu).row();
+        lkGitHub = new LinkLabel("github.com/tonyzhang617/multiplayer-snake", "https://github.com/tonyzhang617/multiplayer-snake");
+        table.add(lkGitHub).row();
         lblAcknowledgements = new VisLabel("Acknowledgements: ");
         table.add(lblAcknowledgements).row();
-        lkLibGdx = new LinkLabel("libGDX (license)", "http://www.apache.org/licenses/LICENSE-2.0.html");
+        lkLibGdx = new LinkLabel("libGDX - APLv2", "http://www.apache.org/licenses/LICENSE-2.0.html");
         table.add(lkLibGdx).row();
-        lkKryonet = new LinkLabel("Kryonet (license)", "https://github.com/EsotericSoftware/kryonet/blob/master/license.txt");
+        lkKryonet = new LinkLabel("Kryonet - Copyright 2008 Nathan Sweet - BSD-3-Clause", "https://github.com/EsotericSoftware/kryonet/blob/master/license.txt");
         table.add(lkKryonet).row();
-        lkProtoBuf = new LinkLabel("Protocol Buffers (license)", "https://github.com/google/protobuf/blob/master/LICENSE");
+        lkProtoBuf = new LinkLabel("Protobuf - Copyright 2008 Google Inc. - BSD-3-Clause", "https://github.com/google/protobuf/blob/master/LICENSE");
         table.add(lkProtoBuf).row();
         btnToTitleScreen = new VisTextButton("Return to main screen");
         btnToTitleScreen.addListener(new ClickListener() {
