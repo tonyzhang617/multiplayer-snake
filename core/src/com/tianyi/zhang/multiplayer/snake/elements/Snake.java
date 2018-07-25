@@ -1,6 +1,7 @@
 package com.tianyi.zhang.multiplayer.snake.elements;
 
 import com.tianyi.zhang.multiplayer.snake.helpers.Constants;
+import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.protobuf.generated.ServerPacket;
 
 import java.util.ArrayList;
@@ -73,6 +74,7 @@ public class Snake {
     }
 
     public ServerPacket.Update.PSnake.Builder toProtoSnake() {
+        // TODO: convert x/y coordinates to linear coordinates to save bandwidth
         ServerPacket.Update.PSnake.Builder snakeBuilder = ServerPacket.Update.PSnake.newBuilder();
         snakeBuilder.setId(id).setLastDirection(lastDirection).setIsDead(isDead).addAllCoords(coords).setInputId(lastInput.id).setInputDirection(lastInput.direction).setInputTimestamp(lastInput.timestamp);
         return snakeBuilder;
@@ -131,6 +133,17 @@ public class Snake {
 
     public List<Integer> getCoordinates() {
         return Collections.unmodifiableList(coords);
+    }
+
+    public List<Integer> getLinearPositions() {
+        List<Integer> positions = new ArrayList<Integer>(coords.size() / 2);
+        for (int i = 0; i < coords.size(); i += 2) {
+            int x = coords.get(i), y = coords.get(i+1);
+            if (x >= 0 && x < Constants.WIDTH && y >= 0 && y < Constants.HEIGHT) {
+                positions.add(Utils.positionFromXy(x, y));
+            }
+        }
+        return positions;
     }
 
     public void die() {

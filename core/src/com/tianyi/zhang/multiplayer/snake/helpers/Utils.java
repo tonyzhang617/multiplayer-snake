@@ -10,9 +10,7 @@ import com.tianyi.zhang.multiplayer.snake.elements.Grid;
 import static com.tianyi.zhang.multiplayer.snake.elements.Grid.Block.*;
 import static com.tianyi.zhang.multiplayer.snake.elements.Grid.Block.CRATE;
 import static com.tianyi.zhang.multiplayer.snake.elements.Grid.Block.GROUND;
-import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.BLOCK_LENGTH;
-import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.BLOCK_OFFSET;
-import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.WIDTH;
+import static com.tianyi.zhang.multiplayer.snake.helpers.Constants.*;
 
 public class Utils {
     private Utils() {
@@ -54,23 +52,26 @@ public class Utils {
 
         for (int y = Constants.HEIGHT - 1; y >= 0; --y) {
             for (int x = 0; x < Constants.WIDTH; ++x) {
-                switch (grid.getBlockByCoordinate(x, y)) {
-                    case PLAYER_SNAKE_BODY:
-                        spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(PLAYER_SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
-                        break;
-                    case SNAKE_BODY:
-                        spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
-                        break;
-                    case FOOD:
+                if (grid.checkCoordinate(x, y, PLAYER_SNAKE_BODY)) {
+                    spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(PLAYER_SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
+                } else if (grid.checkCoordinate(x, y, SNAKE_BODY)) {
+                    spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
+                } else {
+                    if (grid.checkCoordinate(x, y, GROUND)) {
                         spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(GROUND), x, y, BLOCK_LENGTH, BLOCK_LENGTH);
+                    }
+                    if (grid.checkCoordinate(x, y, FOOD)) {
                         spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(FOOD), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
-                        break;
-                    case GROUND:
-                        spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(GROUND), x, y, BLOCK_LENGTH, BLOCK_LENGTH);
-                        break;
-                    case CRATE:
+                    }
+                    if (grid.checkCoordinate(x, y, CRATE)) {
                         spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(CRATE), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
-                        break;
+                    }
+                    if (grid.checkCoordinate(x, y, DEAD_SNAKE_BODY)) {
+                        spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(DEAD_SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
+                    }
+                    if (grid.checkCoordinate(x, y, DEAD_PLAYER_SNAKE_BODY)) {
+                        spriteBatch.draw(AssetManager.INSTANCE.getSpriteByType(DEAD_PLAYER_SNAKE_BODY), x - Constants.BLOCK_OFFSET, y, BLOCK_LENGTH + BLOCK_OFFSET, BLOCK_LENGTH + BLOCK_OFFSET);
+                    }
                 }
             }
         }

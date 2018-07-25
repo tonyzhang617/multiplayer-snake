@@ -25,6 +25,8 @@ public enum AssetManager {
         Sprite food = new Sprite(Utils.newTextureWithLinearFilter("cake.png"));
         Sprite ground = new Sprite(Utils.newTextureWithLinearFilter("ground.png"));
         Sprite crate = new Sprite(Utils.newTextureWithLinearFilter("wooden_crate.png"));
+        Sprite deadPlayerSnakeBody = new Sprite(Utils.newTextureWithLinearFilter("dead_player_snake_body.png"));
+        Sprite deadSnakeBody = new Sprite(Utils.newTextureWithLinearFilter("dead_snake_body.png"));
 
         spriteMap = new HashMap<Grid.Block, Sprite>();
         spriteMap.put(PLAYER_SNAKE_BODY, playerSnakeBody);
@@ -32,6 +34,8 @@ public enum AssetManager {
         spriteMap.put(FOOD, food);
         spriteMap.put(GROUND, ground);
         spriteMap.put(CRATE, crate);
+        spriteMap.put(DEAD_PLAYER_SNAKE_BODY, deadPlayerSnakeBody);
+        spriteMap.put(DEAD_SNAKE_BODY, deadSnakeBody);
 
         title = Utils.newTextureWithLinearFilter("game_title.png");
 

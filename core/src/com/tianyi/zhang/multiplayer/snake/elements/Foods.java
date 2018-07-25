@@ -98,6 +98,11 @@ public class Foods {
         return Collections.unmodifiableList(result);
     }
 
+    public List<Integer> getLinearPositions() {
+        List<Integer> positions = new ArrayList<Integer>(locations);
+        return Collections.unmodifiableList(positions);
+    }
+
     public void setLocations(List<Integer> xyLocations) {
         this.locations.clear();
         for (int i = 0; i < xyLocations.size(); i += 2) {

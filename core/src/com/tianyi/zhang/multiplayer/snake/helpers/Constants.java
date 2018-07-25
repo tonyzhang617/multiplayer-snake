@@ -14,8 +14,8 @@ public class Constants {
      */
     public static final int LAG_TOLERANCE_MS = 500;
 
-    public static final int MOVE_EVERY_MS = 333;
-    public static final int SEARCH_TIMEOUT_MS = 10000;
+    public static final int MOVE_EVERY_MS = 250;
+    public static final int SEARCH_TIMEOUT_MS = 2000;
 
     public static final long SEED = Utils.getNanoTime();
 
