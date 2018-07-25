@@ -216,6 +216,11 @@ public class SVMainGameState extends GameState {
 
         _app.getAgent().setListener(new Listener() {
             @Override
+            public void disconnected(Connection connection) {
+                serverSnapshot.onClientDisconnected(connection.getID());
+            }
+
+            @Override
             public void received(Connection connection, Object object) {
                 if (object instanceof byte[]) {
                     serverSnapshot.onClientMessage(connection.getID(), Server.parseClientMessage(object));

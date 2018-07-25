@@ -109,6 +109,15 @@ public class ServerSnapshot extends Snapshot {
         }
     }
 
+    public void onClientDisconnected(int clientId) {
+        synchronized (lock) {
+            if (clientId > 0 && clientId < snakes.size()) {
+                snakes.get(clientId).die();
+                version += 1;
+            }
+        }
+    }
+
     public int getVersion() {
         synchronized (lock) {
             return version;

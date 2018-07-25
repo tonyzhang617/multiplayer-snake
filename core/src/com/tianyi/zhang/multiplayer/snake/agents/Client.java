@@ -62,6 +62,10 @@ public class Client extends IAgent {
 
     @Override
     public void destroy() {
+        if (listener != null) {
+            client.removeListener(listener);
+            listener = null;
+        }
         client.close();
     }
 }

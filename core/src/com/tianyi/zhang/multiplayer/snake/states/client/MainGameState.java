@@ -251,29 +251,33 @@ public class MainGameState extends GameState {
 
     @Override
     public void render(float delta) {
-        Utils.clear();
+        try {
+            Utils.clear();
 
-        Grid grid = clientSnapshot.getGrid();
-        Utils.renderGrid(grid, camera, spriteBatch);
+            Grid grid = clientSnapshot.getGrid();
+            Utils.renderGrid(grid, camera, spriteBatch);
 
-        // TODO: Store game result in grid
-        if (gameResult.get() == null) {
-            if (grid.isSnakeDead(clientId)) {
-                // Game over... GG
-                gameResult.set(Constants.GameResult.LOST);
-                lblResult.setText(Constants.GAME_OVER);
-                Gdx.input.setInputProcessor(stage);
-            } else if (grid.getAliveCount() == 1) {
-                // You are the last snake alive
-                gameResult.set(Constants.GameResult.WON);
-                lblResult.setText(Constants.CONGRATS);
-                Gdx.input.setInputProcessor(stage);
+            // TODO: Store game result in grid
+            if (gameResult.get() == null) {
+                if (grid.isSnakeDead(clientId)) {
+                    // Game over... GG
+                    gameResult.set(Constants.GameResult.LOST);
+                    lblResult.setText(Constants.GAME_OVER);
+                    Gdx.input.setInputProcessor(stage);
+                } else if (grid.getAliveCount() == 1) {
+                    // You are the last snake alive
+                    gameResult.set(Constants.GameResult.WON);
+                    lblResult.setText(Constants.CONGRATS);
+                    Gdx.input.setInputProcessor(stage);
+                }
             }
-        }
 
-        if (gameResult.get() != null) {
-            stage.act();
-            stage.draw();
+            if (gameResult.get() != null) {
+                stage.act();
+                stage.draw();
+            }
+        } catch (Exception e) {
+            _app.gotoErrorScreen("Please try starting a new game.");
         }
     }
 

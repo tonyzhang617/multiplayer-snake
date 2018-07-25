@@ -39,9 +39,7 @@ public class App extends Game {
 
     @Override
     public void dispose() {
-        if (agent != null) {
-            agent.destroy();
-        }
+        destroyAgent();
         while (!stateStack.empty()) {
             stateStack.pop().dispose();
         }
