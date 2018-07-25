@@ -198,7 +198,7 @@ public class SVMainGameState extends GameState {
                     for (Snake snake : grid.snakes) {
                         builder.addSnakes(snake.toProtoSnake());
                     }
-                    builder.addAllFoodLocations(grid.foods.getLocations());
+                    builder.addAllFoodLocations(grid.foods.getLinearPositions());
                     _app.getAgent().send(builder.build().toByteArray());
 
                     Gdx.graphics.requestRendering();

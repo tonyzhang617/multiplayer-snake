@@ -103,10 +103,8 @@ public class Foods {
         return Collections.unmodifiableList(positions);
     }
 
-    public void setLocations(List<Integer> xyLocations) {
-        this.locations.clear();
-        for (int i = 0; i < xyLocations.size(); i += 2) {
-            this.locations.add(Utils.positionFromXy(xyLocations.get(i), xyLocations.get(i+1)));
-        }
+    public void setLocations(List<Integer> linearPositions) {
+        locations.clear();
+        locations.addAll(linearPositions);
     }
 }

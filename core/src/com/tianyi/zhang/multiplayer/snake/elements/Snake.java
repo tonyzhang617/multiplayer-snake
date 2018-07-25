@@ -69,14 +69,21 @@ public class Snake {
 
     public static Snake fromProtoSnake(ServerPacket.Update.PSnake pSnake) {
         Input input = new Input(pSnake.getInputDirection(), pSnake.getInputId(), pSnake.getInputTimestamp());
-        Snake snake = new Snake(pSnake.getId(), pSnake.getCoordsList(), pSnake.getLastDirection(), input, pSnake.getIsDead());
+        List<Integer> positions = pSnake.getCoordsList();
+        List<Integer> xyCoords = new ArrayList<Integer>(positions.size() * 2);
+        for (int i = 0; i < positions.size(); ++i) {
+            xyCoords.add(Utils.xFromPosition(positions.get(i)));
+            xyCoords.add(Utils.yFromPosition(positions.get(i)));
+        }
+        Snake snake = new Snake(pSnake.getId(), xyCoords, pSnake.getLastDirection(), input, pSnake.getIsDead());
         return snake;
     }
 
     public ServerPacket.Update.PSnake.Builder toProtoSnake() {
         // TODO: convert x/y coordinates to linear coordinates to save bandwidth
         ServerPacket.Update.PSnake.Builder snakeBuilder = ServerPacket.Update.PSnake.newBuilder();
-        snakeBuilder.setId(id).setLastDirection(lastDirection).setIsDead(isDead).addAllCoords(coords).setInputId(lastInput.id).setInputDirection(lastInput.direction).setInputTimestamp(lastInput.timestamp);
+        snakeBuilder.setId(id).setLastDirection(lastDirection).setIsDead(isDead).addAllCoords(getLinearPositions())
+                .setInputId(lastInput.id).setInputDirection(lastInput.direction).setInputTimestamp(lastInput.timestamp);
         return snakeBuilder;
     }
 

@@ -14,6 +14,8 @@ import com.tianyi.zhang.multiplayer.snake.helpers.AssetManager;
 import com.tianyi.zhang.multiplayer.snake.helpers.Utils;
 import com.tianyi.zhang.multiplayer.snake.states.GameState;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class LookForServerState extends GameState {
     private static final String TAG = LookForServerState.class.getCanonicalName();
 
@@ -21,6 +23,8 @@ public class LookForServerState extends GameState {
     private final VisTable table;
     private final VisImage imgTitle;
     private final VisLabel lblInfo;
+
+    private final AtomicBoolean gameStarted;
 
     public LookForServerState(App app) {
         super(app);
@@ -41,6 +45,8 @@ public class LookForServerState extends GameState {
 
         Gdx.input.setInputProcessor(stage);
 
+        gameStarted = new AtomicBoolean(false);
+
         _app.getAgent().lookForServer(new Listener() {
             @Override
             public void connected(Connection connection) {
@@ -59,7 +65,9 @@ public class LookForServerState extends GameState {
 
             @Override
             public void received(Connection connection, Object object) {
-                if (object instanceof byte[]) {
+                if (object instanceof byte[] && !gameStarted.get()) {
+                    gameStarted.set(true);
+
                     // The MainGameState instance must be created by Gdx, because it initializes an OpenGL renderer,
                     // which must be created on the thread that has an OpenGL context.
                     final int id = connection.getID();
